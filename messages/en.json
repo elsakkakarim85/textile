@@ -1,0 +1,70 @@
+{
+  "HomePage": {
+    "title": "Welcome to El Mahalla Textile Cluster",
+    "description": "The unified B2B platform for all textile manufacturers in El Mahalla El Kubra."
+  },
+  "FactoryProfile": {
+    "verified": "Verified Factory",
+    "scanQr": "Scan QR (DPP)",
+    "productsCatalog": "Digital Products Catalog",
+    "indicativePrice": "Indicative Price",
+    "dppAvailable": "Supports Digital Product Passport (DPP)",
+    "rentableResources": "Rentable Production Lines & Warehouses",
+    "rentalPrice": "Rental Price",
+    "day": "day",
+    "capacity": "Capacity"
+  },
+  "Services": {
+    "title": "Service Providers Directory",
+    "description": "Find the best textile-related service providers in Egypt and Europe."
+  },
+  "Marketplaces": {
+    "wasteMarketplaceTitle": "Textile Waste Marketplace",
+    "wasteMarketplaceDesc": "Trade and buy textile waste at competitive prices simulating global open markets.",
+    "addWasteListing": "Add Waste Listing",
+    "factory": "Factory",
+    "price": "Price",
+    "contactSeller": "Contact Seller",
+    "resourcesMarketplaceTitle": "Rent Production Lines & Warehouses",
+    "resourcesMarketplaceDesc": "Utilize idle capacities by renting production lines or storage spaces in El Mahalla.",
+    "productionLines": "Production Lines",
+    "warehouses": "Warehouses",
+    "addListing": "Add New Listing",
+    "capacity": "Capacity",
+    "rentalPrice": "Rental Price",
+    "day": "day",
+    "requestRent": "Request Rent",
+    "matchmakingTitle": "B2B Matchmaking & Joint Manufacturing",
+    "matchmakingDesc": "Find partners for joint manufacturing or feeding industry suppliers within the cluster.",
+    "jointManufacturing": "Joint Manufacturing",
+    "jointManufacturingDesc": "Collaborate with other factories to fulfill massive orders or enter tenders.",
+    "exploreOpportunities": "Explore Opportunities",
+    "postRequest": "Post a Request",
+    "feedingIndustries": "Feeding Industries",
+    "feedingIndustriesDesc": "Find local suppliers for production inputs (buttons, zippers, packaging, etc.).",
+    "findSuppliers": "Find Suppliers",
+    "registerAsSupplier": "Register as Supplier"
+  },
+  "AIBrain": {
+    "title": "The AI Brain (Consultant)",
+    "description": "Ask the AI about anything related to textiles, customs, marketing, or training. Powered by a massive digital library (NotebookLM Clone).",
+    "chatWithData": "Chat with Data & Studies",
+    "emptyState": "Hello! I am your AI consultant dedicated to the El Mahalla Cluster. How can I help you today?",
+    "suggest1": "How to create a marketing plan for cotton yarn in Europe?",
+    "suggest2": "What are the quality standards for export?",
+    "thinking": "Thinking and analyzing data...",
+    "inputPlaceholder": "Type your question or request here...",
+    "send": "Send"
+  },
+  "Recruitment": {
+    "title": "Recruitment & Assessment Portal",
+    "description": "AI-powered system to test and hire the best workers and staff for your factory.",
+    "postJob": "Post a Job",
+    "job1": "Loom Maintenance Technician",
+    "job1Desc": "Looking for a technician with 5 years experience for night shift.",
+    "urgent": "Urgent",
+    "job2": "Quality Engineer",
+    "job2Desc": "Looking for a quality engineer to supervise the dyeing line.",
+    "applyWithAI": "Apply & Take AI Test"
+  }
+}
