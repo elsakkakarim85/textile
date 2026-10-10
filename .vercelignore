@@ -1,0 +1,8 @@
+# Never upload local secrets or data to Vercel. Use Vercel Environment Variables instead.
+.env
+.env.*
+!.env.example
+temp_drive/
+*.db
+*.db-journal
+scripts/ingest-progress.json

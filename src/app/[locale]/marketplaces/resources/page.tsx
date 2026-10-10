@@ -1,94 +1,63 @@
-import { supabase } from '@/lib/supabase';
-import { getTranslations } from 'next-intl/server';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+"use client";
 
-export default async function ResourcesMarketplacePage({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = await params;
-  const t = await getTranslations('Marketplaces');
+import { useEffect, useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Factory, Mail } from 'lucide-react';
+import Link from 'next/link';
 
-  const { data: lines } = await supabase
-    .from('production_lines')
-    .select('*, factories(name_ar, name_en)')
-    .eq('is_rentable', true);
-    
-  const { data: warehouses } = await supabase
-    .from('warehouses')
-    .select('*, factories(name_ar, name_en)')
-    .eq('is_rentable', true);
+export default function ResourcesMarketplacePage() {
+  const [listings, setListings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const displayLines = lines && lines.length > 0 ? lines : [
-    { name_ar: "خط نسيج دائري", name_en: "Circular Knitting Line", capacity_per_day: 1000, rental_price_per_day: 4000, factories: { name_ar: "مصنع أ", name_en: "Factory A" } }
-  ];
-  const displayWarehouses = warehouses && warehouses.length > 0 ? warehouses : [
-    { name: "مخزن المنطقة الصناعية", capacity_sqm: 500, rental_price_per_sqm: 100, factories: { name_ar: "مصنع ب", name_en: "Factory B" } }
-  ];
+  useEffect(() => {
+    fetch('/api/public/listings?type=RESOURCE')
+      .then(res => res.json())
+      .then(data => setListings(Array.isArray(data) ? data : []))
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
-    <div className="container mx-auto py-10 px-4 space-y-12">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold">{t('resourcesMarketplaceTitle')}</h1>
-        <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">{t('resourcesMarketplaceDesc')}</p>
+    <div className="container mx-auto py-10 px-4 space-y-8">
+      <div className="text-center max-w-2xl mx-auto space-y-4">
+        <h1 className="text-4xl font-bold tracking-tight">Raw Materials & Resources</h1>
+        <p className="text-lg text-muted-foreground">Source yarn, fabrics, and production lines from verified suppliers.</p>
       </div>
 
-      {/* Production Lines Section */}
-      <section className="space-y-6">
-        <div className="flex justify-between items-center border-b pb-2">
-          <h2 className="text-2xl font-semibold">{t('productionLines')}</h2>
-          <Button variant="outline">{t('addListing')}</Button>
+      {loading ? (
+        <div className="text-center py-20 text-muted-foreground">Loading resources...</div>
+      ) : listings.length === 0 ? (
+        <div className="text-center py-20 border rounded-xl bg-muted/20">
+          <Factory className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+          <h2 className="text-xl font-bold">No Resources Available</h2>
+          <p className="text-muted-foreground">Check back later for new factory listings.</p>
         </div>
+      ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {displayLines.map((item: any, idx: number) => (
-            <Card key={idx}>
-              <CardHeader>
-                <CardTitle>{locale === 'ar' ? item.name_ar : item.name_en}</CardTitle>
-                <CardDescription>{locale === 'ar' ? item.factories?.name_ar : item.factories?.name_en}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="flex justify-between">
-                  <span>{t('capacity')}:</span>
-                  <span className="font-bold">{item.capacity_per_day} / {t('day')}</span>
+          {listings.map(item => (
+            <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+              <div className="bg-primary/5 h-48 flex items-center justify-center border-b">
+                <Factory className="w-16 h-16 text-primary/40" />
+              </div>
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="font-bold text-xl line-clamp-1">{item.title}</h3>
+                  <span className="font-bold text-primary">${item.price}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>{t('rentalPrice')}:</span>
-                  <span className="text-primary font-bold">{item.rental_price_per_day} EGP / {t('day')}</span>
+                <p className="text-sm text-muted-foreground line-clamp-2 mb-4 h-10">{item.description}</p>
+                <div className="pt-4 border-t flex items-center justify-between">
+                  <div className="text-xs text-muted-foreground">
+                    By: {item.seller.firstName || 'Supplier'}
+                  </div>
+                  <Link href={`mailto:${item.seller.email}`} className="text-sm text-primary flex items-center gap-1 hover:underline">
+                    <Mail className="w-4 h-4" /> Contact
+                  </Link>
                 </div>
-                <Button className="w-full mt-4">{t('requestRent')}</Button>
               </CardContent>
             </Card>
           ))}
         </div>
-      </section>
-
-      {/* Warehouses Section */}
-      <section className="space-y-6">
-        <div className="flex justify-between items-center border-b pb-2">
-          <h2 className="text-2xl font-semibold">{t('warehouses')}</h2>
-          <Button variant="outline">{t('addListing')}</Button>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {displayWarehouses.map((item: any, idx: number) => (
-            <Card key={idx}>
-              <CardHeader>
-                <CardTitle>{item.name}</CardTitle>
-                <CardDescription>{locale === 'ar' ? item.factories?.name_ar : item.factories?.name_en}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="flex justify-between">
-                  <span>{t('capacity')}:</span>
-                  <span className="font-bold">{item.capacity_sqm} m²</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>{t('rentalPrice')}:</span>
-                  <span className="text-primary font-bold">{item.rental_price_per_sqm} EGP / m²</span>
-                </div>
-                <Button className="w-full mt-4">{t('requestRent')}</Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
+      )}
     </div>
   );
 }

@@ -90,6 +90,45 @@ CREATE TABLE public.service_providers (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
 );
 
+-- 8. Job Postings
+CREATE TABLE public.job_postings (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    factory_id UUID REFERENCES public.factories(id) ON DELETE CASCADE,
+    title_ar TEXT NOT NULL,
+    title_en TEXT NOT NULL,
+    description_ar TEXT,
+    description_en TEXT,
+    requirements TEXT,
+    salary_range TEXT,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+);
+
+-- 9. Job Applications
+CREATE TABLE public.job_applications (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    job_id UUID REFERENCES public.job_postings(id) ON DELETE CASCADE,
+    applicant_name TEXT NOT NULL,
+    applicant_phone TEXT NOT NULL,
+    resume_url TEXT,
+    notes TEXT,
+    status TEXT DEFAULT 'pending',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+);
+
+-- 10. B2B Matchmaking (Tenders and Joint Ventures)
+CREATE TABLE public.b2b_matchmaking (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    factory_id UUID REFERENCES public.factories(id) ON DELETE CASCADE,
+    title_ar TEXT NOT NULL,
+    title_en TEXT NOT NULL,
+    request_type TEXT NOT NULL, -- e.g., 'joint_manufacturing', 'feeding_industry', 'export_order'
+    description_ar TEXT,
+    description_en TEXT,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+);
+
 -- Setup Row Level Security (RLS)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.factories ENABLE ROW LEVEL SECURITY;
@@ -98,6 +137,9 @@ ALTER TABLE public.production_lines ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.warehouses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.waste_inventory ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.service_providers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.job_postings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.job_applications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.b2b_matchmaking ENABLE ROW LEVEL SECURITY;
 
 -- Policies (Simplified for development - users can read all, but only write their own)
 CREATE POLICY "Public profiles are viewable by everyone" ON public.profiles FOR SELECT USING (true);
@@ -107,3 +149,7 @@ CREATE POLICY "Public production lines are viewable by everyone" ON public.produ
 CREATE POLICY "Public warehouses are viewable by everyone" ON public.warehouses FOR SELECT USING (true);
 CREATE POLICY "Public waste inventory are viewable by everyone" ON public.waste_inventory FOR SELECT USING (true);
 CREATE POLICY "Public service providers are viewable by everyone" ON public.service_providers FOR SELECT USING (true);
+CREATE POLICY "Public job postings are viewable by everyone" ON public.job_postings FOR SELECT USING (true);
+CREATE POLICY "Public job applications are viewable by everyone" ON public.job_applications FOR SELECT USING (true);
+CREATE POLICY "Public b2b matchmaking viewable by everyone" ON public.b2b_matchmaking FOR SELECT USING (true);
+

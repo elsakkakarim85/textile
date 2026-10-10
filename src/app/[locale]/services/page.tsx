@@ -2,14 +2,20 @@ import { supabase } from '@/lib/supabase';
 import { getTranslations } from 'next-intl/server';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Link } from '@/i18n/routing';
+import { Button } from '@/components/ui/button';
 
 export default async function ServicesDirectoryPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const t = await getTranslations('Services');
 
-  const { data: services, error } = await supabase
-    .from('service_providers')
-    .select('*');
+  let services = null;
+  try {
+    const { data } = await supabase.from('service_providers').select('*');
+    if (data) services = data;
+  } catch (error) {
+    console.error('Failed to fetch services', error);
+  }
 
   // Mock data for UI testing if DB is empty/unconnected
   const displayServices = services && services.length > 0 ? services : [
@@ -20,9 +26,14 @@ export default async function ServicesDirectoryPage({ params }: { params: Promis
 
   return (
     <div className="container mx-auto py-10 px-4 space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold">{t('title')}</h1>
-        <p className="mt-2 text-muted-foreground">{t('description')}</p>
+      <div className="flex justify-between items-center text-center">
+        <div className="text-right flex-1">
+          <h1 className="text-3xl font-bold">{t('title')}</h1>
+          <p className="mt-2 text-muted-foreground">{t('description')}</p>
+        </div>
+        <Link href="/dashboard/factory">
+          <Button variant="outline">تسجيل كمقدم خدمة</Button>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

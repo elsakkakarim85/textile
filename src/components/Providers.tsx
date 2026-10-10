@@ -1,0 +1,14 @@
+"use client";
+
+import { CurrencyProvider } from '@/contexts/CurrencyContext';
+import { ThemeProvider } from './ThemeProvider';
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+      <CurrencyProvider>
+        {children}
+      </CurrencyProvider>
+    </ThemeProvider>
+  );
+}

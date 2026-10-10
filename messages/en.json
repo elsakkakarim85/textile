@@ -66,5 +66,19 @@
     "job2": "Quality Engineer",
     "job2Desc": "Looking for a quality engineer to supervise the dyeing line.",
     "applyWithAI": "Apply & Take AI Test"
+  },
+  "Dashboard": {
+    "title": "Dashboard",
+    "description": "Choose the section you want to browse in the El Mahalla Textile Cluster platform."
+  },
+  "Admin": {
+    "admin_panel": "Super Admin Panel",
+    "dashboard": "Overview",
+    "users": "Users Management",
+    "factories": "Factories Management",
+    "marketplaces": "Marketplaces",
+    "audit_logs": "Audit Logs",
+    "settings": "Settings",
+    "super_admin": "Super Admin"
   }
 }

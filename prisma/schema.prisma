@@ -1,0 +1,236 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url = env("DATABASE_URL")
+  
+  
+  
+}
+
+// User model reflecting Clerk users and additional profile data
+model User {
+  id        String   @id // Clerk user ID
+  email     String   @unique
+  firstName String?
+  lastName  String?
+  role      String   @default("user") // "admin", "factory_owner", "worker", "user"
+  isBanned  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  factories     Factory[]
+  jobs          JobPosting[]
+  listings      MarketplaceListing[]
+  applications  JobApplication[]
+  conversations Conversation[]
+  rfqs          RFQ[]
+  reviews       Review[]
+  contracts     Contract[]
+  notifications Notification[]
+}
+
+// Factory profiles
+model Factory {
+  id                    String         @id @default(cuid())
+  name                  String
+  description           String?
+  address               String
+  taxRegistrationNumber String         @unique
+  status                String         @default("PENDING") // "PENDING", "APPROVED", "REJECTED"
+  subscriptionTier      String         @default("FREE") // "FREE", "PRO", "ENTERPRISE"
+  rejectionReason       String?
+  isVerified            Boolean        @default(false)
+  ownerId               String
+  owner                 User           @relation(fields: [ownerId], references: [id])
+  conversations         Conversation[]
+  quotations            Quotation[]
+  reviews               Review[]
+  contracts             Contract[]
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+}
+
+// Job postings
+model JobPosting {
+  id           String           @id @default(cuid())
+  title        String
+  description  String
+  status       String           @default("ACTIVE") // "ACTIVE", "CLOSED", "FLAGGED"
+  employerId   String
+  employer     User             @relation(fields: [employerId], references: [id])
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  applications JobApplication[]
+}
+
+// Marketplace Listings (Products, Resources, Waste)
+model MarketplaceListing {
+  id          String           @id @default(cuid())
+  title       String
+  description String
+  type        String // "PRODUCT", "RESOURCE", "WASTE"
+  price       Float?
+  status      String           @default("ACTIVE") // "ACTIVE", "SOLD", "FLAGGED"
+  sellerId    String
+  seller      User             @relation(fields: [sellerId], references: [id])
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  passport    ProductPassport?
+}
+
+// Digital Product Passport
+model ProductPassport {
+  id              String             @id @default(cuid())
+  listingId       String             @unique
+  listing         MarketplaceListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  origin          String             @default("Mahalla El Kubra, Egypt")
+  material        String // e.g., "100% Egyptian Cotton"
+  carbonFootprint String?
+  certifications  String? // e.g., "ISO 9001, GOTS"
+  qrCodeUrl       String?
+  signatureHash   String? // Blockchain-style crypto hash
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+}
+
+// Audit Logs for tracking Admin actions
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  entityId  String
+  entity    String // "User", "Factory", "JobPosting", "MarketplaceListing", "Setting"
+  adminId   String
+  details   String? // JSON stringified details of the change
+  createdAt DateTime @default(now())
+}
+
+// Global System Settings for the platform
+model SystemSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique // e.g., "maintenance_mode", "commission_rate"
+  value       String // Stringified value, could be boolean ("true") or number ("5")
+  description String?
+  updatedAt   DateTime @updatedAt
+}
+
+// Job Applications submitted by users
+model JobApplication {
+  id          String     @id @default(cuid())
+  jobId       String
+  job         JobPosting @relation(fields: [jobId], references: [id])
+  applicantId String
+  applicant   User       @relation(fields: [applicantId], references: [id])
+  coverLetter String?
+  contactInfo String?
+  status      String     @default("PENDING") // "PENDING", "REVIEWED", "ACCEPTED", "REJECTED"
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+// B2B Direct Messaging (Conversations)
+model Conversation {
+  id        String    @id @default(cuid())
+  listingId String? // Optional: if the chat started from a specific product
+  buyerId   String
+  factoryId String
+  buyer     User      @relation(fields: [buyerId], references: [id])
+  factory   Factory   @relation(fields: [factoryId], references: [id])
+  messages  Message[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+// Messages within a conversation
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String // Either User or Factory Owner
+  content        String
+  isRead         Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+}
+
+// Request for Quotation (Buyer requesting products)
+model RFQ {
+  id          String      @id @default(cuid())
+  title       String
+  description String
+  quantity    String // e.g., "10,000 pieces"
+  targetPrice String? // e.g., "50 EGP/piece"
+  status      String      @default("OPEN") // "OPEN", "CLOSED"
+  buyerId     String
+  buyer       User        @relation(fields: [buyerId], references: [id])
+  quotations  Quotation[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+// Factory bidding on an RFQ
+model Quotation {
+  id        String   @id @default(cuid())
+  rfqId     String
+  rfq       RFQ      @relation(fields: [rfqId], references: [id], onDelete: Cascade)
+  factoryId String
+  factory   Factory  @relation(fields: [factoryId], references: [id], onDelete: Cascade)
+  price     String
+  message   String
+  status    String   @default("PENDING") // "PENDING", "ACCEPTED", "REJECTED"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Buyer reviews for a Factory
+model Review {
+  id         String   @id @default(cuid())
+  rating     Int // 1 to 5
+  comment    String?
+  factoryId  String
+  factory    Factory  @relation(fields: [factoryId], references: [id], onDelete: Cascade)
+  reviewerId String
+  reviewer   User     @relation(fields: [reviewerId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// Escrow Contracts between Buyer and Factory
+model Contract {
+  id          String      @id @default(cuid())
+  title       String
+  totalAmount Float
+  status      String      @default("ACTIVE") // "ACTIVE", "COMPLETED", "CANCELLED"
+  buyerId     String
+  buyer       User        @relation(fields: [buyerId], references: [id])
+  factoryId   String
+  factory     Factory     @relation(fields: [factoryId], references: [id])
+  milestones  Milestone[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+// Payment Milestones for a Contract
+model Milestone {
+  id         String   @id @default(cuid())
+  contractId String
+  contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  title      String // e.g., "30% Advance Payment"
+  amount     Float
+  status     String   @default("PENDING") // "PENDING", "FUNDED", "RELEASED"
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// User Notifications
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  link      String? // Optional URL to redirect to
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
