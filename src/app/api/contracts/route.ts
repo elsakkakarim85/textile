@@ -1,119 +1,101 @@
-import { NextResponse } from 'next/server';
+import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
-import { auth } from '@clerk/nextjs/server';
+import { requireUser } from '@/server/auth';
+import { HttpError, parseBody, route } from '@/server/http';
+import { notify } from '@/server/events';
 
-export async function GET(req: Request) {
-  const authObj = await auth();
-  if (!authObj.userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+export const GET = route(async () => {
+  const user = await requireUser();
+  // NOTE: the previous version auto-created fake contracts with random factories for any visitor. Removed.
+  return prisma.contract.findMany({
+    where: {
+      OR: [{ buyerId: user.id }, { factory: { ownerId: user.id } }, { factory: { members: { some: { userId: user.id } } } }],
+    },
+    include: {
+      buyer: { select: { id: true, firstName: true, lastName: true, email: true } },
+      factory: { select: { id: true, name: true, ownerId: true, logoUrl: true } },
+      milestones: { orderBy: { createdAt: 'asc' } },
+      shipments: true,
+    },
+    orderBy: { updatedAt: 'desc' },
+  });
+});
 
-  try {
-    let contracts = await prisma.contract.findMany({
-      where: {
-        OR: [
-          { buyerId: authObj.userId },
-          { factory: { ownerId: authObj.userId } }
-        ]
-      },
-      include: {
-        buyer: true,
-        factory: true,
-        milestones: { orderBy: { createdAt: 'asc' } }
-      }
-    });
+const schema = z.discriminatedUnion('action', [
+  z.object({ action: z.literal('CONFIRM'), contractId: z.string() }),
+  z.object({ action: z.literal('FUND'), milestoneId: z.string() }),
+  z.object({ action: z.literal('RELEASE'), milestoneId: z.string() }),
+  z.object({
+    action: z.literal('ADVANCE'),
+    contractId: z.string(),
+    status: z.enum(['IN_PRODUCTION', 'QC', 'SHIPPED', 'DELIVERED', 'COMPLETED']),
+  }),
+  z.object({ action: z.literal('CANCEL'), contractId: z.string() }),
+]);
 
-    // For Demo: Auto-generate a dummy contract if none exist and the user has a factory
-    if (contracts.length === 0) {
-      const factory = await prisma.factory.findFirst({ where: { ownerId: authObj.userId } });
-      if (factory) {
-        const dummyBuyer = await prisma.user.findFirst({ where: { id: { not: authObj.userId } } });
-        if (dummyBuyer) {
-          const newContract = await prisma.contract.create({
-            data: {
-              title: "Export Order: 10,000 Cotton Towels",
-              totalAmount: 25000,
-              buyerId: dummyBuyer.id,
-              factoryId: factory.id,
-              milestones: {
-                create: [
-                  { title: "30% Advance Payment (Materials)", amount: 7500, status: "FUNDED" },
-                  { title: "70% On Bill of Lading (Shipping)", amount: 17500, status: "PENDING" }
-                ]
-              }
-            },
-            include: { buyer: true, factory: true, milestones: true }
-          });
-          contracts = [newContract];
-        }
-      } else {
-        // If user is a buyer, generate a dummy contract with some factory
-        const randomFactory = await prisma.factory.findFirst();
-        if (randomFactory) {
-          const newContract = await prisma.contract.create({
-            data: {
-              title: "Export Order: 5,000 T-Shirts",
-              totalAmount: 15000,
-              buyerId: authObj.userId,
-              factoryId: randomFactory.id,
-              milestones: {
-                create: [
-                  { title: "30% Advance Payment", amount: 4500, status: "PENDING" },
-                  { title: "70% On Delivery", amount: 10500, status: "PENDING" }
-                ]
-              }
-            },
-            include: { buyer: true, factory: true, milestones: true }
-          });
-          contracts = [newContract];
-        }
-      }
-    }
+const FLOW = ['ACTIVE', 'IN_PRODUCTION', 'QC', 'SHIPPED', 'DELIVERED', 'COMPLETED'] as const;
 
-    return NextResponse.json(contracts);
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: 'Failed to fetch contracts' }, { status: 500 });
-  }
-}
+export const POST = route(async (req) => {
+  const user = await requireUser();
+  const body = await parseBody(req, schema);
 
-export async function POST(req: Request) {
-  const authObj = await auth();
-  if (!authObj.userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  // ── Milestone actions (buyer only) ──
+  if (body.action === 'FUND' || body.action === 'RELEASE') {
+    const m = await prisma.milestone.findUnique({ where: { id: body.milestoneId }, include: { contract: { include: { factory: true } } } });
+    if (!m) throw new HttpError(404, 'Milestone not found');
+    if (m.contract.buyerId !== user.id) throw new HttpError(403, 'Only the buyer can do this');
+    if (['DRAFT', 'CANCELLED', 'COMPLETED'].includes(m.contract.status)) throw new HttpError(400, `Contract is ${m.contract.status}`);
 
-  try {
-    const { milestoneId, action } = await req.json();
-    
-    // action: "FUND" or "RELEASE"
-    const milestone = await prisma.milestone.findUnique({
-      where: { id: milestoneId },
-      include: { contract: { include: { factory: true } } }
-    });
-
-    if (!milestone) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-
-    if (action === 'FUND' && milestone.contract.buyerId === authObj.userId) {
-      await prisma.milestone.update({ where: { id: milestoneId }, data: { status: 'FUNDED' } });
-      await prisma.notification.create({
-        data: {
-          userId: milestone.contract.factory.ownerId,
-          title: "Milestone Funded! 💰",
-          message: `The buyer has funded "${milestone.title}". Funds are secured in Escrow.`,
-        }
-      });
-    } else if (action === 'RELEASE' && milestone.contract.buyerId === authObj.userId) {
-      await prisma.milestone.update({ where: { id: milestoneId }, data: { status: 'RELEASED' } });
-      await prisma.notification.create({
-        data: {
-          userId: milestone.contract.factory.ownerId,
-          title: "Funds Released! 🚀",
-          message: `The buyer has released funds for "${milestone.title}". Expect transfer to your bank.`,
-        }
-      });
+    if (body.action === 'FUND') {
+      if (m.status !== 'PENDING') throw new HttpError(400, 'Milestone already funded');
+      // Until the Paymob/Stripe integration (Phase 3) this records an offline/manual payment.
+      await prisma.$transaction([
+        prisma.milestone.update({ where: { id: m.id }, data: { status: 'FUNDED' } }),
+        prisma.payment.create({
+          data: { milestoneId: m.id, provider: 'MANUAL', amount: m.amount, currency: m.contract.currency, status: 'SUCCEEDED' },
+        }),
+      ]);
+      await notify(m.contract.factory.ownerId, 'Milestone funded 💰', `The buyer funded "${m.title}".`, '/dashboard/contracts');
     } else {
-      return NextResponse.json({ error: 'Not authorized for this action' }, { status: 403 });
+      if (m.status !== 'FUNDED') throw new HttpError(400, 'Only funded milestones can be released');
+      await prisma.milestone.update({ where: { id: m.id }, data: { status: 'RELEASED', releasedAt: new Date() } });
+      await notify(m.contract.factory.ownerId, 'Funds released 🚀', `The buyer released "${m.title}".`, '/dashboard/contracts');
     }
-
-    return NextResponse.json({ success: true });
-  } catch (e) {
-    return NextResponse.json({ error: 'Failed' }, { status: 500 });
+    return { success: true };
   }
-}
+
+  // ── Contract-level actions ──
+  const c = await prisma.contract.findUnique({ where: { id: body.contractId }, include: { factory: true } });
+  if (!c) throw new HttpError(404, 'Contract not found');
+  const isBuyer = c.buyerId === user.id;
+  const isFactory = c.factory.ownerId === user.id;
+  if (!isBuyer && !isFactory) throw new HttpError(403, 'Not a party to this contract');
+
+  if (body.action === 'CONFIRM') {
+    if (!isFactory) throw new HttpError(403, 'Only the factory confirms a draft contract');
+    if (c.status !== 'DRAFT') throw new HttpError(400, 'Contract is not a draft');
+    await prisma.contract.update({ where: { id: c.id }, data: { status: 'ACTIVE', factoryAcceptedAt: new Date() } });
+    await notify(c.buyerId, 'Contract confirmed', `${c.factory.name} confirmed "${c.title}".`, '/dashboard/contracts');
+  }
+
+  if (body.action === 'ADVANCE') {
+    // Factory moves production forward; only the buyer can mark DELIVERED/COMPLETED
+    const buyerSteps = ['DELIVERED', 'COMPLETED'];
+    if (buyerSteps.includes(body.status) ? !isBuyer : !isFactory) throw new HttpError(403, 'Not allowed for your role');
+    const from = FLOW.indexOf(c.status as (typeof FLOW)[number]);
+    const to = FLOW.indexOf(body.status);
+    if (from < 0 || to !== from + 1) throw new HttpError(400, `Cannot move from ${c.status} to ${body.status}`);
+    await prisma.contract.update({ where: { id: c.id }, data: { status: body.status } });
+    await notify(isBuyer ? c.factory.ownerId : c.buyerId, 'Contract update', `"${c.title}" is now ${body.status}.`, '/dashboard/contracts');
+  }
+
+  if (body.action === 'CANCEL') {
+    if (!['DRAFT', 'ACTIVE'].includes(c.status)) throw new HttpError(400, 'Only draft or not-yet-started contracts can be cancelled');
+    const funded = await prisma.milestone.count({ where: { contractId: c.id, status: { in: ['FUNDED', 'RELEASED'] } } });
+    if (funded) throw new HttpError(400, 'Contract has funded milestones — open a dispute instead');
+    await prisma.contract.update({ where: { id: c.id }, data: { status: 'CANCELLED' } });
+    await notify(isBuyer ? c.factory.ownerId : c.buyerId, 'Contract cancelled', `"${c.title}" was cancelled.`, '/dashboard/contracts');
+  }
+
+  return { success: true };
+});

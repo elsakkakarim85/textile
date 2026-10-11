@@ -1,47 +1,36 @@
-import { NextResponse } from 'next/server';
+import { z } from 'zod';
+import { Currency } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
-import { auth } from '@clerk/nextjs/server';
+import { requireUser } from '@/server/auth';
+import { parseBody, route } from '@/server/http';
 
-export async function POST(req: Request) {
-  const authObj = await auth();
-  if (!authObj.userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+const schema = z.object({
+  title: z.string().trim().min(5).max(200),
+  description: z.string().trim().min(10).max(5000),
+  quantity: z.coerce.number().int().positive().max(100_000_000),
+  unit: z.string().trim().max(30).default('piece'),
+  targetPrice: z.coerce.number().positive().max(1_000_000).optional(),
+  currency: z.nativeEnum(Currency).default('USD'),
+  deadline: z.coerce.date().optional(),
+  deliveryCountry: z.string().trim().max(60).optional(),
+});
 
-  try {
-    const { title, description, quantity, targetPrice } = await req.json();
+export const POST = route(async (req) => {
+  const user = await requireUser();
+  const data = await parseBody(req, schema);
+  return prisma.rFQ.create({ data: { ...data, buyerId: user.id } });
+});
 
-    const rfq = await prisma.rFQ.create({
-      data: {
-        title,
-        description,
-        quantity,
-        targetPrice,
-        buyerId: authObj.userId
-      }
-    });
-
-    return NextResponse.json(rfq);
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to create RFQ' }, { status: 500 });
-  }
-}
-
-export async function GET(req: Request) {
-  const authObj = await auth();
-  if (!authObj.userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  try {
-    const rfqs = await prisma.rFQ.findMany({
-      where: { buyerId: authObj.userId },
-      include: {
-        quotations: {
-          include: { factory: true }
-        }
+export const GET = route(async () => {
+  const user = await requireUser();
+  return prisma.rFQ.findMany({
+    where: { buyerId: user.id },
+    include: {
+      quotations: {
+        include: { factory: { select: { id: true, name: true, isVerified: true, logoUrl: true } } },
+        orderBy: { unitPrice: 'asc' },
       },
-      orderBy: { createdAt: 'desc' }
-    });
-
-    return NextResponse.json(rfqs);
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch RFQs' }, { status: 500 });
-  }
-}
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+});

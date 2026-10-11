@@ -1,80 +1,77 @@
-import { NextResponse } from 'next/server';
+import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
-import { auth } from '@clerk/nextjs/server';
+import { requireUser } from '@/server/auth';
+import { HttpError, parseBody, route } from '@/server/http';
+import { notify } from '@/server/events';
 
-export async function POST(req: Request) {
-  const authObj = await auth();
-  if (!authObj.userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+const schema = z.object({ rfqId: z.string().min(1), quotationId: z.string().min(1) });
 
-  try {
-    const { rfqId, quotationId } = await req.json();
+/**
+ * Buyer accepts a quotation → RFQ AWARDED, other quotes REJECTED, a DRAFT contract with
+ * default 30/70 milestones is created, and a buyer↔factory conversation is opened.
+ * All in one transaction so the state can never be half-applied.
+ */
+export const POST = route(async (req) => {
+  const user = await requireUser();
+  const { rfqId, quotationId } = await parseBody(req, schema);
 
-    // Verify buyer owns the RFQ
-    const rfq = await prisma.rFQ.findUnique({
-      where: { id: rfqId }
+  const result = await prisma.$transaction(async (tx) => {
+    const rfq = await tx.rFQ.findUnique({ where: { id: rfqId } });
+    if (!rfq || rfq.buyerId !== user.id) throw new HttpError(403, 'Not authorized or RFQ not found');
+    if (rfq.status !== 'OPEN') throw new HttpError(400, 'This RFQ is no longer open');
+
+    const quote = await tx.quotation.findUnique({ where: { id: quotationId }, include: { factory: true } });
+    if (!quote || quote.rfqId !== rfqId) throw new HttpError(404, 'Quotation not found for this RFQ');
+    if (quote.validUntil && quote.validUntil < new Date()) throw new HttpError(400, 'This quotation has expired');
+
+    await tx.rFQ.update({ where: { id: rfqId }, data: { status: 'AWARDED' } });
+    await tx.quotation.updateMany({ where: { rfqId, id: { not: quotationId } }, data: { status: 'REJECTED' } });
+    await tx.quotation.update({ where: { id: quotationId }, data: { status: 'ACCEPTED' } });
+
+    const total = new Prisma.Decimal(quote.unitPrice).mul(rfq.quantity);
+    const advance = total.mul(0.3).toDecimalPlaces(2);
+    const contract = await tx.contract.create({
+      data: {
+        title: rfq.title,
+        totalAmount: total,
+        currency: quote.currency,
+        status: 'DRAFT',
+        quotationId: quote.id,
+        buyerId: user.id,
+        factoryId: quote.factoryId,
+        buyerAcceptedAt: new Date(),
+        milestones: {
+          create: [
+            { title: '30% advance payment', amount: advance },
+            { title: '70% balance against bill of lading', amount: total.minus(advance) },
+          ],
+        },
+      },
     });
 
-    if (!rfq || rfq.buyerId !== authObj.userId) {
-      return NextResponse.json({ error: 'Not authorized or RFQ not found' }, { status: 403 });
-    }
+    const conversation =
+      (await tx.conversation.findFirst({ where: { buyerId: user.id, factoryId: quote.factoryId } })) ??
+      (await tx.conversation.create({ data: { buyerId: user.id, factoryId: quote.factoryId, rfqId, contractId: contract.id } }));
 
-    if (rfq.status === 'CLOSED') {
-      return NextResponse.json({ error: 'RFQ is already closed' }, { status: 400 });
-    }
-
-    // 1. Mark RFQ as CLOSED
-    await prisma.rFQ.update({
-      where: { id: rfqId },
-      data: { status: 'CLOSED' }
-    });
-
-    // 2. Mark the selected quotation as ACCEPTED, and others as REJECTED
-    await prisma.quotation.updateMany({
-      where: { rfqId },
-      data: { status: 'REJECTED' }
-    });
-
-    const acceptedQuote = await prisma.quotation.update({
-      where: { id: quotationId },
-      data: { status: 'ACCEPTED' },
-      include: { factory: true }
-    });
-
-    // 3. Create or find a Conversation between buyer and factory owner
-    let conversation = await prisma.conversation.findFirst({
-      where: { buyerId: authObj.userId, factoryId: acceptedQuote.factoryId }
-    });
-
-    if (!conversation) {
-      conversation = await prisma.conversation.create({
-        data: {
-          buyerId: authObj.userId,
-          factoryId: acceptedQuote.factoryId
-        }
-      });
-    }
-
-    // 4. Send an automatic message
-    await prisma.message.create({
+    await tx.message.create({
       data: {
         conversationId: conversation.id,
-        senderId: authObj.userId,
-        content: `I have accepted your quotation of ${acceptedQuote.price} for my RFQ: "${rfq.title}". Let's discuss the details!`
-      }
+        senderId: user.id,
+        content: `I accepted your quotation of ${quote.unitPrice} ${quote.currency}/${rfq.unit} for "${rfq.title}" (${rfq.quantity} ${rfq.unit}). A draft contract has been created for your confirmation.`,
+      },
     });
+    await tx.conversation.update({ where: { id: conversation.id }, data: { lastMessageAt: new Date() } });
 
-    // Notify the factory owner
-    await prisma.notification.create({
-      data: {
-        userId: acceptedQuote.factory.ownerId,
-        title: "RFQ Accepted! 🎉",
-        message: `Your quotation for "${rfq.title}" was accepted. Check your messages.`,
-      }
-    });
+    return { contract, conversation, factoryOwnerId: quote.factory.ownerId, rfqTitle: rfq.title };
+  });
 
-    return NextResponse.json({ success: true, conversationId: conversation.id });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: 'Failed to accept quotation' }, { status: 500 });
-  }
-}
+  await notify(
+    result.factoryOwnerId,
+    'Quotation accepted 🎉',
+    `Your quotation for "${result.rfqTitle}" was accepted. Please review and confirm the draft contract.`,
+    '/dashboard/contracts',
+  );
+
+  return { success: true, conversationId: result.conversation.id, contractId: result.contract.id };
+});

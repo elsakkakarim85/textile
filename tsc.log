@@ -1,0 +1,6 @@
+﻿prisma/seed.ts(160,7): error TS2322: Type 'string' is not assignable to type 'number'.
+prisma/seed.ts(171,7): error TS2353: Object literal may only specify known properties, and 'price' does not exist in type 'Without<QuotationCreateInput, QuotationUncheckedCreateInput> & QuotationUncheckedCreateInput'.
+src/app/api/factory/listings/route.ts(41,24): error TS18048: 'media' is possibly 'undefined'.
+src/app/api/ingest/route.ts(19,41): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/app/api/webhooks/clerk/route.ts(35,11): error TS2352: Conversion of type 'undefined' to type 'ClerkUserEvent' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.

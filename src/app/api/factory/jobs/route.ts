@@ -1,73 +1,47 @@
-import { NextResponse } from 'next/server';
+import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
-import { auth } from '@clerk/nextjs/server';
+import { requireFactory, requireUser } from '@/server/auth';
+import { HttpError, parseBody, route } from '@/server/http';
 
-export async function GET(req: Request) {
-  const authObj = await auth();
-  if (!authObj.userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+export const GET = route(async () => {
+  const user = await requireUser();
+  return prisma.jobPosting.findMany({
+    where: { employerId: user.id },
+    include: { _count: { select: { applications: true } } },
+    orderBy: { createdAt: 'desc' },
+  });
+});
 
-  try {
-    const jobs = await prisma.jobPosting.findMany({
-      where: { employerId: authObj.userId },
-      include: { applications: true },
-      orderBy: { createdAt: 'desc' }
-    });
-    return NextResponse.json(jobs);
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch jobs' }, { status: 500 });
-  }
-}
+const schema = z
+  .object({
+    title: z.string().trim().min(3).max(200),
+    description: z.string().trim().min(10).max(10000),
+    location: z.string().trim().max(120).optional(),
+    employmentType: z.enum(['full_time', 'part_time', 'contract', 'internship']).optional(),
+    salaryMin: z.coerce.number().nonnegative().optional(),
+    salaryMax: z.coerce.number().nonnegative().optional(),
+    skills: z.array(z.string().trim().max(50)).max(20).default([]),
+  })
+  .refine((v) => v.salaryMin === undefined || v.salaryMax === undefined || v.salaryMin <= v.salaryMax, {
+    message: 'Minimum salary must not exceed maximum',
+    path: ['salaryMin'],
+  });
 
-export async function POST(req: Request) {
-  const authObj = await auth();
-  if (!authObj.userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+export const POST = route(async (req) => {
+  const { user } = await requireFactory({ approved: true });
+  const data = await parseBody(req, schema);
+  return prisma.jobPosting.create({ data: { ...data, employerId: user.id } });
+});
 
-  try {
-    const { title, description } = await req.json();
-    
-    // Verify user is a factory owner and their factory is approved
-    const factory = await prisma.factory.findFirst({
-      where: { ownerId: authObj.userId, status: 'APPROVED' }
-    });
-    
-    if (!factory) {
-      return NextResponse.json({ error: 'You must have an approved factory profile to post jobs.' }, { status: 403 });
-    }
+export const DELETE = route(async (req) => {
+  const user = await requireUser();
+  const id = new URL(req.url).searchParams.get('id');
+  if (!id) throw new HttpError(400, 'Missing id');
 
-    const job = await prisma.jobPosting.create({
-      data: {
-        title,
-        description,
-        employerId: authObj.userId
-      }
-    });
-    return NextResponse.json(job);
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to create job posting' }, { status: 500 });
-  }
-}
+  const job = await prisma.jobPosting.findUnique({ where: { id } });
+  if (!job || job.employerId !== user.id) throw new HttpError(403, 'Not found or forbidden');
 
-export async function DELETE(req: Request) {
-  const authObj = await auth();
-  if (!authObj.userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  try {
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get('id');
-    
-    if (!id) return NextResponse.json({ error: 'Missing ID' }, { status: 400 });
-
-    const job = await prisma.jobPosting.findUnique({ where: { id } });
-    if (!job || job.employerId !== authObj.userId) {
-      return NextResponse.json({ error: 'Not found or forbidden' }, { status: 403 });
-    }
-
-    // Must delete applications first due to foreign key constraints
-    await prisma.jobApplication.deleteMany({ where: { jobId: id } });
-    await prisma.jobPosting.delete({ where: { id } });
-    
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to delete job' }, { status: 500 });
-  }
-}
+  // Close instead of hard delete so applicants keep their history
+  await prisma.jobPosting.update({ where: { id }, data: { status: 'CLOSED' } });
+  return { success: true };
+});

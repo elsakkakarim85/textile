@@ -1,75 +1,53 @@
-import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { auth, clerkClient } from '@clerk/nextjs/server';
+import { requireAdmin } from '@/server/auth';
+import { route } from '@/server/http';
 
-async function checkAdmin() {
-  const authObj = await auth();
-  let role = (authObj.sessionClaims?.metadata as any)?.role;
-  if (!role && authObj.userId) {
-    const client = await clerkClient();
-    const user = await client.users.getUser(authObj.userId);
-    role = user.publicMetadata?.role;
-  }
-  return role === 'admin';
-}
+export const GET = route(async () => {
+  await requireAdmin();
 
-export async function GET() {
-  if (!(await checkAdmin())) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const since = new Date();
+  since.setDate(since.getDate() - 6);
+  since.setHours(0, 0, 0, 0);
 
-  try {
-    // Generate an array of the last 7 days
-    const days = [...Array(7)].map((_, i) => {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      return d.toISOString().split('T')[0];
-    }).reverse();
+  const days = [...Array(7)].map((_, i) => {
+    const d = new Date(since);
+    d.setDate(since.getDate() + i);
+    return d.toISOString().split('T')[0];
+  });
 
-    // Fetch user creations in the last 7 days
-    const users = await prisma.user.findMany({
-      where: {
-        createdAt: {
-          gte: new Date(new Date().setDate(new Date().getDate() - 7))
-        }
-      },
-      select: { createdAt: true }
-    });
+  const [users, byStatus, totalUsers, totalJobs, totalListings, totalRfqs, contractValue] = await Promise.all([
+    prisma.user.findMany({ where: { createdAt: { gte: since } }, select: { createdAt: true } }),
+    prisma.factory.groupBy({ by: ['status'], _count: true, where: { deletedAt: null } }),
+    prisma.user.count({ where: { deletedAt: null } }),
+    prisma.jobPosting.count(),
+    prisma.marketplaceListing.count({ where: { deletedAt: null } }),
+    prisma.rFQ.count(),
+    prisma.contract.aggregate({ _sum: { totalAmount: true }, where: { status: { not: 'CANCELLED' } } }),
+  ]);
 
-    // Group users by day
-    const userGrowth = days.map(day => {
-      const count = users.filter(u => u.createdAt.toISOString().startsWith(day)).length;
-      return { date: day, newUsers: count };
-    });
+  const userGrowth = days.map((day) => ({
+    date: day,
+    newUsers: users.filter((u) => u.createdAt.toISOString().startsWith(day)).length,
+  }));
 
-    // Factory Status Breakdown
-    const approvedFactories = await prisma.factory.count({ where: { status: 'APPROVED' } });
-    const pendingFactories = await prisma.factory.count({ where: { status: 'PENDING' } });
-    const rejectedFactories = await prisma.factory.count({ where: { status: 'REJECTED' } });
-    
-    const factoryStats = [
-      { name: 'Approved', value: approvedFactories, fill: '#22c55e' },
-      { name: 'Pending', value: pendingFactories, fill: '#eab308' },
-      { name: 'Rejected', value: rejectedFactories, fill: '#ef4444' }
-    ];
+  const count = (s: string) => byStatus.find((b) => b.status === s)?._count ?? 0;
+  const factoryStats = [
+    { name: 'Approved', value: count('APPROVED'), fill: '#22c55e' },
+    { name: 'Pending', value: count('PENDING'), fill: '#eab308' },
+    { name: 'Rejected', value: count('REJECTED'), fill: '#ef4444' },
+    { name: 'Suspended', value: count('SUSPENDED'), fill: '#64748b' },
+  ];
 
-    // High level counters
-    const totalUsers = await prisma.user.count();
-    const totalJobs = await prisma.jobPosting.count();
-    const totalListings = await prisma.marketplaceListing.count();
-
-    return NextResponse.json({
-      userGrowth,
-      factoryStats,
-      totals: {
-        users: totalUsers,
-        jobs: totalJobs,
-        listings: totalListings,
-        pendingFactories
-      }
-    });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: 'Failed to fetch analytics' }, { status: 500 });
-  }
-}
+  return {
+    userGrowth,
+    factoryStats,
+    totals: {
+      users: totalUsers,
+      jobs: totalJobs,
+      listings: totalListings,
+      rfqs: totalRfqs,
+      pendingFactories: count('PENDING'),
+      gmv: contractValue._sum.totalAmount ?? 0,
+    },
+  };
+});

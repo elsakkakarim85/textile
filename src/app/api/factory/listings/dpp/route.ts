@@ -1,59 +1,59 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { auth } from '@clerk/nextjs/server';
 import crypto from 'crypto';
+import { z } from 'zod';
+import { prisma } from '@/lib/prisma';
+import { requireUser } from '@/server/auth';
+import { HttpError, parseBody, route } from '@/server/http';
 
-export async function POST(req: Request) {
-  const authObj = await auth();
-  if (!authObj.userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+const schema = z.object({
+  listingId: z.string().min(1),
+  material: z.string().trim().min(2).max(300),
+  origin: z.string().trim().max(200).optional(),
+  fiberOrigin: z.string().trim().max(200).optional(),
+  carbonFootprint: z.string().trim().max(100).optional(),
+  waterUsage: z.string().trim().max(100).optional(),
+  certifications: z.string().trim().max(500).optional(),
+  careInstructions: z.string().trim().max(1000).optional(),
+  recyclability: z.string().trim().max(500).optional(),
+  supplyChain: z
+    .array(z.object({ step: z.string().max(100), actor: z.string().max(200), location: z.string().max(200).optional(), date: z.string().max(30).optional() }))
+    .max(20)
+    .optional(),
+});
 
-  try {
-    const { listingId, material, origin, carbonFootprint, certifications } = await req.json();
-
-    // Verify ownership
-    const listing = await prisma.marketplaceListing.findUnique({ where: { id: listingId } });
-    if (!listing || listing.sellerId !== authObj.userId) {
-      return NextResponse.json({ error: 'Not found or forbidden' }, { status: 403 });
-    }
-
-    // Generate Blockchain-style Hash
-    const timestamp = new Date().toISOString();
-    const dataToHash = `${listingId}-${material}-${origin}-${carbonFootprint}-${timestamp}`;
-    const signatureHash = crypto.createHash('sha256').update(dataToHash).digest('hex');
-
-    // Generate the public URL that the QR code will point to
-    const dppUrl = `https://mahalla-cluster-app.vercel.app/en/dpp/${listingId}`;
-    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(dppUrl)}`;
-
-    const passport = await prisma.productPassport.upsert({
-      where: { listingId },
-      update: {
-        material, origin, carbonFootprint, certifications, qrCodeUrl, signatureHash
-      },
-      create: {
-        listingId, material, origin, carbonFootprint, certifications, qrCodeUrl, signatureHash
-      }
-    });
-
-    return NextResponse.json(passport);
-  } catch (error) {
-    console.error('DPP Error:', error);
-    return NextResponse.json({ error: 'Failed to create passport' }, { status: 500 });
-  }
+/**
+ * Tamper-evident signature over the passport content.
+ * HMAC with a server secret when DPP_SIGNING_SECRET is set (recommended), plain SHA-256 otherwise.
+ */
+function sign(payload: unknown) {
+  const data = JSON.stringify(payload);
+  const secret = process.env.DPP_SIGNING_SECRET;
+  return secret
+    ? crypto.createHmac('sha256', secret).update(data).digest('hex')
+    : crypto.createHash('sha256').update(data).digest('hex');
 }
 
-export async function GET(req: Request) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const listingId = searchParams.get('listingId');
-    if (!listingId) return NextResponse.json({ error: 'Missing listingId' }, { status: 400 });
+export const POST = route(async (req) => {
+  const user = await requireUser();
+  const input = await parseBody(req, schema);
 
-    const passport = await prisma.productPassport.findUnique({
-      where: { listingId }
-    });
+  const listing = await prisma.marketplaceListing.findUnique({ where: { id: input.listingId } });
+  if (!listing || listing.sellerId !== user.id) throw new HttpError(403, 'Not found or forbidden');
 
-    return NextResponse.json(passport);
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch passport' }, { status: 500 });
-  }
-}
+  const origin = process.env.NEXT_PUBLIC_APP_URL || new URL(req.url).origin;
+  const dppUrl = `${origin}/en/dpp/${listing.id}`;
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(dppUrl)}`;
+  const { listingId, ...fields } = input;
+  const signatureHash = sign({ listingId, ...fields, signedAt: new Date().toISOString().slice(0, 10) });
+
+  return prisma.productPassport.upsert({
+    where: { listingId },
+    update: { ...fields, qrCodeUrl, signatureHash },
+    create: { listingId, ...fields, origin: fields.origin ?? 'Mahalla El Kubra, Egypt', qrCodeUrl, signatureHash },
+  });
+});
+
+export const GET = route(async (req) => {
+  const listingId = new URL(req.url).searchParams.get('listingId');
+  if (!listingId) throw new HttpError(400, 'Missing listingId');
+  return prisma.productPassport.findUnique({ where: { listingId } });
+});

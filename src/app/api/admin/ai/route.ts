@@ -1,70 +1,36 @@
-import { generateText } from 'ai';
-import { groq } from '@ai-sdk/groq';
 import { prisma } from '@/lib/prisma';
-import { auth, clerkClient } from '@clerk/nextjs/server';
-import { NextResponse } from 'next/server';
+import { requireAdmin } from '@/server/auth';
+import { route } from '@/server/http';
+import { generate, sanitizeMessages } from '@/server/ai';
 
-async function checkAdmin() {
-  const authObj = await auth();
-  let role = (authObj.sessionClaims?.metadata as any)?.role;
-  if (!role && authObj.userId) {
-    const client = await clerkClient();
-    const user = await client.users.getUser(authObj.userId);
-    role = user.publicMetadata?.role;
-  }
-  return role === 'admin';
-}
+export const maxDuration = 30;
 
-export async function POST(req: Request) {
-  if (!(await checkAdmin())) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+export const POST = route(async (req) => {
+  await requireAdmin();
+  const body = await req.json().catch(() => ({}));
+  const messages = sanitizeMessages(body?.messages);
 
-  try {
-    const { messages } = await req.json();
+  const [totalUsers, byStatus, openRfqs, activeContracts, settings, logs] = await Promise.all([
+    prisma.user.count({ where: { deletedAt: null } }),
+    prisma.factory.groupBy({ by: ['status'], _count: true }),
+    prisma.rFQ.count({ where: { status: 'OPEN' } }),
+    prisma.contract.count({ where: { status: { in: ['ACTIVE', 'IN_PRODUCTION', 'QC', 'SHIPPED'] } } }),
+    prisma.systemSetting.findMany(),
+    prisma.auditLog.findMany({ take: 10, orderBy: { createdAt: 'desc' } }),
+  ]);
 
-    const totalUsers = await prisma.user.count();
-    const approvedFactories = await prisma.factory.count({ where: { status: 'APPROVED' } });
-    const pendingFactories = await prisma.factory.count({ where: { status: 'PENDING' } });
-    const settings = await prisma.systemSetting.findMany();
-    const logs = await prisma.auditLog.findMany({ take: 5, orderBy: { createdAt: 'desc' } });
+  const system = `You are the Super-Admin assistant for the Mahalla Cluster B2B textile platform.
+Answer only from the live data below; if something is not in the data, say so. Reply in the user's language
+(professional Egyptian Arabic if they write Arabic). Use Markdown headings, tables and bullet points.
 
-    const dbContext = `
-      CURRENT PLATFORM STATISTICS:
-      - Total Registered Users: ${totalUsers}
-      - Approved Factories: ${approvedFactories}
-      - Pending Factories (Need Review): ${pendingFactories}
-      
-      GLOBAL SETTINGS:
-      ${settings.map(s => `- ${s.key}: ${s.value}`).join('\n')}
+LIVE PLATFORM DATA:
+- Registered users: ${totalUsers}
+- Factories by status: ${byStatus.map((b) => `${b.status}=${b._count}`).join(', ') || 'none'}
+- Open RFQs: ${openRfqs}
+- Active contracts: ${activeContracts}
+- Settings: ${settings.map((s) => `${s.key}=${s.value}`).join(', ') || 'none'}
+- Last admin actions: ${logs.map((l) => `${l.action} on ${l.entity} (${l.createdAt.toISOString().slice(0, 10)})`).join('; ') || 'none'}`;
 
-      LAST 5 ADMIN ACTIONS:
-      ${logs.map(l => `- ${l.action} on ${l.entity}`).join('\n')}
-    `;
-
-    const systemPrompt = `You are the Expert Super Admin AI for the Mahalla Cluster platform. 
-    You have direct access to the live platform database statistics.
-    Your job is to answer the admin's questions about the platform, summarize activity, and provide strategic advice.
-    You MUST respond in the language the user speaks. If they speak Arabic, respond in professional Egyptian Arabic.
-    
-    Here is the live data from the database right now:
-    ${dbContext}
-    `;
-
-    const sanitizedMessages = messages.map((m: any) => ({
-      role: m.role,
-      content: m.content
-    }));
-
-    const result = await generateText({
-      model: groq('llama-3.3-70b-versatile'),
-      system: systemPrompt,
-      messages: sanitizedMessages,
-    });
-
-    return NextResponse.json({ text: result.text });
-  } catch (error) {
-    console.error('Admin AI Error:', error);
-    return NextResponse.json({ error: 'AI failed to process request.' }, { status: 500 });
-  }
-}
+  const { text } = await generate({ system, messages });
+  return { text };
+});

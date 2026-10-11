@@ -1,50 +1,37 @@
-import { NextResponse } from 'next/server';
+import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
-import { auth } from '@clerk/nextjs/server';
+import { requireAdmin } from '@/server/auth';
+import { parseBody, route } from '@/server/http';
+import { audit, notify } from '@/server/events';
 
-// Check if user is admin (simplified check for demo, usually verify roles)
-async function isAdmin() {
-  const authObj = await auth();
-  return authObj.userId; // For demo purposes, any logged in user can access this. In production, check role.
-}
+export const GET = route(async () => {
+  await requireAdmin(); // previously ANY signed-in user could list and verify factories
+  return prisma.factory.findMany({
+    where: { deletedAt: null },
+    include: { owner: true, kycDocuments: { orderBy: { createdAt: 'desc' } } },
+    orderBy: { createdAt: 'desc' },
+  });
+});
 
-export async function GET() {
-  if (!await isAdmin()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  
-  try {
-    const factories = await prisma.factory.findMany({
-      include: { owner: true },
-      orderBy: { createdAt: 'desc' }
-    });
-    return NextResponse.json(factories);
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch factories' }, { status: 500 });
+const schema = z.object({ factoryId: z.string().min(1), isVerified: z.boolean() });
+
+export const PUT = route(async (req) => {
+  const admin = await requireAdmin();
+  const { factoryId, isVerified } = await parseBody(req, schema);
+
+  const updated = await prisma.factory.update({
+    where: { id: factoryId },
+    data: { isVerified, verifiedAt: isVerified ? new Date() : null },
+  });
+
+  await audit(admin.id, isVerified ? 'KYC_VERIFIED' : 'KYC_UNVERIFIED', 'Factory', factoryId);
+  if (isVerified) {
+    await notify(
+      updated.ownerId,
+      'Account verified ✔',
+      'Congratulations! Your factory has been verified by the Mahalla Cluster admin team.',
+      `/factories/${updated.id}`,
+    );
   }
-}
-
-export async function PUT(req: Request) {
-  if (!await isAdmin()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  try {
-    const { factoryId, isVerified } = await req.json();
-    const updated = await prisma.factory.update({
-      where: { id: factoryId },
-      data: { isVerified }
-    });
-
-    // Notify the factory owner
-    if (isVerified) {
-      await prisma.notification.create({
-        data: {
-          userId: updated.ownerId,
-          title: "Account Verified! ✔️",
-          message: "Congratulations! Your factory has been verified by the Mahalla Cluster Admin Team.",
-        }
-      });
-    }
-
-    return NextResponse.json(updated);
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to update KYC status' }, { status: 500 });
-  }
-}
+  return updated;
+});

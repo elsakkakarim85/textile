@@ -1,88 +1,52 @@
-import { NextResponse } from 'next/server';
+import { z } from 'zod';
+import { Role } from '@prisma/client';
+import { clerkClient } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
-import { auth, clerkClient } from '@clerk/nextjs/server';
+import { requireAdmin } from '@/server/auth';
+import { HttpError, parseBody, route } from '@/server/http';
+import { audit } from '@/server/events';
 
-async function checkAdmin() {
-  const authObj = await auth();
-  let role = (authObj.sessionClaims?.metadata as any)?.role;
-  if (!role && authObj.userId) {
-    const client = await clerkClient();
-    const user = await client.users.getUser(authObj.userId);
-    role = user.publicMetadata?.role;
-  }
-  return role === 'admin';
-}
+export const GET = route(async (req) => {
+  await requireAdmin();
+  const search = (new URL(req.url).searchParams.get('search') || '').trim();
 
-export async function GET(req: Request) {
-  if (!(await checkAdmin())) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  return prisma.user.findMany({
+    where: {
+      deletedAt: null,
+      ...(search
+        ? {
+            OR: [
+              { email: { contains: search, mode: 'insensitive' } },
+              { firstName: { contains: search, mode: 'insensitive' } },
+              { lastName: { contains: search, mode: 'insensitive' } },
+            ],
+          }
+        : {}),
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 100,
+  });
+});
 
-  const { searchParams } = new URL(req.url);
-  const search = searchParams.get('search') || '';
-  
-  try {
-    const users = await prisma.user.findMany({
-      where: {
-        OR: [
-          { email: { contains: search,  } },
-          { firstName: { contains: search,  } },
-          { lastName: { contains: search,  } },
-        ]
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 100,
-    });
-    return NextResponse.json(users);
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
-  }
-}
+const schema = z
+  .object({ userId: z.string().min(1), role: z.nativeEnum(Role).optional(), isBanned: z.boolean().optional() })
+  .refine((v) => v.role !== undefined || v.isBanned !== undefined, 'Nothing to update');
 
-export async function PATCH(req: Request) {
-  if (!(await checkAdmin())) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+export const PATCH = route(async (req) => {
+  const admin = await requireAdmin();
+  const { userId, role, isBanned } = await parseBody(req, schema);
+
+  if (userId === admin.id && (role !== undefined && role !== 'admin' || isBanned)) {
+    throw new HttpError(400, 'You cannot demote or ban your own account.');
   }
 
-  try {
-    const { userId, role, isBanned } = await req.json();
-    if (!userId) return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+  const updates = { ...(role !== undefined ? { role } : {}), ...(isBanned !== undefined ? { isBanned } : {}) };
+  const updatedUser = await prisma.user.update({ where: { id: userId }, data: updates });
 
-    const authObj = await auth();
-    const adminId = authObj.userId!;
+  const client = await clerkClient();
+  if (role !== undefined) await client.users.updateUserMetadata(userId, { publicMetadata: { role } });
+  if (isBanned !== undefined) await (isBanned ? client.users.banUser(userId) : client.users.unbanUser(userId));
 
-    const updates: any = {};
-    if (role !== undefined) updates.role = role;
-    if (isBanned !== undefined) updates.isBanned = isBanned;
-
-    // Update in Prisma
-    const updatedUser = await prisma.user.update({
-      where: { id: userId },
-      data: updates,
-    });
-
-    // Sync role to Clerk
-    if (role !== undefined) {
-      const client = await clerkClient();
-      await client.users.updateUserMetadata(userId, {
-        publicMetadata: { role }
-      });
-    }
-
-    // Create Audit Log
-    await prisma.auditLog.create({
-      data: {
-        action: `UPDATED_USER`,
-        entityId: userId,
-        entity: 'User',
-        adminId,
-        details: JSON.stringify(updates)
-      }
-    });
-
-    return NextResponse.json(updatedUser);
-  } catch (error: any) {
-    console.error('Error updating user:', error);
-    return NextResponse.json({ error: 'Failed to update user' }, { status: 500 });
-  }
-}
+  await audit(admin.id, 'UPDATED_USER', 'User', userId, updates);
+  return updatedUser;
+});

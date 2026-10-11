@@ -1,77 +1,58 @@
-import { NextResponse } from 'next/server';
+import { z } from 'zod';
+import { FactoryStatus } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
-import { auth, clerkClient } from '@clerk/nextjs/server';
+import { requireAdmin } from '@/server/auth';
+import { parseBody, route } from '@/server/http';
+import { audit, notify } from '@/server/events';
 import { sendFactoryStatusEmail } from '@/lib/email';
 
-async function checkAdmin() {
-  const authObj = await auth();
-  let role = (authObj.sessionClaims?.metadata as any)?.role;
-  if (!role && authObj.userId) {
-    const client = await clerkClient();
-    const user = await client.users.getUser(authObj.userId);
-    role = user.publicMetadata?.role;
+export const GET = route(async (req) => {
+  await requireAdmin();
+  const status = new URL(req.url).searchParams.get('status');
+  const parsed = z.nativeEnum(FactoryStatus).safeParse(status);
+
+  return prisma.factory.findMany({
+    where: { deletedAt: null, ...(parsed.success ? { status: parsed.data } : {}) },
+    include: { owner: true, _count: { select: { kycDocuments: true, certifications: true } } },
+    orderBy: { createdAt: 'desc' },
+  });
+});
+
+const patchSchema = z
+  .object({
+    factoryId: z.string().min(1),
+    status: z.nativeEnum(FactoryStatus),
+    rejectionReason: z.string().max(1000).optional(),
+  })
+  .refine((v) => v.status !== 'REJECTED' || !!v.rejectionReason?.trim(), {
+    message: 'A rejection reason is required',
+    path: ['rejectionReason'],
+  });
+
+export const PATCH = route(async (req) => {
+  const admin = await requireAdmin();
+  const { factoryId, status, rejectionReason } = await parseBody(req, patchSchema);
+
+  const factory = await prisma.factory.update({
+    where: { id: factoryId },
+    data: { status, rejectionReason: status === 'REJECTED' ? rejectionReason : null },
+    include: { owner: true },
+  });
+
+  await audit(admin.id, `FACTORY_STATUS_${status}`, 'Factory', factoryId, { status, rejectionReason });
+  await notify(
+    factory.ownerId,
+    status === 'APPROVED' ? 'Factory approved' : `Factory status: ${status}`,
+    status === 'REJECTED' ? `Reason: ${rejectionReason}` : `Your factory "${factory.name}" is now ${status.toLowerCase()}.`,
+    '/dashboard/factory',
+  );
+
+  if (factory.owner.email) {
+    // Email failure must not fail the admin action
+    sendFactoryStatusEmail(factory.owner.email, status, factory.owner.firstName || 'Factory Owner', rejectionReason).catch((e) =>
+      console.error('[email] factory status', e),
+    );
   }
-  return role === 'admin';
-}
 
-export async function GET(req: Request) {
-  if (!(await checkAdmin())) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const { searchParams } = new URL(req.url);
-  const status = searchParams.get('status');
-
-  try {
-    const factories = await prisma.factory.findMany({
-      where: status ? { status } : undefined,
-      include: { owner: true },
-      orderBy: { createdAt: 'desc' },
-    });
-    return NextResponse.json(factories);
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch factories' }, { status: 500 });
-  }
-}
-
-export async function PATCH(req: Request) {
-  if (!(await checkAdmin())) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  try {
-    const { factoryId, status, rejectionReason } = await req.json();
-    if (!factoryId || !status) return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
-
-    const authObj = await auth();
-    const adminId = authObj.userId!;
-
-    const factory = await prisma.factory.update({
-      where: { id: factoryId },
-      data: { status, rejectionReason: status === 'REJECTED' ? rejectionReason : null },
-      include: { owner: true }
-    });
-
-    // Send Email
-    if (factory.owner?.email) {
-      const ownerName = factory.owner.firstName || 'Factory Owner';
-      await sendFactoryStatusEmail(factory.owner.email, status, ownerName, rejectionReason);
-    }
-
-    // Audit log
-    await prisma.auditLog.create({
-      data: {
-        action: `FACTORY_STATUS_${status}`,
-        entityId: factoryId,
-        entity: 'Factory',
-        adminId,
-        details: JSON.stringify({ status, rejectionReason })
-      }
-    });
-
-    return NextResponse.json(factory);
-  } catch (error) {
-    console.error('Error updating factory:', error);
-    return NextResponse.json({ error: 'Failed to update factory' }, { status: 500 });
-  }
-}
+  return factory;
+});

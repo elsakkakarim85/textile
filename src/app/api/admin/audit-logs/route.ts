@@ -1,31 +1,19 @@
-import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { auth, clerkClient } from '@clerk/nextjs/server';
+import { requireAdmin } from '@/server/auth';
+import { route } from '@/server/http';
 
-async function checkAdmin() {
-  const authObj = await auth();
-  let role = (authObj.sessionClaims?.metadata as any)?.role;
-  if (!role && authObj.userId) {
-    const client = await clerkClient();
-    const user = await client.users.getUser(authObj.userId);
-    role = user.publicMetadata?.role;
-  }
-  return role === 'admin';
-}
+export const GET = route(async (req) => {
+  await requireAdmin();
+  const { searchParams } = new URL(req.url);
+  const take = Math.min(Number(searchParams.get('take')) || 100, 500);
+  const cursor = searchParams.get('cursor');
+  const entity = searchParams.get('entity') || undefined;
 
-export async function GET() {
-  if (!(await checkAdmin())) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  try {
-    const logs = await prisma.auditLog.findMany({
-      orderBy: { createdAt: 'desc' },
-      take: 100, // Pagination can be added later via query params
-    });
-    
-    return NextResponse.json(logs);
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch audit logs' }, { status: 500 });
-  }
-}
+  const logs = await prisma.auditLog.findMany({
+    where: entity ? { entity } : undefined,
+    orderBy: { createdAt: 'desc' },
+    take,
+    ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
+  });
+  return logs;
+});

@@ -157,8 +157,8 @@ async function main() {
     data: {
       title: 'Supply of 50,000 meters of Twill Fabric for Workwear',
       description: 'Looking for 65/35 Poly-Cotton Twill, 240 GSM. Must withstand industrial washing at 85C.',
-      quantity: '50000',
-      targetPrice: '3.5 USD/meter',
+      quantity: 50000,
+      targetPrice: 3.5,
       status: 'OPEN',
       buyerId: buyer1.id,
     }
@@ -168,7 +168,7 @@ async function main() {
     data: {
       rfqId: rfq1.id,
       factoryId: factory1.id,
-      price: '3.8 USD/meter',
+      unitPrice: 3.8,
       message: 'We can manufacture this using Indanthrene dyes for maximum wash fastness. Lead time: 45 days.',
     }
   });

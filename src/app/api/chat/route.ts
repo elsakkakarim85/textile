@@ -1,116 +1,81 @@
-import { generateText, embed } from 'ai';
-import { google } from '@ai-sdk/google';
-import { getPineconeIndex } from '@/lib/pinecone';
-import { NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
-import { search, SafeSearchType } from 'duck-duck-scrape';
+import { HttpError, route } from '@/server/http';
+import { generate, sanitizeMessages } from '@/server/ai';
+import { searchKnowledge } from '@/server/knowledge';
+import { clientIp, rateLimit } from '@/server/rate-limit';
 
 export const maxDuration = 30;
 
-export async function POST(req: Request) {
-  try {
-    const { messages } = await req.json();
-    const lastMessageObj = messages[messages.length - 1];
-    const lastMessage = lastMessageObj.content;
+/** Core export-quality reference (curated, static). Live documents come from the pgvector knowledge base. */
+const EXPORT_STANDARDS = `
+- Colour fastness: ISO 105 series (washing C06, rubbing X12, light B02). Azo dyes restricted under EU REACH Annex XVII.
+- Tensile strength (woven): ASTM D5034 grab test; buyer-specified minimum, commonly ≥250 N.
+- Dimensional stability: AATCC 135 / ISO 6330; typical tolerance ≤3–5% after home laundering.
+- GSM and construction: within ±5% of approved sample.
+- Chemical safety: OEKO-TEX Standard 100 (formaldehyde, heavy metals, phthalates); ZDHC MRSL for wet processing.
+- Organic / recycled claims: GOTS, OCS, GRS, BCI.
+- Labelling (EU Reg. 1007/2011): fibre composition, care symbols (ISO 3758), country of origin.
+- Packing: moisture-protective polybags, silica gel for sea freight, carton marks per buyer manual.`;
 
-    let contextText = '';
-    
-    // Prisma RAG: Fetch actual marketplace data
-    try {
-      
-      const factories = await prisma.factory.findMany({
-        where: { isVerified: true },
-        include: {
-          owner: {
-            include: { listings: true }
-          }
-        },
-        take: 10
-      });
+export const POST = route(async (req) => {
+  const { userId } = await auth();
+  // Signed-in: 30 req / 10 min. Anonymous: 8 req / 10 min per IP.
+  rateLimit(userId ? `chat:u:${userId}` : `chat:ip:${clientIp(req)}`, userId ? 30 : 8, 10 * 60_000);
 
-      if (factories && factories.length > 0) {
-        contextText = factories.map((f: any) => {
-          const products = f.owner.listings.map((l: any) => `- ${l.title} (${l.price} ${l.currency})`).join('\n');
-          return `Factory: ${f.name} (Address: ${f.address})\nProducts:\n${products}\nLink: /factories/${f.id}`;
-        }).join('\n\n---\n\n');
-      }
-    } catch (error) {
-      console.error('Prisma RAG failed.', error);
-    }
+  const setting = await prisma.systemSetting.findUnique({ where: { key: 'ai_enabled' } }).catch(() => null);
+  if (setting?.value === 'false') throw new HttpError(503, 'The AI consultant is temporarily disabled.');
 
-    // Mock RAG: Inject Document Analysis from Google Drive PDFs
-    const docAnalysis = `
-    ### تحليل مستندات التصدير - تقرير الجودة الشامل (المراجع من Google Drive)
-    معايير الجودة الأساسية لتصدير المنسوجات من تكتل المحلة (يجب سردها في الإجابة):
-    
-    1. **المواصفات الفيزيائية (Physical Properties):**
-       - **ثبات اللون (Color Fastness):** يجب أن تكون درجة ثبات اللون للاحتكاك (الغسيل، العرق، والضوء) مطابقة لمعايير ISO 105. يمنع استخدام صبغات الآزو (Azo Dyes) المحظورة عالمياً وخاصة في الاتحاد الأوروبي (REACH regulations).
-       - **قوة الشد (Tensile Strength):** وفقاً لمعايير ASTM D5034-09، يجب أن تتحمل الأقمشة المصدرة إجهاداً لا يقل عن 250 نيوتن للأقمشة المنسوجة (Woven fabrics).
-       - **معدل الانكماش (Shrinkage Rate):** لا يتجاوز 3-5% كحد أقصى بعد 5 غسلات عند درجة حرارة 40 مئوية (طبقاً لمواصفة AATCC 135).
-       - **عدد الخيوط والكثافة (Thread Count & GSM):** يجب أن تتطابق كثافة النسيج والوزن بالمتر المربع (GSM) مع العينة المعتمدة (Tolerance +/- 5%).
-       
-    2. **المعايير الكيميائية والبيئية (Chemical & Environmental Standards):**
-       - **خلو من المواد الضارة:** خلو الأقمشة من الفورمالديهايد (Formaldehyde)، المعادن الثقيلة (Heavy Metals)، والفثالات (Phthalates) طبقاً لمعيار OEKO-TEX Standard 100.
-       - **إدارة مياه الصرف:** المصانع المصدرة يجب أن تمتلك شهادات معالجة مياه الصرف (Zero Liquid Discharge) للحفاظ على الاستدامة البيئية.
-       
-    3. **التعبئة والتغليف (Packaging & Labeling):**
-       - **بطاقات البيانات (Labels):** يجب أن تتضمن نسبة الخلط (مثل: 100% قطن مصري)، تعليمات الغسيل الدولية (Care Symbols)، بلد المنشأ (Made in Egypt)، ورقم تسجيلي ضريبي للمصنع.
-       - **التغليف الخارجي:** التغليف في أكياس بولي إيثيلين مقواة لضمان حماية المنسوجات من الرطوبة أثناء الشحن البحري، مع إدراج أكياس السيليكا (Silica Gel).
-    `;
-    contextText += `\n\n--- Document Analysis (Google Drive PDFs) ---\n\n${docAnalysis}`;
+  const body = await req.json().catch(() => ({}));
+  const messages = sanitizeMessages(body?.messages);
+  const question = messages.filter((m) => m.role === 'user').at(-1)?.content;
+  if (!question) throw new HttpError(400, 'Message is required');
 
-    // Live Web Search for up-to-date data
-    try {
-      
-      const searchResults = await search(lastMessage, {
-        safeSearch: SafeSearchType.OFF
-      });
-      if (searchResults.results && searchResults.results.length > 0) {
-        const topResults = searchResults.results.slice(0, 3).map((r: any) => `- **${r.title}**: ${r.description} (Source: ${r.url})`).join('\n');
-        contextText += `\n\n--- Live Web Search Results (Up-to-date Data) ---\n\n${topResults}`;
-      }
-    } catch (searchError) {
-      console.error('Web search failed.', searchError);
-    }
+  const [knowledge, factories] = await Promise.all([
+    searchKnowledge(question, 5),
+    prisma.factory.findMany({
+      where: { isVerified: true, status: 'APPROVED', deletedAt: null },
+      select: {
+        id: true,
+        name: true,
+        address: true,
+        capabilities: true,
+        owner: { select: { listings: { where: { status: 'ACTIVE', deletedAt: null }, select: { title: true, price: true, currency: true, unit: true }, take: 5 } } },
+      },
+      take: 10,
+    }),
+  ]);
 
-    const systemPrompt = `أنت مستشار ذكي ومندوب توريد لتكتل المحلة للنسيج (El Mahalla Textile Cluster).
-    تتحدث باللغة العربية. هدفك هو مساعدة أصحاب المصانع، العمال، والموردين.
-    
-    [تعليمات صارمة للتنسيق - يجب الالتزام بها]:
-    - لا تقم بكتابة نصوص عادية متصلة أبداً. يجب أن تنسق ردك كتقرير احترافي.
-    - استخدم العناوين الكبيرة (Heading 1) مثل: # عنوان التقرير.
-    - استخدم الجداول (Markdown Tables) لعرض المعايير والمقاسات.
-    - استخدم النقاط (Bullet points) لسرد التفاصيل.
-    - تجنب تكرار نفس الجملة. كن دقيقاً، مفصلاً، واحترافياً.
-    
-    هذه معلومات من قواعد البيانات وتحليل مستندات التصدير (PDFs):
-    ${contextText ? contextText : 'لا توجد بيانات متاحة حالياً.'}
-    
-    يجب أن تبني ردك التفصيلي والمنسق بالكامل بناءً على هذه المعايير (مستندات التصدير) المذكورة أعلاه.`;
+  const marketplace = factories
+    .map((f) => {
+      const products = f.owner.listings.map((l) => `  - ${l.title}${l.price ? ` (${l.price} ${l.currency}${l.unit ? '/' + l.unit : ''})` : ''}`).join('\n');
+      return `• ${f.name} — ${f.address}${f.capabilities.length ? ` — ${f.capabilities.join(', ')}` : ''} — /factories/${f.id}\n${products}`;
+    })
+    .join('\n');
 
-    if (!process.env.GROQ_API_KEY) {
-       return NextResponse.json({ text: "عذراً، يجب توفير مفتاح GROQ_API_KEY." });
-    }
+  const sources = knowledge.map((k, i) => `[${i + 1}] (${k.title})\n${k.content}`).join('\n\n');
 
-    const { createGroq } = require('@ai-sdk/groq');
-    const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
-    
-    const coreMessages = messages.map((m: any) => ({
-      role: m.role,
-      content: m.content
-    }));
+  const system = `You are the AI trade consultant of the El Mahalla Textile Cluster (Egypt), serving factory owners, buyers and workers.
+Reply in the user's language (Arabic → professional Modern Standard/Egyptian Arabic; English → English).
 
-    const result = await generateText({
-      model: groq('qwen/qwen3.8-27b'),
-      system: systemPrompt,
-      messages: coreMessages,
-      temperature: 0.3,
-      frequencyPenalty: 0.5,
-    });
+FORMAT (strict):
+- Start with a "# " title, then short sections with "## " headings.
+- Use Markdown tables for standards, measurements, prices or comparisons.
+- Use bullet points; no long unbroken paragraphs. Never repeat sentences.
+- When you use a knowledge source, cite it as [1], [2]… and end with a "## Sources" list.
 
-    return NextResponse.json({ text: result.text });
-  } catch (error: any) {
-    console.error('Route error:', error);
-    return NextResponse.json({ text: "حدث خطأ في الاتصال بالذكاء الاصطناعي. يرجى المحاولة لاحقاً." }, { status: 500 });
-  }
-}
+ACCURACY:
+- Base answers on the context below. If the context does not contain the answer, say so clearly and give general guidance marked as such.
+- Never invent factories, prices, certifications or regulations.
+
+EXPORT STANDARDS REFERENCE:${EXPORT_STANDARDS}
+
+VERIFIED FACTORIES ON THE PLATFORM:
+${marketplace || '(none yet)'}
+
+KNOWLEDGE BASE SOURCES:
+${sources || '(no matching documents)'}`;
+
+  const { text, model } = await generate({ system, messages, temperature: 0.3 });
+  return { text, model, sources: knowledge.map((k) => k.title) };
+});

@@ -1,62 +1,41 @@
-import { NextResponse } from 'next/server';
+import { z } from 'zod';
+import { Currency } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
-import { auth } from '@clerk/nextjs/server';
+import { requireFactory } from '@/server/auth';
+import { HttpError, parseBody, route } from '@/server/http';
+import { notify } from '@/server/events';
 
-export async function POST(req: Request) {
-  const authObj = await auth();
-  if (!authObj.userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+const schema = z.object({
+  rfqId: z.string().min(1),
+  unitPrice: z.coerce.number().positive().max(1_000_000),
+  currency: z.nativeEnum(Currency).default('USD'),
+  minOrderQty: z.coerce.number().int().positive().optional(),
+  leadTimeDays: z.coerce.number().int().positive().max(730).optional(),
+  validUntil: z.coerce.date().optional(),
+  message: z.string().trim().min(10).max(5000),
+});
 
-  try {
-    const { rfqId, price, message } = await req.json();
+export const POST = route(async (req) => {
+  const { factory } = await requireFactory({ approved: true });
+  const data = await parseBody(req, schema);
 
-    const factory = await prisma.factory.findFirst({
-      where: { ownerId: authObj.userId, status: 'APPROVED' }
-    });
+  const rfq = await prisma.rFQ.findUnique({ where: { id: data.rfqId } });
+  if (!rfq || rfq.status !== 'OPEN') throw new HttpError(400, 'This RFQ is not open for quotations');
+  if (rfq.buyerId === factory.ownerId) throw new HttpError(400, 'You cannot quote on your own RFQ');
+  if (rfq.deadline && rfq.deadline < new Date()) throw new HttpError(400, 'The RFQ deadline has passed');
 
-    if (!factory) {
-      return NextResponse.json({ error: 'Only approved factories can submit quotes.' }, { status: 403 });
-    }
+  // @@unique([rfqId, factoryId]) guarantees one quote per factory (409 on duplicates)
+  const quotation = await prisma.quotation.create({ data: { ...data, factoryId: factory.id } });
 
-    // Check if already quoted
-    const existing = await prisma.quotation.findFirst({
-      where: { rfqId, factoryId: factory.id }
-    });
+  await notify(rfq.buyerId, 'New quotation received', `${factory.name} quoted ${data.unitPrice} ${data.currency} on "${rfq.title}".`, '/dashboard/buyer/rfqs');
+  return quotation;
+});
 
-    if (existing) {
-      return NextResponse.json({ error: 'You have already quoted for this RFQ.' }, { status: 400 });
-    }
-
-    const quotation = await prisma.quotation.create({
-      data: {
-        rfqId,
-        factoryId: factory.id,
-        price,
-        message
-      }
-    });
-
-    return NextResponse.json(quotation);
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to submit quotation' }, { status: 500 });
-  }
-}
-
-export async function GET(req: Request) {
-  const authObj = await auth();
-  if (!authObj.userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  try {
-    const factory = await prisma.factory.findFirst({ where: { ownerId: authObj.userId } });
-    if (!factory) return NextResponse.json([]);
-
-    const quotes = await prisma.quotation.findMany({
-      where: { factoryId: factory.id },
-      include: { rfq: true },
-      orderBy: { createdAt: 'desc' }
-    });
-
-    return NextResponse.json(quotes);
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch quotations' }, { status: 500 });
-  }
-}
+export const GET = route(async () => {
+  const { factory } = await requireFactory();
+  return prisma.quotation.findMany({
+    where: { factoryId: factory.id },
+    include: { rfq: true },
+    orderBy: { createdAt: 'desc' },
+  });
+});

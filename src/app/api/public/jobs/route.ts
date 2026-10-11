@@ -1,20 +1,20 @@
-import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { route } from '@/server/http';
 
-export async function GET() {
-  try {
-    const jobs = await prisma.jobPosting.findMany({
-      where: { status: 'ACTIVE' },
-      include: {
-        employer: {
-          select: { firstName: true, lastName: true, factories: { select: { name: true } } }
-        }
-      },
-      orderBy: { createdAt: 'desc' }
-    });
+export const dynamic = 'force-dynamic';
 
-    return NextResponse.json(jobs);
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch jobs' }, { status: 500 });
-  }
-}
+export const GET = route(async (req) => {
+  const q = new URL(req.url).searchParams.get('q')?.trim();
+  return prisma.jobPosting.findMany({
+    where: {
+      status: 'ACTIVE',
+      ...(q ? { OR: [{ title: { contains: q, mode: 'insensitive' } }, { description: { contains: q, mode: 'insensitive' } }] } : {}),
+    },
+    include: {
+      employer: { select: { firstName: true, lastName: true, factories: { select: { id: true, name: true, isVerified: true } } } },
+      _count: { select: { applications: true } },
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 100,
+  });
+});
