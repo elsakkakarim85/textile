@@ -1,0 +1,76 @@
+"use client";
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { api } from '@/lib/api-client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { tr } from '@/lib/i18n-inline';
+
+export function FundingApplyForm({ programId, hasApplied, locale }: { programId: string, hasApplied: boolean, locale: string }) {
+  const router = useRouter();
+  const t = (en: string, ar: string) => tr(locale, en, ar);
+  
+  const [isOpen, setIsOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [amount, setAmount] = useState('');
+  const [purpose, setPurpose] = useState('');
+
+  if (hasApplied) {
+    return (
+      <div className="bg-emerald-50 text-emerald-700 p-3 rounded-lg text-sm font-medium text-center border border-emerald-200">
+        {t('Application Submitted ✓', 'تم تقديم الطلب ✓')}
+      </div>
+    );
+  }
+
+  if (!isOpen) {
+    return (
+      <Button className="w-full" onClick={() => setIsOpen(true)}>
+        {t('Apply Now', 'قدم الآن')}
+      </Button>
+    );
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await api(`/api/cluster/funding/${programId}/apply`, 'POST', {
+        amountRequested: amount ? Number(amount) : undefined,
+        purpose
+      });
+      router.refresh();
+    } catch (err: any) {
+      alert(err.message);
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-3 mt-4 pt-4 border-t">
+      <div>
+        <label className="block text-xs font-medium mb-1">{t('Amount Requested', 'المبلغ المطلوب')} (EGP/USD)</label>
+        <Input type="number" min="0" value={amount} onChange={e => setAmount(e.target.value)} placeholder={t('Optional', 'اختياري')} className="h-8 text-sm" />
+      </div>
+      <div>
+        <label className="block text-xs font-medium mb-1">{t('Purpose / Justification', 'الغرض / المبرر')}</label>
+        <textarea 
+          required 
+          className="flex min-h-[60px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+          value={purpose} 
+          onChange={e => setPurpose(e.target.value)} 
+          placeholder={t('Briefly explain how you will use the funds...', 'اشرح باختصار كيف ستستخدم الأموال...')}
+        />
+      </div>
+      <div className="flex gap-2">
+        <Button type="button" variant="outline" size="sm" className="flex-1" onClick={() => setIsOpen(false)} disabled={loading}>
+          {t('Cancel', 'إلغاء')}
+        </Button>
+        <Button type="submit" size="sm" className="flex-1" disabled={loading}>
+          {loading ? t('Submitting...', 'جاري التقديم...') : t('Submit', 'تأكيد')}
+        </Button>
+      </div>
+    </form>
+  );
+}
