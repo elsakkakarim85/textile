@@ -1,8 +1,18 @@
 import { z } from 'zod';
+import type { EventType } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { route, parseBody, HttpError } from '@/server/http';
-import { requireRole } from '@/server/auth';
+import { requireUser } from '@/server/auth';
 import { audit } from '@/server/events';
+
+const VALID_EVENT_TYPES: EventType[] = [
+  'WORKSHOP',
+  'TRADE_FAIR',
+  'B2B_MEETING',
+  'TRAINING',
+  'WEBINAR',
+  'NETWORKING',
+];
 
 export const GET = route(async (req) => {
   const url = new URL(req.url);
@@ -10,11 +20,13 @@ export const GET = route(async (req) => {
   const past = url.searchParams.get('past') === 'true';
 
   const where: any = {};
-  if (type) where.type = type;
+  if (type && VALID_EVENT_TYPES.includes(type as EventType)) {
+    where.type = type as EventType;
+  }
   if (past) {
-    where.endAt = { lt: new Date() };
+    where.startsAt = { lt: new Date() };
   } else {
-    where.endAt = { gte: new Date() };
+    where.startsAt = { gte: new Date() };
   }
 
   const events = await prisma.clusterEvent.findMany({
@@ -22,35 +34,55 @@ export const GET = route(async (req) => {
     include: {
       _count: { select: { registrations: true } },
     },
-    orderBy: past ? { startAt: 'desc' } : { startAt: 'asc' },
+    orderBy: past ? { startsAt: 'desc' } : { startsAt: 'asc' },
   });
 
   return { events };
 });
 
 const createEventSchema = z.object({
-  title: z.string().min(5),
+  title: z.string().min(4),
+  titleAr: z.string().optional(),
   description: z.string(),
-  type: z.string(),
-  startAt: z.string().datetime(),
-  endAt: z.string().datetime(),
+  type: z.string().default('WORKSHOP'),
+  startAt: z.string().optional(),
+  startsAt: z.string().optional(),
+  endAt: z.string().optional(),
+  endsAt: z.string().optional(),
   location: z.string().optional(),
-  isOnline: z.boolean(),
+  onlineUrl: z.string().optional(),
+  isOnline: z.boolean().optional(),
   capacity: z.number().optional(),
 });
 
 export const POST = route(async (req) => {
-  const { user } = await requireRole(['admin', 'service_provider']);
+  const user = await requireUser();
   const body = await parseBody(req, createEventSchema);
 
-  if (new Date(body.endAt) <= new Date(body.startAt)) {
+  const startsAt = new Date(body.startsAt || body.startAt || Date.now() + 86400000);
+  const endsAtRaw = body.endsAt || body.endAt;
+  const endsAt = endsAtRaw ? new Date(endsAtRaw) : new Date(startsAt.getTime() + 2 * 3600000);
+
+  if (endsAt <= startsAt) {
     throw new HttpError(400, 'End time must be after start time');
   }
+
+  const eventType: EventType = VALID_EVENT_TYPES.includes(body.type as EventType)
+    ? (body.type as EventType)
+    : 'WORKSHOP';
 
   const event = await prisma.clusterEvent.create({
     data: {
       organizerId: user.id,
-      ...body,
+      title: body.title,
+      titleAr: body.titleAr || null,
+      description: body.description,
+      type: eventType,
+      startsAt,
+      endsAt,
+      location: body.location || (body.isOnline ? 'Online Webinar' : 'Mahalla Cluster Center'),
+      onlineUrl: body.onlineUrl || (body.isOnline ? 'https://meet.google.com' : null),
+      capacity: body.capacity || 100,
     },
   });
 

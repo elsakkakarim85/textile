@@ -1,13 +1,21 @@
-import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { currentUserId, findUserFactory, safeQuery } from '@/server/cluster';
 import { tr, fmtMoney, fmtDate, daysUntil } from '@/lib/i18n-inline';
 import { PageHeader, EmptyState, DbOfflineBanner, Pill } from '@/components/cluster/ui';
 import { FundingApplyForm } from '@/components/cluster/modern/FundingApplyForm';
-import { Landmark, Building2, Calendar, Target, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Landmark, Target } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
-export default async function FundingPage({ params, searchParams }: { params: Promise<{ locale: string }>, searchParams: Promise<{ tag?: string }> }) {
+export const dynamic = 'force-dynamic';
+
+export default async function FundingPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ tag?: string }>;
+}) {
   const { locale } = await params;
   const { tag } = await searchParams;
   const t = (en: string, ar: string) => tr(locale, en, ar);
@@ -15,18 +23,16 @@ export default async function FundingPage({ params, searchParams }: { params: Pr
   const userId = await currentUserId();
   const factory = await findUserFactory(userId);
 
-  if (!userId) redirect(`/${locale}/sign-in`);
-
-  // Compute recommended tags based on lowest maturity score dimensions (if user has a factory)
   let recommendedTags: string[] = [];
   if (factory) {
     const { data: latestMaturity } = await safeQuery(
-      () => prisma.maturityAssessment.findFirst({ where: { factoryId: factory.id }, orderBy: { createdAt: 'desc' } })
+      () => prisma.maturityAssessment.findFirst({ where: { factoryId: factory.id }, orderBy: { createdAt: 'desc' } }),
+      null
     );
     if (latestMaturity) {
       const scores = latestMaturity.scores as Record<string, number>;
-      const sorted = Object.entries(scores).sort((a, b) => a[1] - b[1]); // Ascending
-      recommendedTags = sorted.slice(0, 2).map(([key]) => key); // Top 2 weakest dimensions
+      const sorted = Object.entries(scores).sort((a, b) => a[1] - b[1]);
+      recommendedTags = sorted.slice(0, 2).map(([key]) => key);
     }
   }
 
@@ -37,86 +43,113 @@ export default async function FundingPage({ params, searchParams }: { params: Pr
       return prisma.fundingProgram.findMany({
         where,
         include: {
-          applications: factory ? { where: { factoryId: factory.id } } : false
+          applications: factory ? { where: { factoryId: factory.id } } : false,
         },
-        orderBy: { deadline: 'asc' }
+        orderBy: { deadline: 'asc' },
       });
     },
-    // Fallback
     [
-      { id: '1', title: 'SME Green Transformation Grant', provider: 'EBRD & MSMEDA', description: 'Financial assistance for installing solar panels and water recycling systems.', type: 'GRANT', maxAmount: 500000, deadline: new Date(Date.now() + 15*86400000), tags: ['sustainability', 'energy'], applications: [] },
-      { id: '2', title: 'Digital ERP Subsidy', provider: 'TIGARA / IMC', description: '70% subsidy for implementing cloud ERP and tracking software.', type: 'SUBSIDY', maxAmount: 150000, deadline: new Date(Date.now() + 45*86400000), tags: ['digital', 'production'], applications: [] },
-    ]
+      {
+        id: '1',
+        title: 'SME Green Transformation Grant',
+        titleAr: 'منحة التحول الأخضر للمصانع الصغيرة والمتوسطة',
+        provider: 'EBRD & MSMEDA',
+        description: 'Financial assistance for installing solar panels and water recycling systems.',
+        eligibility: 'Approved Mahalla Textile SMEs',
+        type: 'GRANT',
+        maxAmount: 500000,
+        currency: 'EGP',
+        deadline: new Date(Date.now() + 15 * 86400000),
+        tags: ['sustainability', 'energy'],
+        applications: [],
+      },
+    ] as any[]
   );
 
   return (
     <div className="container mx-auto py-8 px-4">
       <PageHeader
         icon={Landmark}
-        title={t('Funding & Grants Hub', 'مركز التمويل والمنح')}
-        subtitle={t('Access subsidies, green financing, and technical assistance programs targeted for the textile sector.', 'احصل على الدعم، التمويل الأخضر، وبرامج المساعدة الفنية المخصصة لقطاع الغزل والنسيج.')}
+        title={t('Funding, Grants & Green Finance Hub', 'مركز التمويل والمنح والدعم الفني')}
+        subtitle={t(
+          'Access EU/UNIDO TIGARA technical assistance, MSMEDA green loans, IMC modernization subsidies, and CBE SME financing matched to your factory gaps.',
+          'احصل على منح الدعم الفني من مشروع تيجارا واليونيدو، القروض الخضراء من جهاز تنمية المشروعات، وبرامج مركز تحديث الصناعة.'
+        )}
       />
 
       {!ok && <DbOfflineBanner locale={locale} />}
 
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-        <a href={`/${locale}/cluster/funding`} className={`px-4 py-1.5 rounded-full text-sm whitespace-nowrap ${!tag ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80'}`}>
+      <div className="flex flex-wrap gap-2 mb-6">
+        <Link
+          href={`/${locale}/cluster/funding`}
+          className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap ${
+            !tag ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80'
+          }`}
+        >
           {t('All Programs', 'جميع البرامج')}
-        </a>
-        {['digital', 'sustainability', 'export', 'production', 'quality', 'people'].map(tDim => (
-          <a key={tDim} href={`/${locale}/cluster/funding?tag=${tDim}`} className={`px-4 py-1.5 rounded-full text-sm whitespace-nowrap capitalize ${tag === tDim ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80'}`}>
-            {t(tDim, tDim)}
-          </a>
+        </Link>
+        {['digital', 'sustainability', 'export', 'production', 'quality', 'people'].map((tDim) => (
+          <Link
+            key={tDim}
+            href={`/${locale}/cluster/funding?tag=${tDim}`}
+            className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap capitalize ${
+              tag === tDim ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80'
+            }`}
+          >
+            {tDim}
+          </Link>
         ))}
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {programs?.map((prog: any) => {
-          const isRecommended = prog.tags.some((t: string) => recommendedTags.includes(t));
+          const isRecommended = (prog.tags || []).some((tg: string) => recommendedTags.includes(tg));
           const hasApplied = prog.applications && prog.applications.length > 0;
-          
+          const title = locale === 'ar' ? prog.titleAr || prog.title : prog.title;
+          const desc = locale === 'ar' ? prog.descriptionAr || prog.description : prog.description;
+
           return (
             <Card key={prog.id} className={`p-6 flex flex-col h-full ${isRecommended ? 'border-primary shadow-sm' : ''}`}>
               <div className="flex justify-between items-start mb-3">
                 <Pill tone={prog.type === 'GRANT' ? 'emerald' : prog.type === 'LOAN' ? 'blue' : 'amber'}>
-                  {prog.type}
+                  {prog.type.replace('_', ' ')}
                 </Pill>
                 {isRecommended && (
                   <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded">
-                    <Target className="w-3 h-3" /> {t('Recommended', 'موصى به')}
+                    <Target className="w-3 h-3" /> {t('Matched to Your Factory', 'موصى به لمصنعك')}
                   </span>
                 )}
               </div>
-              
-              <h3 className="text-xl font-bold mb-1">{prog.title}</h3>
-              <p className="text-sm font-medium text-muted-foreground mb-3">{prog.provider}</p>
-              
-              <p className="text-sm mb-4 flex-1 text-muted-foreground">{prog.description}</p>
-              
-              <div className="space-y-2 text-sm mb-6 bg-muted/30 p-3 rounded-lg">
+
+              <h3 className="text-xl font-bold mb-1">{title}</h3>
+              <p className="text-xs font-semibold text-primary mb-3 uppercase tracking-wider">{prog.provider}</p>
+
+              <p className="text-sm mb-4 flex-1 text-muted-foreground">{desc}</p>
+
+              <div className="space-y-2 text-xs mb-6 bg-muted/30 p-3.5 rounded-lg">
                 {prog.maxAmount && (
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">{t('Up to:', 'حتى:')}</span>
-                    <span className="font-semibold">{fmtMoney(locale, prog.maxAmount)}</span>
+                    <span className="text-muted-foreground">{t('Maximum Funding:', 'الحد الأقصى للتمويل:')}</span>
+                    <span className="font-bold text-sm">{fmtMoney(locale, Number(prog.maxAmount), prog.currency || 'EGP')}</span>
+                  </div>
+                )}
+                {prog.eligibility && (
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-muted-foreground">{t('Eligibility:', 'الأهلية:')}</span>
+                    <span className="font-medium truncate">{prog.eligibility}</span>
                   </div>
                 )}
                 {prog.deadline && (
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">{t('Deadline:', 'الموعد النهائي:')}</span>
-                    <span className={`font-semibold ${daysUntil(prog.deadline) < 7 ? 'text-red-600' : ''}`}>
-                      {fmtDate(locale, prog.deadline)}
+                    <span className={`font-semibold ${daysUntil(prog.deadline) < 7 ? 'text-rose-600' : ''}`}>
+                      {fmtDate(locale, prog.deadline)} ({Math.max(0, daysUntil(prog.deadline))}d)
                     </span>
                   </div>
                 )}
               </div>
 
-              {factory ? (
-                <FundingApplyForm programId={prog.id} hasApplied={hasApplied} locale={locale} />
-              ) : (
-                <div className="text-xs text-center text-amber-600 bg-amber-50 p-2 rounded mt-auto border border-amber-100">
-                  {t('Factory profile required to apply.', 'مطلوب ملف مصنع للتقديم.')}
-                </div>
-              )}
+              <FundingApplyForm programId={prog.id} hasApplied={hasApplied} locale={locale} />
             </Card>
           );
         })}

@@ -1,104 +1,162 @@
-import { redirect } from 'next/navigation';
+import Link from 'next/link';
+import type { FacilityType } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
-import { currentUserId, safeQuery } from '@/server/cluster';
+import { safeQuery } from '@/server/cluster';
 import { tr, fmtMoney } from '@/lib/i18n-inline';
 import { PageHeader, EmptyState, DbOfflineBanner, Pill } from '@/components/cluster/ui';
-import { FlaskConical, MapPin, UserSquare2, ShieldCheck, Activity } from 'lucide-react';
+import { FacilityBookForm } from '@/components/cluster/collab/FacilityBookForm';
+import { FlaskConical, MapPin, UserSquare2, ShieldCheck } from 'lucide-react';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 
-export default async function FacilitiesPage({ params, searchParams }: { params: Promise<{ locale: string }>, searchParams: Promise<{ type?: string }> }) {
+export const dynamic = 'force-dynamic';
+
+const FACILITY_TYPES: { key: FacilityType; en: string; ar: string }[] = [
+  { key: 'TESTING_LAB', en: 'Testing Lab', ar: 'معمل الاختبارات' },
+  { key: 'CAD_DESIGN', en: 'CAD/CAM Studio', ar: 'استوديو التصميم CAD' },
+  { key: 'EFFLUENT_TREATMENT', en: 'Effluent Treatment', ar: 'محطة معالجة الصرف' },
+  { key: 'TRAINING_CENTER', en: 'Training Center', ar: 'مركز التدريب' },
+  { key: 'SHOWROOM', en: 'Export Showroom', ar: 'صالة عرض التصدير' },
+  { key: 'DYEHOUSE', en: 'Pilot Dyehouse', ar: 'مصبغة تجريبية' },
+];
+
+export default async function FacilitiesPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ type?: string }>;
+}) {
   const { locale } = await params;
   const { type } = await searchParams;
   const t = (en: string, ar: string) => tr(locale, en, ar);
 
-  const userId = await currentUserId();
-  if (!userId) redirect(`/${locale}/sign-in`);
-
   const { data: facilities, ok } = await safeQuery(
     async () => {
-      const where: any = {};
-      if (type) where.type = type;
+      const where: any = { isActive: true };
+      if (type && FACILITY_TYPES.some((f) => f.key === type)) {
+        where.type = type as FacilityType;
+      }
       return prisma.sharedFacility.findMany({
         where,
-        include: { _count: { select: { bookings: { where: { status: 'CONFIRMED', endAt: { gt: new Date() } } } } } },
-        orderBy: { createdAt: 'desc' }
+        include: {
+          bookings: {
+            where: { status: { in: ['PENDING', 'CONFIRMED'] } },
+            include: { factory: { select: { name: true } } },
+            orderBy: { startAt: 'asc' },
+            take: 5,
+          },
+          _count: {
+            select: {
+              bookings: { where: { status: 'CONFIRMED', endAt: { gt: new Date() } } },
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
       });
     },
-    // Fallback data
     [
-      { id: '1', name: 'TIGARA Textile Testing Lab', type: 'LAB', description: 'ISO certified lab for yarn strength, color fastness, and composition testing.', ratePerHour: 500, location: 'Mahalla Cluster Center, Bldg B', operatorName: 'Eng. Khaled', equipmentIds: ['Tensile Tester', 'Spectrophotometer'], _count: { bookings: 3 } },
-      { id: '2', name: 'CAD/CAM Design Studio', type: 'STUDIO', description: 'High-end workstations with Optitex and Gerber software for pattern making.', ratePerHour: 150, location: 'Innovation Hub', operatorName: 'IT Dept', equipmentIds: ['Optitex 3D', 'Plotter'], _count: { bookings: 0 } }
-    ]
+      {
+        id: '1',
+        name: 'TIGARA ISO Textile Testing Lab',
+        nameAr: 'معمل تيجارا المعتمد لاختبارات النسيج',
+        type: 'TESTING_LAB' as FacilityType,
+        description: 'ISO 17025 certified laboratory for yarn tensile strength, color fastness, pilling, and fiber composition.',
+        ratePerHour: 500,
+        currency: 'EGP',
+        location: 'Mahalla Cluster Center, Bldg B',
+        operator: 'Eng. Khaled Mansour',
+        equipment: ['Uster Tensorapid', 'Datacolor Spectrophotometer', 'Martindale Abrasion Tester'],
+        bookings: [],
+        _count: { bookings: 3 },
+      },
+    ] as any[]
   );
 
   return (
     <div className="container mx-auto py-8 px-4">
       <PageHeader
         icon={FlaskConical}
-        title={t('Shared Facilities', 'المرافق المشتركة')}
-        subtitle={t('Book testing labs, design studios, and specialized equipment shared by the cluster.', 'احجز مختبرات الفحص، استوديوهات التصميم، والمعدات المتخصصة المشتركة في التجمع.')}
+        title={t('Shared Cluster Facilities & Labs', 'المرافق والمعامل المشتركة للتجمع')}
+        subtitle={t(
+          'Book accredited quality testing laboratories, 3D CAD/CAM pattern studios, central effluent treatment, and export showrooms at subsidized cluster rates.',
+          'احجز معامل فحص الجودة المعتمدة واستوديوهات التصميم ثلاثي الأبعاد ومحطة المعالجة المركزية وصالات العرض بأسعار مدعومة لأعضاء التجمع.'
+        )}
       />
 
       {!ok && <DbOfflineBanner locale={locale} />}
 
-      <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
-        <a href={`/${locale}/cluster/facilities`} className={`px-4 py-1.5 rounded-full text-sm whitespace-nowrap ${!type ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80'}`}>
+      <div className="flex flex-wrap gap-2 mb-8">
+        <Link
+          href={`/${locale}/cluster/facilities`}
+          className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap ${
+            !type ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80'
+          }`}
+        >
           {t('All Facilities', 'جميع المرافق')}
-        </a>
-        {['LAB', 'STUDIO', 'TREATMENT', 'TRAINING', 'SHOWROOM'].map(cat => (
-          <a key={cat} href={`/${locale}/cluster/facilities?type=${cat}`} className={`px-4 py-1.5 rounded-full text-sm whitespace-nowrap ${type === cat ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80'}`}>
-            {t(cat, cat)}
-          </a>
+        </Link>
+        {FACILITY_TYPES.map((cat) => (
+          <Link
+            key={cat.key}
+            href={`/${locale}/cluster/facilities?type=${cat.key}`}
+            className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap ${
+              type === cat.key ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80'
+            }`}
+          >
+            {t(cat.en, cat.ar)}
+          </Link>
         ))}
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {facilities?.map((fac: any) => (
-          <Card key={fac.id} className="p-0 overflow-hidden flex flex-col h-full hover:border-primary/50 transition-colors">
-            <div className="p-6 flex flex-col flex-1">
+        {facilities?.map((fac: any) => {
+          const name = locale === 'ar' ? fac.nameAr || fac.name : fac.name;
+          const equipList: string[] = fac.equipment || fac.equipmentIds || [];
+          const operatorName = fac.operator || fac.operatorName;
+
+          return (
+            <Card key={fac.id} className="p-6 flex flex-col h-full hover:border-primary/50 transition-colors">
               <div className="flex justify-between items-start mb-4">
-                <Pill tone="blue">{fac.type}</Pill>
-                <div className="text-right">
-                  <div className="font-bold text-lg text-primary">{fmtMoney(locale, fac.ratePerHour)}</div>
+                <Pill tone="blue">{fac.type.replace('_', ' ')}</Pill>
+                <div className="text-end">
+                  <div className="font-bold text-lg text-primary">
+                    {fmtMoney(locale, Number(fac.ratePerHour || 0), fac.currency || 'EGP')}
+                  </div>
                   <div className="text-xs text-muted-foreground">{t('per hour', 'في الساعة')}</div>
                 </div>
               </div>
-              
-              <h3 className="text-xl font-bold mb-2">{fac.name}</h3>
-              <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-1">{fac.description}</p>
-              
-              <div className="space-y-2 text-sm bg-muted/20 p-3 rounded-lg mb-6">
+
+              <h3 className="text-xl font-bold mb-2">{name}</h3>
+              <p className="text-sm text-muted-foreground mb-4 flex-1">{fac.description}</p>
+
+              <div className="space-y-2 text-xs bg-muted/30 p-3.5 rounded-lg mb-4">
                 <div className="flex items-center gap-2 text-muted-foreground">
-                  <MapPin className="w-4 h-4 shrink-0" />
-                  <span className="truncate">{fac.location}</span>
+                  <MapPin className="w-4 h-4 text-primary shrink-0" />
+                  <span className="truncate font-medium text-foreground">{fac.location}</span>
                 </div>
-                {fac.operatorName && (
+                {operatorName && (
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <UserSquare2 className="w-4 h-4 shrink-0" />
-                    <span>{fac.operatorName}</span>
+                    <span>{operatorName}</span>
                   </div>
                 )}
-                {fac.equipmentIds && fac.equipmentIds.length > 0 && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <ShieldCheck className="w-4 h-4 shrink-0" />
-                    <span className="truncate">{fac.equipmentIds.join(' • ')}</span>
+                {equipList.length > 0 && (
+                  <div className="flex items-start gap-2 text-muted-foreground">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <div className="flex flex-wrap gap-1">
+                      {equipList.map((eq) => (
+                        <span key={eq} className="px-2 py-0.5 rounded bg-background border text-[11px]">
+                          {eq}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
 
-              <div className="mt-auto flex items-center justify-between border-t pt-4">
-                <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                  <Activity className="w-3.5 h-3.5" />
-                  {fac._count?.bookings || 0} {t('upcoming bookings', 'حجوزات قادمة')}
-                </span>
-                <Button size="sm">
-                  {t('Book Slot', 'احجز موعد')}
-                </Button>
-              </div>
-            </div>
-          </Card>
-        ))}
+              <FacilityBookForm facility={fac} locale={locale} />
+            </Card>
+          );
+        })}
 
         {(!facilities || facilities.length === 0) && (
           <div className="col-span-full">

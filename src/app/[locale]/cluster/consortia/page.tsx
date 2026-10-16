@@ -1,21 +1,17 @@
-import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
-import { currentUserId, findUserFactory, safeQuery } from '@/server/cluster';
+import { safeQuery } from '@/server/cluster';
 import { tr } from '@/lib/i18n-inline';
 import { PageHeader, EmptyState, DbOfflineBanner, Pill } from '@/components/cluster/ui';
 import { ConsortiumForm } from '@/components/cluster/collab/ConsortiumForm';
-import { Network, Building2, Target, Users, ArrowRight } from 'lucide-react';
+import { Network, Target, Users, ArrowRight } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import Link from 'next/link';
+
+export const dynamic = 'force-dynamic';
 
 export default async function ConsortiaPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const t = (en: string, ar: string) => tr(locale, en, ar);
-
-  const userId = await currentUserId();
-  const factory = await findUserFactory(userId);
-
-  if (!userId) redirect(`/${locale}/sign-in`);
 
   const { data: consortia, ok } = await safeQuery(
     async () => {
@@ -27,66 +23,77 @@ export default async function ConsortiaPage({ params }: { params: Promise<{ loca
           },
           rfq: { select: { title: true } },
         },
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
       });
     },
-    // Fallback data
     [
-      { 
-        id: '1', name: 'Mahalla Denim Export Alliance', description: 'Targeting European buyers with integrated spinning to sewing.', status: 'ACTIVE', targetMarket: 'EU', 
-        members: [{ factory: { name: 'Al-Rowad Textiles' } }, { factory: { name: 'Misr Spinning' } }] 
-      }
-    ]
+      {
+        id: '1',
+        name: 'Mahalla Denim Export Alliance',
+        description: 'Targeting European buyers with integrated spinning to sewing.',
+        status: 'ACTIVE',
+        targetMarket: 'EU',
+        members: [
+          { factory: { name: 'Al-Rowad Textiles', capabilities: ['dyeing', 'finishing'] } },
+          { factory: { name: 'Misr Spinning', capabilities: ['spinning', 'weaving'] } },
+        ],
+      },
+    ] as any[]
   );
 
   return (
     <div className="container mx-auto py-8 px-4">
       <PageHeader
         icon={Network}
-        title={t('Export Consortia', 'تحالفات التصدير')}
-        subtitle={t('Combine capabilities with other SMEs to bid on large RFQs and enter new markets.', 'اجمع قدراتك مع مصانع أخرى للمنافسة على طلبات كبيرة ودخول أسواق جديدة.')}
+        title={t('Export Consortia', 'التحالفات التصديرية')}
+        subtitle={t(
+          'Combine capabilities with other Mahalla SMEs along the textile value chain to bid jointly on large international orders.',
+          'اجمع قدرات مصنعك مع المصانع الأخرى عبر سلسلة القيمة للمنافسة بشكل مشترك على الطلبيات التصديرية الكبرى.'
+        )}
       />
 
       {!ok && <DbOfflineBanner locale={locale} />}
 
       <div className="mb-8">
-        {factory ? (
-          <ConsortiumForm locale={locale} />
-        ) : (
-          <div className="bg-amber-50 p-4 rounded-lg text-amber-700 text-sm">
-            {t('You must create a factory profile to form a consortium.', 'يجب عليك إنشاء ملف مصنع لتشكيل تحالف.')}
-          </div>
-        )}
+        <ConsortiumForm locale={locale} />
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {consortia?.map((c: any) => (
           <Link key={c.id} href={`/${locale}/cluster/consortia/${c.id}`} className="block group">
-            <Card className="p-6 h-full flex flex-col hover:border-primary/50 transition-colors">
+            <Card className="p-6 h-full flex flex-col hover:border-primary/50 hover:shadow-md transition-all">
               <div className="flex justify-between items-start mb-3">
                 <Pill tone={c.status === 'ACTIVE' ? 'emerald' : c.status === 'FORMING' ? 'blue' : 'gray'}>
                   {c.status}
                 </Pill>
+                {c.targetMarket && (
+                  <Pill tone="purple">
+                    <Target className="w-3 h-3 me-1" /> {c.targetMarket}
+                  </Pill>
+                )}
               </div>
-              
+
               <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">{c.name}</h3>
               <p className="text-muted-foreground text-sm mb-4 line-clamp-3 flex-1">{c.description}</p>
-              
-              <div className="space-y-3 text-sm mb-4">
-                {c.targetMarket && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Target className="w-4 h-4 shrink-0" />
-                    <span>{t('Target:', 'الهدف:')} {c.targetMarket}</span>
-                  </div>
-                )}
+
+              <div className="space-y-2 text-sm mb-4">
                 <div className="flex items-center gap-2 text-muted-foreground">
-                  <Users className="w-4 h-4 shrink-0" />
-                  <span>{c.members.length} {t('Active Members', 'أعضاء نشطين')}</span>
+                  <Users className="w-4 h-4 shrink-0 text-primary" />
+                  <span className="font-medium">
+                    {c.members.length} {t('Member Factories', 'مصانع أعضاء')}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {c.members.map((m: any, idx: number) => (
+                    <span key={idx} className="text-xs px-2 py-0.5 rounded bg-muted">
+                      {m.factory?.name}
+                    </span>
+                  ))}
                 </div>
               </div>
 
-              <div className="pt-4 border-t flex items-center justify-between text-sm font-medium text-primary">
-                {t('View Details', 'عرض التفاصيل')}
+              <div className="pt-4 border-t flex items-center justify-between text-sm font-semibold text-primary">
+                {t('Open Consortium Workspace', 'فتح مساحة عمل التحالف')}
                 <ArrowRight className="w-4 h-4" />
               </div>
             </Card>
@@ -97,7 +104,7 @@ export default async function ConsortiaPage({ params }: { params: Promise<{ loca
             <EmptyState
               icon={Network}
               title={t('No Consortia Found', 'لا توجد تحالفات')}
-              hint={t('Start a new consortium to combine forces with other factories.', 'ابدأ تحالفاً جديداً لتوحيد جهودك مع المصانع الأخرى.')}
+              hint={t('Start a new consortium above to combine forces with other factories.', 'ابدأ تحالفاً جديداً أعلاه لتوحيد جهودك مع المصانع الأخرى.')}
             />
           </div>
         )}

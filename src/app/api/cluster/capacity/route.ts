@@ -7,12 +7,15 @@ import { audit } from '@/server/events';
 const createCapacitySchema = z.object({
   kind: z.enum(['OFFER', 'REQUEST']),
   process: z.string(),
-  title: z.string().min(5),
+  title: z.string().min(4),
   description: z.string().optional(),
-  availableFrom: z.string().datetime(),
-  availableUntil: z.string().datetime(),
+  availableFrom: z.string(),
+  availableUntil: z.string().optional(),
+  availableTo: z.string().optional(),
   quantity: z.number().min(1).optional(),
   uom: z.string().optional(),
+  unit: z.string().optional(),
+  unitPrice: z.number().min(0).optional(),
 });
 
 export const GET = route(async (req) => {
@@ -20,15 +23,19 @@ export const GET = route(async (req) => {
   const kind = url.searchParams.get('kind');
   const process = url.searchParams.get('process');
 
-  const where: any = { status: 'OPEN' };
+  const where: any = {};
   if (kind) where.kind = kind;
   if (process) where.process = process;
 
   const posts = await prisma.capacityPost.findMany({
     where,
     include: {
-      factory: { select: { name: true, id: true } },
-      _count: { select: { responses: true } }
+      factory: { select: { name: true, id: true, city: true, isVerified: true } },
+      responses: {
+        include: { factory: { select: { id: true, name: true } } },
+        orderBy: { createdAt: 'desc' },
+      },
+      _count: { select: { responses: true } },
     },
     orderBy: { createdAt: 'desc' },
   });
@@ -40,7 +47,11 @@ export const POST = route(async (req) => {
   const { user, factory } = await requireFactory();
   const body = await parseBody(req, createCapacitySchema);
 
-  if (new Date(body.availableUntil) <= new Date(body.availableFrom)) {
+  const fromDate = new Date(body.availableFrom);
+  const toRaw = body.availableTo || body.availableUntil;
+  const toDate = toRaw ? new Date(toRaw) : null;
+
+  if (toDate && toDate <= fromDate) {
     throw new HttpError(400, 'End date must be after start date');
   }
 
@@ -48,7 +59,15 @@ export const POST = route(async (req) => {
     data: {
       factoryId: factory.id,
       status: 'OPEN',
-      ...body,
+      kind: body.kind,
+      process: body.process.toLowerCase(),
+      title: body.title,
+      description: body.description || body.title,
+      quantity: body.quantity || 1000,
+      unit: body.unit || body.uom || 'meters',
+      availableFrom: fromDate,
+      availableTo: toDate,
+      unitPrice: body.unitPrice,
     },
   });
 

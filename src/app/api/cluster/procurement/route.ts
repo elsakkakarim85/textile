@@ -1,19 +1,35 @@
 import { z } from 'zod';
+import type { ProcurementCategory, PoolStatus } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { route, parseBody, HttpError } from '@/server/http';
-import { requireRole, requireFactory } from '@/server/auth';
+import { requireUser } from '@/server/auth';
 import { audit } from '@/server/events';
+
+const VALID_CATEGORIES: ProcurementCategory[] = [
+  'YARN',
+  'FIBER',
+  'DYES_CHEMICALS',
+  'SPARE_PARTS',
+  'PACKAGING',
+  'ENERGY',
+  'LOGISTICS',
+  'OTHER',
+];
 
 const createPoolSchema = z.object({
   title: z.string().min(5),
-  description: z.string(),
+  titleAr: z.string().optional(),
+  description: z.string().min(5),
+  specification: z.string().optional(),
   category: z.string(),
   targetQty: z.number().min(1),
-  uom: z.string(),
-  minCommitQty: z.number().min(1),
+  uom: z.string().optional(),
+  unit: z.string().optional(),
+  minCommitQty: z.number().min(1).default(1),
   benchmarkUnitPrice: z.number().min(0).optional(),
   targetUnitPrice: z.number().min(0).optional(),
-  deadline: z.string().datetime(), // ISO datetime string
+  supplierName: z.string().optional(),
+  deadline: z.string(),
 });
 
 export const GET = route(async (req) => {
@@ -22,8 +38,10 @@ export const GET = route(async (req) => {
   const status = url.searchParams.get('status');
 
   const where: any = {};
-  if (category) where.category = category;
-  if (status) where.status = status;
+  if (category && VALID_CATEGORIES.includes(category as ProcurementCategory)) {
+    where.category = category as ProcurementCategory;
+  }
+  if (status) where.status = status as PoolStatus;
 
   const pools = await prisma.procurementPool.findMany({
     where,
@@ -34,42 +52,51 @@ export const GET = route(async (req) => {
     orderBy: { createdAt: 'desc' },
   });
 
-  // Calculate committed quantity aggregate per pool
-  // Prisma doesn't natively do SUM in include, so we might need a separate query or raw, 
-  // but for simplicity/safety we fetch the commitments sum for each pool.
-  const poolIds = pools.map(p => p.id);
+  const poolIds = pools.map((p) => p.id);
   const aggregates = await prisma.poolCommitment.groupBy({
     by: ['poolId'],
     where: { poolId: { in: poolIds }, status: { in: ['COMMITTED', 'CONFIRMED'] } },
     _sum: { quantity: true },
   });
 
-  const aggregateMap = new Map(aggregates.map(a => [a.poolId, a._sum.quantity || 0]));
+  const aggregateMap = new Map(aggregates.map((a) => [a.poolId, a._sum.quantity || 0]));
 
   return {
-    pools: pools.map(p => ({
+    pools: pools.map((p) => ({
       ...p,
       committedQty: aggregateMap.get(p.id) || 0,
-    }))
+    })),
   };
 });
 
 export const POST = route(async (req) => {
-  // Only admins or factory owners can organize a pool
   const user = await requireUser();
-  if (user.role !== 'admin' && user.role !== 'factory_owner') throw new HttpError(403, 'Forbidden');
-  const { factory } = await requireFactory();
-  
   const body = await parseBody(req, createPoolSchema);
-  
-  if (new Date(body.deadline) <= new Date()) {
-    throw new HttpError(400, 'Deadline must be in the future');
+
+  const deadlineDate = new Date(body.deadline);
+  if (isNaN(deadlineDate.getTime()) || deadlineDate <= new Date()) {
+    throw new HttpError(400, 'Deadline must be a valid future date');
   }
+
+  const category: ProcurementCategory = VALID_CATEGORIES.includes(body.category as ProcurementCategory)
+    ? (body.category as ProcurementCategory)
+    : 'OTHER';
 
   const pool = await prisma.procurementPool.create({
     data: {
       organizerId: user.id,
-      ...body,
+      title: body.title,
+      titleAr: body.titleAr || null,
+      description: body.description,
+      specification: body.specification || null,
+      category,
+      targetQty: body.targetQty,
+      unit: body.unit || body.uom || 'kg',
+      minCommitQty: body.minCommitQty,
+      benchmarkUnitPrice: body.benchmarkUnitPrice,
+      targetUnitPrice: body.targetUnitPrice,
+      supplierName: body.supplierName || null,
+      deadline: deadlineDate,
       status: 'OPEN',
     },
   });

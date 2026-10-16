@@ -12,7 +12,6 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  typescript: { ignoreBuildErrors: true },
   serverExternalPackages: ["@prisma/client", "prisma"],
   images: {
     remotePatterns: [

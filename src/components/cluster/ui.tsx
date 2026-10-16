@@ -4,6 +4,8 @@ import { cn } from '@/lib/utils';
 
 /** Shared presentational building blocks for cluster modules (server-safe, no hooks). */
 
+export type Tone = 'default' | 'green' | 'emerald' | 'amber' | 'blue' | 'purple' | 'red' | 'gray';
+
 export function PageHeader({ icon: Icon, title, subtitle, actions, accent = 'from-primary/15' }: {
   icon?: LucideIcon; title: string; subtitle?: string; actions?: ReactNode; accent?: string;
 }) {
@@ -29,20 +31,23 @@ export function PageHeader({ icon: Icon, title, subtitle, actions, accent = 'fro
 
 export function StatCard({ label, value, hint, icon: Icon, tone = 'default' }: {
   label: string; value: ReactNode; hint?: string; icon?: LucideIcon;
-  tone?: 'default' | 'green' | 'amber' | 'blue' | 'red';
+  tone?: Tone;
 }) {
-  const tones = {
+  const tones: Record<Tone, string> = {
     default: 'text-primary bg-primary/10',
     green: 'text-emerald-600 bg-emerald-500/10',
+    emerald: 'text-emerald-600 bg-emerald-500/10',
     amber: 'text-amber-600 bg-amber-500/10',
     blue: 'text-sky-600 bg-sky-500/10',
+    purple: 'text-violet-600 bg-violet-500/10',
     red: 'text-rose-600 bg-rose-500/10',
+    gray: 'text-slate-600 bg-slate-500/10',
   };
   return (
     <div className="rounded-xl border bg-card p-5 shadow-sm">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">{label}</p>
-        {Icon && <span className={cn('rounded-lg p-2', tones[tone])}><Icon className="w-4 h-4" /></span>}
+        {Icon && <span className={cn('rounded-lg p-2', tones[tone] || tones.default)}><Icon className="w-4 h-4" /></span>}
       </div>
       <p className="mt-2 text-2xl font-bold tabular-nums">{value}</p>
       {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
@@ -80,6 +85,20 @@ export function DbOfflineBanner({ locale }: { locale: string }) {
   );
 }
 
-export function Pill({ children, className }: { children: ReactNode; className?: string }) {
-  return <span className={cn('inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium', className)}>{children}</span>;
+export function Pill({ children, className, tone = 'default' }: { children: ReactNode; className?: string; tone?: Tone }) {
+  const pillTones: Record<Tone, string> = {
+    default: 'bg-muted/60 text-foreground border-border',
+    green: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30',
+    emerald: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30',
+    amber: 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30',
+    blue: 'bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/30',
+    purple: 'bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-500/30',
+    red: 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/30',
+    gray: 'bg-muted text-muted-foreground border-border',
+  };
+  return (
+    <span className={cn('inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium', pillTones[tone] || pillTones.default, className)}>
+      {children}
+    </span>
+  );
 }
