@@ -2,13 +2,15 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { api } from '@/lib/api-client';
 import { tr } from '@/lib/i18n-inline';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ProgressBar, Pill } from '@/components/cluster/ui';
-import type { AuthorizedResource } from '@/server/modernization/course-generator';
+import {
+  inferTopicProfile,
+  type AuthorizedResource,
+} from '@/server/modernization/course-generator';
 import {
   Sparkles,
   ShieldCheck,
@@ -16,13 +18,12 @@ import {
   Layers,
   Video,
   Headphones,
-  FileText,
-  ClipboardCheck,
   Award,
   ArrowRight,
   ExternalLink,
   CheckCircle2,
   Wand2,
+  RotateCcw,
 } from 'lucide-react';
 
 interface SuggestedNeed {
@@ -61,41 +62,37 @@ export function AiCourseStudioClient({
   const router = useRouter();
   const t = (en: string, ar: string) => tr(locale, en, ar);
 
-  const [topic, setTopic] = useState(
-    initialOverride?.topic ||
-      (suggestedNeeds[0]
-        ? locale === 'ar'
-          ? suggestedNeeds[0].titleAr
-          : suggestedNeeds[0].title
-        : '')
-  );
-  const [userNeed, setUserNeed] = useState(
-    initialOverride?.need ||
-      (suggestedNeeds[0]
-        ? locale === 'ar'
-          ? suggestedNeeds[0].needSummaryAr
-          : suggestedNeeds[0].needSummary
-        : '')
-  );
+  const [topic, setTopic] = useState(initialOverride?.topic || '');
+  const [userNeed, setUserNeed] = useState(initialOverride?.need || '');
   const [targetRole, setTargetRole] = useState(
     initialOverride?.role ||
       suggestedNeeds[0]?.targetRole ||
       'Spinning & Weaving Floor Engineer'
   );
   const [category, setCategory] = useState(
-    initialOverride?.category || suggestedNeeds[0]?.category || 'SUSTAINABILITY'
+    initialOverride?.category || suggestedNeeds[0]?.category || 'TECHNICAL'
   );
   const [levelProgression, setLevelProgression] = useState<
     'BEGINNER_TO_ADVANCED' | 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
   >('BEGINNER_TO_ADVANCED');
-  const [durationHours, setDurationHours] = useState(12);
+  const [durationHours] = useState(12);
   const [selectedResources, setSelectedResources] = useState<string[]>(
-    suggestedNeeds[0]?.resourceIds || ['unido-tigara', 'zdhc-mrsl', 'iso-astm-lab']
+    suggestedNeeds[0]?.resourceIds || ['unido-tigara', 'iso-astm-lab', 'zdhc-mrsl']
   );
 
   const [generating, setGenerating] = useState(false);
   const [genProgress, setGenProgress] = useState(0);
   const [genStepText, setGenStepText] = useState('');
+
+  const handleTopicChange = (val: string) => {
+    setTopic(val);
+    if (val.trim().length >= 3) {
+      const inferred = inferTopicProfile(val);
+      setCategory(inferred.category);
+      setTargetRole(inferred.targetRole);
+      setSelectedResources(inferred.resourceIds);
+    }
+  };
 
   const applySuggestedNeed = (need: SuggestedNeed) => {
     setTopic(locale === 'ar' ? need.titleAr : need.title);
@@ -115,16 +112,53 @@ export function AiCourseStudioClient({
     );
   };
 
+  const liveInferred = topic.trim().length >= 2 ? inferTopicProfile(topic) : null;
+
+  const quickTopicExamples = [
+    {
+      en: 'Jacquard Terry Towel Weaving & Pile Ratio Control',
+      ar: 'نسيج الجاكار والوبريات وضبط نسبة الوبرة',
+    },
+    {
+      en: 'Compact Ring Spinning of Giza 94 Extra-Long Staple Cotton',
+      ar: 'الغزل الحلقي المدمج لقطن جيزة 94 فائق الطول',
+    },
+    {
+      en: 'Denim Laser Finishing, Ozone Washing & EIM Score',
+      ar: 'تجهيز الدنيم بالليزر والأوزون وتقليل استهلاك المياه',
+    },
+    {
+      en: 'Mercerizing, Sanforizing & Dimensional Shrinkage Control',
+      ar: 'المرسرة والسنفرة والتحكم في انكماش الأقمشة القطنية',
+    },
+    {
+      en: 'Rotary Screen & Digital Sublimation Printing Color Management',
+      ar: 'إدارة الألوان في الطباعة الدورانية والطباعة الرقمية الحرارية',
+    },
+    {
+      en: 'Garment CAD/CAM Marker Efficiency, SAM Costing & Line Balancing',
+      ar: 'كفاءة التعشيق CAD/CAM وحساب الزمن القياسي SAM وتوازن خطوط الحياكة',
+    },
+    {
+      en: 'Circular Knitting Lycra Feeding Tension & Spirality Prevention',
+      ar: 'ضبط شد الليكرا ومنع التلوير في ماكينات التريكو الدائري',
+    },
+    {
+      en: 'Solar PPA & Steam Boiler Condensate Heat Recovery in Dyehouses',
+      ar: 'الطاقة الشمسية واسترجاع حرارة تكثيف الغلايات في المصابغ',
+    },
+  ];
+
   const handleGenerateCourse = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!topic.trim()) return;
+    if (topic.trim().length < 2) return;
 
     setGenerating(true);
     setGenProgress(15);
     setGenStepText(
       t(
-        '1/4 Analyzing user & factory competency gaps...',
-        '١/٤ تحليل فجوات المهارات واحتياجات المصنع...'
+        `1/4 Analyzing topic "${topic.trim()}" & operational requirements...`,
+        `١/٤ تحليل موضوع «${topic.trim()}» والمتطلبات الفنية...`
       )
     );
 
@@ -150,7 +184,7 @@ export function AiCourseStudioClient({
 
     try {
       const res = await api<{ slug: string }>('/api/cluster/academy/ai-generate', 'POST', {
-        topic,
+        topic: topic.trim(),
         userNeed,
         targetRole,
         category,
@@ -171,7 +205,7 @@ export function AiCourseStudioClient({
 
       setTimeout(() => {
         router.push(`/${locale}/cluster/academy/${res.slug}`);
-      }, 400);
+      }, 350);
     } catch (err: any) {
       clearTimeout(stepTimer1);
       clearTimeout(stepTimer2);
@@ -246,12 +280,30 @@ export function AiCourseStudioClient({
 
             <div className="space-y-3">
               {[
-                { key: 'sustainability', label: t('Sustainability, ZDHC & Water', 'الاستدامة والكيماويات والمياه') },
-                { key: 'digital', label: t('Digital ERP, OEE & EU DPP', 'التحول الرقمي وجواز المنتج') },
-                { key: 'quality', label: t('ISO 17025 Lab & Shade Control', 'معامل الجودة وضبط الألوان') },
-                { key: 'market', label: t('EU Export & CBAM Readiness', 'التصدير الأوروبي والبصمة الكربونية') },
-                { key: 'people', label: t('Workforce & Safety (ILO)', 'تأهيل الكوادر والسلامة المهنية') },
-                { key: 'production', label: t('Weaving & Spinning OEE', 'كفاءة الغزل والنسيج OEE') },
+                {
+                  key: 'sustainability',
+                  label: t('Sustainability, ZDHC & Water', 'الاستدامة والكيماويات والمياه'),
+                },
+                {
+                  key: 'digital',
+                  label: t('Digital ERP, OEE & EU DPP', 'التحول الرقمي وجواز المنتج'),
+                },
+                {
+                  key: 'quality',
+                  label: t('ISO 17025 Lab & Shade Control', 'معامل الجودة وضبط الألوان'),
+                },
+                {
+                  key: 'market',
+                  label: t('EU Export & CBAM Readiness', 'التصدير الأوروبي والبصمة الكربونية'),
+                },
+                {
+                  key: 'people',
+                  label: t('Workforce & Safety (ILO)', 'تأهيل الكوادر والسلامة المهنية'),
+                },
+                {
+                  key: 'production',
+                  label: t('Weaving & Spinning OEE', 'كفاءة الغزل والنسيج OEE'),
+                },
               ].map((dim) => {
                 const val = maturityScores[dim.key] ?? 55;
                 return (
@@ -290,8 +342,8 @@ export function AiCourseStudioClient({
             <h3 className="font-bold text-sm flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-amber-500" />
               {t(
-                '1-Click Recommended Needs Blueprints',
-                'قوالب تدريبية مقترحة حسب احتياجاتك'
+                '1-Click Factory Gap Blueprints',
+                'قوالب تدريبية مقترحة حسب فجوات مصنعك'
               )}
             </h3>
             <div className="space-y-2.5">
@@ -336,55 +388,126 @@ export function AiCourseStudioClient({
               <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-500/10 px-3 py-1 rounded-full mb-2">
                 <Wand2 className="w-3.5 h-3.5" />
                 {t(
-                  'AI Curriculum Architect • Trusted & Authorized Sources',
-                  'معماري المناهج بالذكاء الاصطناعي • مصادر دولية معتمدة'
+                  'AI Curriculum Architect • Enter Any Topic',
+                  'معماري المناهج بالذكاء الاصطناعي • أدخل أي موضوع'
                 )}
               </div>
               <h2 className="text-2xl font-extrabold">
                 {t(
-                  'Build Custom Expert Course (Beginner → Advanced)',
-                  'إنشاء دورة تدريبية احترافية مخصصة (مبتدئ ← متقدم)'
+                  'Generate an Expert Course on Any Topic (Beginner → Advanced)',
+                  'أنشئ دورة تدريبية احترافية في أي موضوع (مبتدئ ← متقدم)'
                 )}
               </h2>
               <p className="text-sm text-muted-foreground mt-1">
                 {t(
-                  'Describe your operational need and select the authorized international standards. The AI generates a complete 3-tier multimedia course with video slides, audio narration, SOP checklists, quizzes, and verifiable certification.',
-                  'حدد الاحتياج التدريبي لمصنعك واختر الهيئات المعتمدة، ليقوم الذكاء الاصطناعي ببناء دورة متكاملة من المبتدئ للمتقدم تشمل الفيديو والصوت وقوائم SOP والاختبارات والشهادة الموثقة.'
+                  'Type any topic below (in English or Arabic). The AI automatically detects the industrial domain, matches trusted UNIDO, ZDHC, ISO 17025, OEKO-TEX, and EU ESPR standards, and builds a 3-tier multimedia course.',
+                  'اكتب أي موضوع تدريبي باللغة العربية أو الإنجليزية أدناه، وسيقوم الذكاء الاصطناعي تلقائياً بتحديد التخصص والمعايير الدولية المعتمدة وبناء دورة متدرجة من المبتدئ للمتقدم.'
                 )}
               </p>
             </div>
 
             <form onSubmit={handleGenerateCourse} className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-sm font-bold block">
-                  {t('1. Course Title / Competency Topic', '١. عنوان الدورة أو المهارة المطلوبة')}
-                </label>
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-bold block">
+                    {t(
+                      '1. Enter Any Topic or Skill to Generate a Course',
+                      '١. اكتب أي موضوع أو مهارة ترغب في إنشاء دورة تدريبية لها'
+                    )}
+                  </label>
+                  {topic && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTopic('');
+                        setUserNeed('');
+                      }}
+                      className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                      {t('Clear Topic', 'مسح الموضوع')}
+                    </button>
+                  )}
+                </div>
+
                 <input
                   required
+                  minLength={2}
                   value={topic}
-                  onChange={(e) => setTopic(e.target.value)}
+                  onChange={(e) => handleTopicChange(e.target.value)}
                   placeholder={t(
-                    'e.g. Zero-Defect Air-Jet Weaving & Giza 86 Warp Tension Control',
-                    'مثال: ضبط شد السداء في أنوال الهواء لخيوط قطن جيزة 86 بدون عيوب'
+                    'Type ANY topic (e.g., Jacquard Towel Weaving, Denim Laser Finishing, Garment SAM Costing, Reactive Dyeing, Solar Steam)...',
+                    'اكتب أي موضوع هنا (مثال: نسيج الجاكار، صباغة القطن، توازن خطوط الملابس، الطاقة الشمسية، فحص الجودة)...'
                   )}
-                  className="w-full rounded-xl border bg-background px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
+                  className="w-full rounded-xl border-2 border-emerald-500/40 bg-background px-4 py-3 text-sm md:text-base font-medium focus:ring-2 focus:ring-emerald-500 outline-none"
                 />
+
+                {/* Live AI Topic Analyzer Preview */}
+                {liveInferred && (
+                  <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs space-y-1.5">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="font-extrabold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5" />
+                        {t(
+                          'AI Topic Analysis & Auto-Matched Engineering Profile:',
+                          'التحليل الذكي للموضوع والمحددات الهندسية المطابقة:'
+                        )}
+                      </span>
+                      <span className="font-mono font-bold text-emerald-700 dark:text-emerald-300">
+                        {liveInferred.keyMetrics.join(' • ')}
+                      </span>
+                    </div>
+                    <p className="text-muted-foreground">
+                      <strong>{t('Detected Scope:', 'النطاق الفني:')}</strong>{' '}
+                      {locale === 'ar' ? liveInferred.domainFocusAr : liveInferred.domainFocusEn}
+                    </p>
+                    <p className="text-muted-foreground">
+                      <strong>{t('Target Machinery / Systems:', 'المعدات والأنظمة المستهدفة:')}</strong>{' '}
+                      {locale === 'ar' ? liveInferred.equipmentAr : liveInferred.equipmentEn}
+                    </p>
+                  </div>
+                )}
+
+                {/* 1-Click Topic Inspiration Chips */}
+                <div className="space-y-1.5 pt-1">
+                  <div className="text-xs font-semibold text-muted-foreground">
+                    {t(
+                      'Or click any example topic below (or type your own above):',
+                      'أو اختر أحد المواضيع السريعة التالية (أو اكتب أي موضوع خاص بك أعلاه):'
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {quickTopicExamples.map((ex, i) => {
+                      const label = locale === 'ar' ? ex.ar : ex.en;
+                      return (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => handleTopicChange(label)}
+                          className="text-[11px] px-2.5 py-1 rounded-full border bg-muted/40 hover:bg-emerald-500/15 hover:border-emerald-500/50 transition-colors text-start"
+                        >
+                          + {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-bold block">
                   {t(
-                    '2. Specific User / Factory Operational Need',
-                    '٢. وصف الاحتياج الفعلي للمستخدم أو المصنع'
+                    '2. Specific Operational Context or Goal (Optional)',
+                    '٢. تفاصيل إضافية عن احتياج المصنع أو الهدف التطبيقي (اختياري)'
                   )}
                 </label>
                 <textarea
-                  rows={3}
+                  rows={2}
                   value={userNeed}
                   onChange={(e) => setUserNeed(e.target.value)}
                   placeholder={t(
-                    'Describe the exact shop-floor problem, machine type, defect rate, or European buyer compliance requirement you want this course to solve...',
-                    'اشرح المشكلة الفنية في صالة الإنتاج، أو نوع الماكينات، أو متطلبات المشتري الأوروبي التي ترغب في معالجتها خلال الدورة...'
+                    'Optional: Mention specific machine models, fabric GSM, defect types, or buyer audit requirements...',
+                    'اختياري: اذكر طراز الماكينات، أو نوع الخامة، أو العيوب المراد علاجها، أو متطلبات العميل...'
                   )}
                   className="w-full rounded-xl border bg-background px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
                 />
@@ -465,8 +588,8 @@ export function AiCourseStudioClient({
                   <label className="text-sm font-bold flex items-center gap-1.5">
                     <ShieldCheck className="w-4 h-4 text-emerald-600" />
                     {t(
-                      '3. Select Trusted & Authorized Reference Bodies',
-                      '٣. اختر الهيئات والمواصفات الدولية المعتمدة لتوثيق الدورة'
+                      '3. Trusted & Authorized Reference Bodies (Auto-Matched or Custom)',
+                      '٣. الهيئات والمواصفات الدولية المعتمدة لتوثيق الدورة (تلقائي أو مخصص)'
                     )}
                   </label>
                   <span className="text-xs text-muted-foreground">
@@ -545,7 +668,7 @@ export function AiCourseStudioClient({
                 </div>
                 <Button
                   type="submit"
-                  disabled={generating}
+                  disabled={generating || topic.trim().length < 2}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 gap-2 shadow-md"
                 >
                   <Sparkles className="w-4 h-4" />

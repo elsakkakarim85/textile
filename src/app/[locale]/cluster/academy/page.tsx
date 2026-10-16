@@ -22,6 +22,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { CertificateVerifierBar, type IssuedCertItem } from '@/components/cluster/modern/CertificateVerifierBar';
+import { InstantTopicCourseBar } from '@/components/cluster/modern/InstantTopicCourseBar';
 
 export const dynamic = 'force-dynamic';
 
@@ -140,36 +141,17 @@ export default async function AcademyPage({
             </div>
             <h2 className="text-2xl font-extrabold">
               {t(
-                'Generate Expert Training Courses Tailored to Your Factory’s Exact Needs',
-                'صمّم دورات تدريبية احترافية مخصصة لسد فجوات المهارات في مصنعك'
+                'Enter Any Topic to Generate an Expert Multimedia Course (Beginner → Advanced)',
+                'أدخل أي موضوع لتوليد دورة تدريبية احترافية متكاملة (مبتدئ ← متقدم)'
               )}
             </h2>
             <p className="text-sm text-slate-300 leading-relaxed">
               {t(
-                'Our AI Course Studio analyzes your Digital Maturity & ESG scores and synthesizes a complete Beginner → Intermediate → Advanced curriculum grounded in trusted UNIDO, ZDHC MRSL v3.1, ISO 17025, and EU ESPR resources.',
-                'يقوم استوديو الذكاء الاصطناعي بتحليل تقييم النضج الرقمي والاستدامة لمصنعك وبناء منهج متكامل (مبتدئ ← متوسط ← متقدم) موثق من هيئات UNIDO و ZDHC و ISO 17025 و EU ESPR.'
+                'Type any textile engineering, quality, dyeing, garment, digital, or export topic below. Our AI Course Studio automatically matches trusted UNIDO, ZDHC MRSL v3.1, ISO 17025, OEKO-TEX, and EU ESPR standards and builds a complete Beginner → Intermediate → Advanced course.',
+                'اكتب أي موضوع فني في الغزل أو النسيج أو الصباغة أو الملابس أو الجودة أو التصدير أدناه، وسيقوم الذكاء الاصطناعي بربطه بمعايير UNIDO و ZDHC و ISO 17025 و EU ESPR وبناء دورة متكاملة فوراً.'
               )}
             </p>
-            <div className="flex flex-wrap items-center gap-3 pt-1">
-              <Link href={`/${locale}/cluster/academy/studio`}>
-                <Button className="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold gap-2">
-                  <Sparkles className="w-4 h-4" />
-                  {t('Launch AI Course Studio', 'افتح استوديو بناء الدورات الذكي')}
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-              </Link>
-              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-300">
-                <span className="inline-flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-full">
-                  <Video className="w-3.5 h-3.5 text-emerald-400" /> Video Slides
-                </span>
-                <span className="inline-flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-full">
-                  <Headphones className="w-3.5 h-3.5 text-sky-400" /> EN/AR Audio
-                </span>
-                <span className="inline-flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-full">
-                  <ClipboardCheck className="w-3.5 h-3.5 text-amber-400" /> SOPs & Quizzes
-                </span>
-              </div>
-            </div>
+            <InstantTopicCourseBar locale={locale} />
           </div>
 
           {/* Learner Progress & Certification Summary */}
