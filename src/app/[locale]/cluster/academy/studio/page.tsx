@@ -12,10 +12,13 @@ export const dynamic = 'force-dynamic';
 
 export default async function AiCourseStudioPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ topic?: string; need?: string; role?: string; category?: string }>;
 }) {
   const { locale } = await params;
+  const query = await searchParams;
   const t = (en: string, ar: string) => tr(locale, en, ar);
 
   const { data } = await safeQuery(async () => {
@@ -145,6 +148,7 @@ export default async function AiCourseStudioPage({
         maturityScores={scores}
         suggestedNeeds={suggestedNeeds}
         authorizedResources={TRUSTED_AUTHORIZED_RESOURCES}
+        initialOverride={query}
       />
     </div>
   );

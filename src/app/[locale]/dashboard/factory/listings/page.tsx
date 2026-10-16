@@ -144,16 +144,26 @@ export default function FactoryListingsPage() {
                   
                   {listing.type === 'PRODUCT' && (
                     <div className="pt-4 border-t flex items-center justify-between">
-                      {listing.passport?.qrCodeUrl ? (
-                        <div className="flex items-center gap-4 bg-muted/30 p-2 rounded-lg w-full">
-                          <img src={listing.passport.qrCodeUrl} alt="QR Code" className="w-16 h-16 rounded bg-white p-1" />
+                      {listing.passport ? (
+                        <div className="flex items-center justify-between gap-4 bg-emerald-50 border border-emerald-200 p-3 rounded-lg w-full">
                           <div>
-                            <p className="text-sm font-bold text-primary">Digital Passport Active</p>
-                            <a href={`/en/dpp/${listing.id}`} target="_blank" className="text-xs text-blue-500 hover:underline">View Public Page</a>
+                            <p className="text-sm font-bold text-emerald-800">
+                              ✓ EU Digital Product Passport Active
+                            </p>
+                            <p className="text-xs text-emerald-700">
+                              {listing.passport.material} • {listing.passport.certifications || 'OEKO-TEX / ISO'}
+                            </p>
                           </div>
+                          <a
+                            href={`/en/dpp/${listing.id}`}
+                            target="_blank"
+                            className="text-xs font-bold bg-emerald-600 text-white px-3 py-1.5 rounded-md hover:bg-emerald-700"
+                          >
+                            View Public DPP →
+                          </a>
                         </div>
                       ) : (
-                        <button 
+                        <button
                           onClick={() => handleGenerateDPP(listing.id)}
                           disabled={dppLoading === listing.id}
                           className="text-sm bg-secondary text-secondary-foreground px-4 py-2 rounded font-medium hover:bg-secondary/80 disabled:opacity-50"

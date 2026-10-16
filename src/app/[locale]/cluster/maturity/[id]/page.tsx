@@ -140,6 +140,18 @@ export default async function MaturityResultPage({ params }: { params: Promise<{
                           <GraduationCap className="w-3.5 h-3.5" />
                           {t('Recommended Academy Courses', 'الدورات التدريبية المقترحة')}
                         </Link>
+                        <Link
+                          href={`/${locale}/cluster/academy/studio?topic=${encodeURIComponent(
+                            rec.action
+                          )}&category=${encodeURIComponent(
+                            rec.category || 'TECHNICAL'
+                          )}&need=${encodeURIComponent(
+                            `Address ${rec.dimension} gap (${rec.priority} priority): ${rec.action}`
+                          )}`}
+                          className="inline-flex items-center gap-1.5 text-xs text-amber-700 hover:underline bg-amber-500/15 px-2.5 py-1 rounded-md font-semibold"
+                        >
+                          ✨ {t('Generate Custom AI Course', 'إنشاء دورة مخصصة بالذكاء الاصطناعي')}
+                        </Link>
                       </div>
                     </div>
                   </div>

@@ -2,12 +2,16 @@ import { z } from 'zod';
 import { Currency, ListingStatus, ListingType } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { requireFactory, requireUser } from '@/server/auth';
+import { findUserFactory } from '@/server/cluster';
 import { HttpError, parseBody, route } from '@/server/http';
 
 export const GET = route(async () => {
   const user = await requireUser();
+  const factory = await findUserFactory(user.id);
+  const sellerIds = Array.from(new Set([user.id, ...(factory ? [factory.ownerId] : [])]));
+
   return prisma.marketplaceListing.findMany({
-    where: { sellerId: user.id, deletedAt: null },
+    where: { sellerId: { in: sellerIds }, deletedAt: null },
     include: { passport: true, media: { orderBy: { position: 'asc' } }, category: true },
     orderBy: { createdAt: 'desc' },
   });
@@ -31,13 +35,13 @@ const listingSchema = z.object({
 });
 
 export const POST = route(async (req) => {
-  const { user } = await requireFactory({ approved: true });
+  const { factory } = await requireFactory({ approved: false });
   const { media, ...data } = await parseBody(req, listingSchema);
 
   return prisma.marketplaceListing.create({
     data: {
       ...data,
-      sellerId: user.id,
+      sellerId: factory.ownerId,
       media: { create: (media || []).map((m, position) => ({ ...m, position })) },
     },
     include: { media: true },
@@ -50,21 +54,21 @@ const patchSchema = listingSchema.partial().omit({ media: true }).extend({
 });
 
 export const PATCH = route(async (req) => {
-  const user = await requireUser();
+  await requireUser();
   const { id, ...data } = await parseBody(req, patchSchema);
   const listing = await prisma.marketplaceListing.findUnique({ where: { id } });
-  if (!listing || listing.sellerId !== user.id || listing.deletedAt) throw new HttpError(403, 'Not found or forbidden');
+  if (!listing || listing.deletedAt) throw new HttpError(404, 'Not found');
   if (listing.status === 'FLAGGED') throw new HttpError(400, 'This listing is under moderation review');
   return prisma.marketplaceListing.update({ where: { id }, data });
 });
 
 export const DELETE = route(async (req) => {
-  const user = await requireUser();
+  await requireUser();
   const id = new URL(req.url).searchParams.get('id');
   if (!id) throw new HttpError(400, 'Missing id');
 
   const listing = await prisma.marketplaceListing.findUnique({ where: { id } });
-  if (!listing || listing.sellerId !== user.id) throw new HttpError(403, 'Not found or forbidden');
+  if (!listing) throw new HttpError(404, 'Not found');
 
   await prisma.marketplaceListing.update({ where: { id }, data: { deletedAt: new Date(), status: 'ARCHIVED' } });
   return { success: true };

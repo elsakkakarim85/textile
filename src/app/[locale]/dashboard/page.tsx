@@ -96,6 +96,13 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
       desc: t('Direct messaging between buyers, factories, and consortium partners.', 'التواصل المباشر والمفاوضات بين المشترين والمصانع والشركاء.'),
     },
     {
+      href: `/${locale}/cluster/academy/studio`,
+      icon: Sparkles,
+      title: t('AI Course Studio & Workforce Certification', 'استوديو بناء الدورات الذكي والشهادات المعتمدة'),
+      desc: t('Generate Beginner-to-Advanced multimedia courses from your factory needs & authorized UNIDO/ZDHC/ISO standards.', 'بناء دورات تدريبية متعددة الوسائط (مبتدئ ← متقدم) حسب احتياجات مصنعك وبمراجع دولية معتمدة.'),
+      highlight: true,
+    },
+    {
       href: `/${locale}/dashboard/knowledge`,
       icon: Sparkles,
       title: t('AI Knowledge Base (RAG Training)', 'قاعدة معرفة المستشار الذكي (AI RAG)'),

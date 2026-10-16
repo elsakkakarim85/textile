@@ -44,34 +44,47 @@ export function AiCourseStudioClient({
   maturityScores,
   suggestedNeeds,
   authorizedResources,
+  initialOverride,
 }: {
   locale: string;
   factoryName: string;
   maturityScores: Record<string, number>;
   suggestedNeeds: SuggestedNeed[];
   authorizedResources: AuthorizedResource[];
+  initialOverride?: {
+    topic?: string;
+    need?: string;
+    role?: string;
+    category?: string;
+  };
 }) {
   const router = useRouter();
   const t = (en: string, ar: string) => tr(locale, en, ar);
 
   const [topic, setTopic] = useState(
-    suggestedNeeds[0]
-      ? locale === 'ar'
-        ? suggestedNeeds[0].titleAr
-        : suggestedNeeds[0].title
-      : ''
+    initialOverride?.topic ||
+      (suggestedNeeds[0]
+        ? locale === 'ar'
+          ? suggestedNeeds[0].titleAr
+          : suggestedNeeds[0].title
+        : '')
   );
   const [userNeed, setUserNeed] = useState(
-    suggestedNeeds[0]
-      ? locale === 'ar'
-        ? suggestedNeeds[0].needSummaryAr
-        : suggestedNeeds[0].needSummary
-      : ''
+    initialOverride?.need ||
+      (suggestedNeeds[0]
+        ? locale === 'ar'
+          ? suggestedNeeds[0].needSummaryAr
+          : suggestedNeeds[0].needSummary
+        : '')
   );
   const [targetRole, setTargetRole] = useState(
-    suggestedNeeds[0]?.targetRole || 'Spinning & Weaving Floor Engineer'
+    initialOverride?.role ||
+      suggestedNeeds[0]?.targetRole ||
+      'Spinning & Weaving Floor Engineer'
   );
-  const [category, setCategory] = useState(suggestedNeeds[0]?.category || 'SUSTAINABILITY');
+  const [category, setCategory] = useState(
+    initialOverride?.category || suggestedNeeds[0]?.category || 'SUSTAINABILITY'
+  );
   const [levelProgression, setLevelProgression] = useState<
     'BEGINNER_TO_ADVANCED' | 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
   >('BEGINNER_TO_ADVANCED');
