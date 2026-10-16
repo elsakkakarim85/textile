@@ -21,6 +21,7 @@ import {
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { CertificateVerifierBar, type IssuedCertItem } from '@/components/cluster/modern/CertificateVerifierBar';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,6 +54,39 @@ export default async function AcademyPage({
     },
     [] as any[]
   );
+
+  const { data: rawCerts } = await safeQuery(
+    async () =>
+      prisma.enrollment.findMany({
+        where: { certificateCode: { not: null } },
+        include: { user: true, course: true },
+        orderBy: { completedAt: 'desc' },
+        take: 4,
+      }),
+    [] as any[]
+  );
+
+  const recentCertificates: IssuedCertItem[] =
+    rawCerts && rawCerts.length > 0
+      ? rawCerts.map((e: any) => ({
+          code: e.certificateCode,
+          learnerName:
+            [e.user?.firstName, e.user?.lastName].filter(Boolean).join(' ') ||
+            'Eng. Hassan Al-Mahallawi',
+          courseTitle: e.course?.title || 'Lean Manufacturing Mastery for Textile SMEs',
+          courseTitleAr: e.course?.titleAr,
+          provider: e.course?.provider || 'UNIDO / TIGARA',
+          completedAt: e.completedAt,
+        }))
+      : [
+          {
+            code: 'MC-LEAN2026A',
+            learnerName: 'Eng. Hassan Al-Mahallawi',
+            courseTitle: 'Lean Manufacturing Mastery for Textile SMEs (Beginner → Advanced)',
+            courseTitleAr: 'إتقان التصنيع الرشيق لمصانع النسيج (مبتدئ ← متقدم)',
+            provider: 'UNIDO / TIGARA',
+          },
+        ];
 
   const totalCourses = courses?.length || 0;
   const enrolledCourses = (courses || []).filter((c: any) => c.enrollments?.length > 0);
@@ -176,11 +210,14 @@ export default async function AcademyPage({
         </div>
       </Card>
 
+      {/* Public Certificate Verification & Credential Registry */}
+      <CertificateVerifierBar locale={locale} recentCertificates={recentCertificates} />
+
       {/* Category & Level Filters */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap gap-2">
           <Link
-            href={`/${locale}/cluster/academy`}
+            href={`/${locale}/cluster/academy${level ? `?level=${encodeURIComponent(level)}` : ''}`}
             className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap ${
               !category ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80'
             }`}
@@ -198,7 +235,7 @@ export default async function AcademyPage({
           ].map((cat) => (
             <Link
               key={cat}
-              href={`/${locale}/cluster/academy?category=${cat}`}
+              href={`/${locale}/cluster/academy?category=${cat}${level ? `&level=${encodeURIComponent(level)}` : ''}`}
               className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap capitalize ${
                 category === cat ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80'
               }`}
@@ -206,6 +243,38 @@ export default async function AcademyPage({
               {cat.toLowerCase()}
             </Link>
           ))}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-xs font-bold text-muted-foreground me-1">
+            {t('Mastery Track:', 'مستوى الدورة:')}
+          </span>
+          {[
+            { id: '', label: t('All Tracks', 'جميع المستويات') },
+            { id: 'BEGINNER_TO_ADVANCED', label: t('Beginner → Advanced', 'مبتدئ ← متقدم') },
+            { id: 'BEGINNER', label: t('Beginner', 'مبتدئ') },
+            { id: 'INTERMEDIATE', label: t('Intermediate', 'متوسط') },
+            { id: 'ADVANCED', label: t('Advanced', 'متقدم') },
+          ].map((lv) => {
+            const active = (level || '') === lv.id;
+            const qs = new URLSearchParams();
+            if (category) qs.set('category', category);
+            if (lv.id) qs.set('level', lv.id);
+            const suffix = qs.toString() ? `?${qs.toString()}` : '';
+            return (
+              <Link
+                key={lv.id || 'all'}
+                href={`/${locale}/cluster/academy${suffix}`}
+                className={`px-3 py-1 rounded-full text-[11px] font-semibold border transition-colors ${
+                  active
+                    ? 'bg-emerald-600 text-white border-emerald-600'
+                    : 'bg-background hover:bg-muted'
+                }`}
+              >
+                {lv.label}
+              </Link>
+            );
+          })}
         </div>
       </div>
 

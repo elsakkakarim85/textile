@@ -5,8 +5,9 @@ import { tr, fmtNumber } from '@/lib/i18n-inline';
 import { PageHeader, StatCard, DbOfflineBanner, Pill } from '@/components/cluster/ui';
 import { SustainabilityChart } from '@/components/cluster/modern/SustainabilityChart';
 import SustainabilityEntryForm from '@/components/cluster/modern/SustainabilityEntryForm';
-import { Leaf, Droplets, Recycle, TrendingDown, CheckCircle2, Sun } from 'lucide-react';
+import { Leaf, Droplets, Recycle, TrendingDown, CheckCircle2, Sun, Sparkles, GraduationCap } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
@@ -175,6 +176,40 @@ export default async function SustainabilityPage({ params }: { params: Promise<{
                       {t('Chemical safety & organic fiber traceability', 'سلامة المنتج وتتبع سلاسل الإمداد القطنية')}
                     </p>
                   </div>
+                </div>
+              </div>
+
+              <div className="mt-6 pt-4 border-t space-y-2.5">
+                <div className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
+                  <GraduationCap className="w-4 h-4" />
+                  {t('Recommended ESG & Export Courses', 'الدورات التدريبية المعتمدة للاستدامة والتصدير')}
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Link
+                    href={`/${locale}/cluster/academy/eu-cbam-dpp-export`}
+                    className="text-xs font-semibold p-2.5 rounded-lg border bg-muted/40 hover:border-emerald-500/50 transition-colors flex items-center justify-between"
+                  >
+                    <span>{t('EU CBAM Carbon Reporting & Digital Product Passports', 'تقارير الكربون CBAM وجواز المنتج الأوروبي')}</span>
+                    <span className="text-emerald-600 font-bold">→</span>
+                  </Link>
+                  <Link
+                    href={`/${locale}/cluster/academy/zdhc-chemical-management`}
+                    className="text-xs font-semibold p-2.5 rounded-lg border bg-muted/40 hover:border-emerald-500/50 transition-colors flex items-center justify-between"
+                  >
+                    <span>{t('ZDHC MRSL v3.1 Chemical & Wastewater Mastery', 'إدارة الكيماويات والصرف الصناعي ZDHC')}</span>
+                    <span className="text-emerald-600 font-bold">→</span>
+                  </Link>
+                  <Link
+                    href={`/${locale}/cluster/academy/studio?category=SUSTAINABILITY&topic=${encodeURIComponent(
+                      'Decarbonization, Solar PPA Integration & ZLD Water Recycling for Dyehouses'
+                    )}&role=${encodeURIComponent('Sustainability & Utility Engineers')}&need=${encodeURIComponent(
+                      `Reduce carbon intensity (${kpis?.intensityCo2e ?? 0.89} kg CO2e/kg) and water intensity (${kpis?.intensityWater ?? 32} L/kg) to meet EU ESPR and ZDHC Level 3.`
+                    )}`}
+                    className="mt-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-700 shadow-xs"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    {t('Generate Custom ESG Course (AI Studio)', 'توليد دورة استدامة مخصصة لمصنعك بالذكاء الاصطناعي')}
+                  </Link>
                 </div>
               </div>
             </Card>
