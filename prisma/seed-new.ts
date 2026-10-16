@@ -726,6 +726,121 @@ async function main() {
     });
   }
 
+  // 11. Buyer Persona, Digital Product Passports, Smart Contracts, B2B Conversations & Reviews
+  const buyer1 = await prisma.user.upsert({
+    where: { email: 'buyer@eurotextiles.de' },
+    update: { role: 'buyer', firstName: 'Stefan', lastName: 'Weber (EU Buyer)' },
+    create: {
+      id: 'user_seed_buyer1',
+      email: 'buyer@eurotextiles.de',
+      firstName: 'Stefan',
+      lastName: 'Weber (EU Buyer)',
+      role: 'buyer',
+      locale: 'en',
+    },
+  });
+
+  // Ensure all product listings have EU Digital Product Passports
+  const productListings = await prisma.marketplaceListing.findMany({
+    where: { type: 'PRODUCT', deletedAt: null },
+  });
+  for (const item of productListings) {
+    await prisma.productPassport.upsert({
+      where: { listingId: item.id },
+      update: {},
+      create: {
+        listingId: item.id,
+        origin: 'El Mahalla El Kubra, Gharbia, Egypt',
+        material: '100% Egyptian Long-Staple Combed Cotton (Giza 86)',
+        fiberOrigin: 'Nile Delta — Kafr El-Sheikh & Gharbia Cooperative Ginning',
+        carbonFootprint: '2.08 kg CO2e / kg textile (Scope 1 + 2 verified)',
+        waterUsage: '39 L / kg (Closed-loop UF recovery)',
+        certifications: 'OEKO-TEX Standard 100, ISO 9001:2015, ZDHC MRSL Level 3',
+        recyclability: '100% Mechanically Recyclable Mono-Fiber Cotton',
+        signatureHash: `0x9f84c2e1b7a04d3c8e51209ab45f67d2e8c1a3094b7f82d1c6e5a4b30192f8a1`,
+      },
+    });
+  }
+
+  // Ensure Smart Escrow Contracts exist
+  const contractCount = await prisma.contract.count();
+  if (contractCount === 0) {
+    await prisma.contract.create({
+      data: {
+        title: 'Export Order: 12,000 m Giza 86 Sateen 300TC + Reactive Dyeing',
+        totalAmount: 540000,
+        currency: 'EGP',
+        status: 'IN_PRODUCTION',
+        incoterm: 'FOB Alexandria',
+        buyerId: buyer1.id,
+        factoryId: f1.id,
+        buyerAcceptedAt: new Date(Date.now() - 5 * 86400000),
+        factoryAcceptedAt: new Date(Date.now() - 4 * 86400000),
+        milestones: {
+          create: [
+            {
+              title: '1. Advance Deposit (30%) — Giza 86 Yarn Allocation',
+              amount: 162000,
+              status: 'RELEASED',
+              releasedAt: new Date(Date.now() - 3 * 86400000),
+            },
+            {
+              title: '2. Weaving & Reactive Dyeing Inspection (40%)',
+              amount: 216000,
+              status: 'FUNDED',
+            },
+            {
+              title: '3. Final Bill of Lading & EU DPP Handover (30%)',
+              amount: 162000,
+              status: 'PENDING',
+            },
+          ],
+        },
+      },
+    });
+  }
+
+  // Ensure B2B Conversations & Messages exist
+  const convoCount = await prisma.conversation.count();
+  if (convoCount === 0) {
+    const c1 = await prisma.conversation.create({
+      data: {
+        buyerId: buyer1.id,
+        factoryId: f1.id,
+        lastMessageAt: new Date(),
+      },
+    });
+    await prisma.message.createMany({
+      data: [
+        {
+          conversationId: c1.id,
+          senderId: buyer1.id,
+          content:
+            'Hello Misr Spinning team, we are reviewing your Giza 86 combed yarn and 300TC sateen specs for our Q1 Frankfurt hospitality line. Can you provide OEKO-TEX & DPP batch data?',
+        },
+        {
+          conversationId: c1.id,
+          senderId: f1.ownerId,
+          content:
+            'Welcome Stefan! Yes, all our Giza 86 lots include verified Scope 1+2 carbon intensity (2.08 kg CO2e/kg) and ISO 17025 lab test reports from the TIGARA Testing Lab.',
+        },
+      ],
+    });
+  }
+
+  // Ensure Factory Reviews exist
+  await prisma.review.upsert({
+    where: { factoryId_reviewerId: { factoryId: f1.id, reviewerId: buyer1.id } },
+    update: { rating: 5 },
+    create: {
+      factoryId: f1.id,
+      reviewerId: buyer1.id,
+      rating: 5,
+      comment:
+        'Exceptional Giza 86 yarn regularity and fast reactive dyeing turnaround. Full EU Digital Product Passport documentation was provided on schedule.',
+    },
+  });
+
   console.log('All Mahalla Textile Cluster modules seeded successfully!');
 }
 

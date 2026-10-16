@@ -29,11 +29,12 @@ export async function currentUserId(): Promise<string | null> {
 }
 
 /** The factory the user owns or belongs to, falling back to the primary cluster factory so pages are always interactive. */
-export async function findUserFactory(userId: string | null): Promise<Factory | null> {
+export async function findUserFactory(userId?: string | null): Promise<Factory | null> {
   try {
-    if (userId) {
+    const resolvedId = userId !== undefined ? userId : await currentUserId();
+    if (resolvedId) {
       const owned = await prisma.factory.findFirst({
-        where: { deletedAt: null, OR: [{ ownerId: userId }, { members: { some: { userId } } }] },
+        where: { deletedAt: null, OR: [{ ownerId: resolvedId }, { members: { some: { userId: resolvedId } } }] },
       });
       if (owned) return owned;
     }

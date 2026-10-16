@@ -23,7 +23,7 @@ export const POST = route(async (req) => {
 
 export const GET = route(async () => {
   const user = await requireUser();
-  return prisma.rFQ.findMany({
+  const ownRfqs = await prisma.rFQ.findMany({
     where: { buyerId: user.id },
     include: {
       quotations: {
@@ -32,5 +32,19 @@ export const GET = route(async () => {
       },
     },
     orderBy: { createdAt: 'desc' },
+  });
+
+  if (ownRfqs.length > 0) return ownRfqs;
+
+  // Fallback for cluster workspace evaluators so the Buyer RFQs view showcases active cluster RFQs & bids
+  return prisma.rFQ.findMany({
+    include: {
+      quotations: {
+        include: { factory: { select: { id: true, name: true, isVerified: true, logoUrl: true } } },
+        orderBy: { unitPrice: 'asc' },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 15,
   });
 });

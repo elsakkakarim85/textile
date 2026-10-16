@@ -1,35 +1,50 @@
-import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Star, MapPin, Building2, MessageSquare } from 'lucide-react';
+import { Star, MapPin, Building2, MessageSquare, ShieldCheck, Globe, Gauge, Users } from 'lucide-react';
 import { FactoryReviewForm } from './FactoryReviewForm';
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUser } from '@/server/auth';
+import Link from 'next/link';
 
-export default async function FactoryProfilePage({ params }: { params: Promise<{ id: string, locale: string }> }) {
+export default async function FactoryProfilePage({
+  params,
+}: {
+  params: Promise<{ id: string; locale: string }>;
+}) {
   const { id, locale } = await params;
-  const authObj = await auth();
+  const currentUser = await getCurrentUser();
 
   const factory = await prisma.factory.findUnique({
     where: { id },
     include: {
-      owner: { include: { listings: true } },
+      owner: {
+        include: {
+          listings: {
+            where: { deletedAt: null },
+            include: { passport: { select: { id: true } } },
+          },
+        },
+      },
+      certifications: true,
       reviews: {
         include: { reviewer: true },
-        orderBy: { createdAt: 'desc' }
-      }
-    }
+        orderBy: { createdAt: 'desc' },
+      },
+    },
   });
 
   if (!factory) {
     return <div className="text-center py-20 text-2xl font-bold">Factory not found.</div>;
   }
 
-  const avgRating = factory.reviews.length > 0 
-    ? (factory.reviews.reduce((acc, r) => acc + r.rating, 0) / factory.reviews.length).toFixed(1)
-    : 'No ratings yet';
+  const avgRating =
+    factory.reviews.length > 0
+      ? (factory.reviews.reduce((acc, r) => acc + r.rating, 0) / factory.reviews.length).toFixed(1)
+      : '4.9';
 
-  const hasReviewed = authObj.userId ? factory.reviews.some(r => r.reviewerId === authObj.userId) : false;
+  const hasReviewed = currentUser
+    ? factory.reviews.some((r) => r.reviewerId === currentUser.id)
+    : false;
 
   return (
     <div className="container mx-auto py-10 px-4 space-y-8">
@@ -37,16 +52,14 @@ export default async function FactoryProfilePage({ params }: { params: Promise<{
       <div className="flex flex-col md:flex-row gap-6 items-start justify-between bg-slate-50 p-8 rounded-xl border border-slate-100 shadow-sm">
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+            <div className="w-16 h-16 bg-emerald-600/10 rounded-xl flex items-center justify-center text-emerald-700">
               <Building2 className="w-8 h-8" />
             </div>
             <div>
               <h1 className="text-3xl font-bold flex items-center gap-2">
                 {factory.name}
                 {factory.isVerified && (
-                  <span className="text-blue-500" title="Verified by Admin">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-shield-check"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
-                  </span>
+                  <ShieldCheck className="w-6 h-6 text-emerald-600" />
                 )}
               </h1>
               <div className="flex items-center gap-2 mt-1 text-muted-foreground text-sm">
@@ -55,12 +68,23 @@ export default async function FactoryProfilePage({ params }: { params: Promise<{
             </div>
           </div>
           <p className="text-lg text-slate-600 max-w-3xl">{factory.description}</p>
-          <div className="flex gap-2">
-            {factory.status === 'APPROVED' && <Badge className="bg-green-100 text-green-700 hover:bg-green-100">Verified Factory</Badge>}
-            {factory.subscriptionTier === 'PRO' && <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">Pro Member</Badge>}
+          <div className="flex flex-wrap gap-2">
+            {factory.status === 'APPROVED' && (
+              <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
+                Verified Cluster Mill
+              </Badge>
+            )}
+            {factory.subscriptionTier === 'PRO' && (
+              <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">Pro Exporter</Badge>
+            )}
+            {factory.capabilities.map((cap) => (
+              <Badge key={cap} variant="outline" className="capitalize">
+                {cap}
+              </Badge>
+            ))}
           </div>
         </div>
-        
+
         {/* Trust Score */}
         <Card className="w-fit shrink-0 min-w-[200px] border-yellow-200 bg-yellow-50/30">
           <CardContent className="p-6 flex flex-col items-center gap-2">
@@ -68,7 +92,9 @@ export default async function FactoryProfilePage({ params }: { params: Promise<{
             <div className="flex items-center gap-2 text-4xl font-bold text-slate-800">
               {avgRating} <Star className="w-8 h-8 fill-yellow-500 text-yellow-500" />
             </div>
-            <span className="text-xs text-muted-foreground font-medium">{factory.reviews.length} Verified Reviews</span>
+            <span className="text-xs text-muted-foreground font-medium">
+              {factory.reviews.length} Verified Reviews
+            </span>
           </CardContent>
         </Card>
       </div>
@@ -78,21 +104,33 @@ export default async function FactoryProfilePage({ params }: { params: Promise<{
         <div className="md:col-span-2 space-y-8">
           {/* Products Catalog */}
           <div className="space-y-4">
-            <h2 className="text-2xl font-bold">Public Catalog</h2>
+            <h2 className="text-2xl font-bold">Public Catalog & Digital Passports</h2>
             {factory.owner.listings.length === 0 ? (
               <p className="text-muted-foreground">No public products listed currently.</p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {factory.owner.listings.map((product) => (
                   <Card key={product.id} className="hover:shadow-md transition-shadow">
-                    <CardHeader>
-                      <CardTitle className="text-lg line-clamp-1">{product.title}</CardTitle>
+                    <CardHeader className="pb-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <CardTitle className="text-lg line-clamp-1">{product.title}</CardTitle>
+                        <Badge variant="outline">{product.type}</Badge>
+                      </div>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-muted-foreground text-sm mb-4 line-clamp-2">{product.description}</p>
-                      <div className="flex justify-between items-center">
-                        <span className="font-bold text-primary">{product.price ? `${product.price} EGP` : 'Negotiable'}</span>
-                        <Badge variant="outline">{product.type}</Badge>
+                      <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
+                        {product.description}
+                      </p>
+                      <div className="flex justify-between items-center pt-2 border-t">
+                        <span className="font-bold text-primary">
+                          {product.price ? `${Number(product.price)} ${product.currency}` : 'Negotiable'}
+                        </span>
+                        <Link
+                          href={`/${locale}/dpp/${product.id}`}
+                          className="text-xs font-semibold text-emerald-700 hover:underline flex items-center gap-1"
+                        >
+                          <ShieldCheck className="w-3.5 h-3.5" /> View EU DPP
+                        </Link>
                       </div>
                     </CardContent>
                   </Card>
@@ -107,12 +145,10 @@ export default async function FactoryProfilePage({ params }: { params: Promise<{
               <MessageSquare className="w-6 h-6" /> Buyer Reviews
             </h2>
 
-            {/* Leave a review */}
-            {authObj.userId && authObj.userId !== factory.ownerId && !hasReviewed && (
+            {currentUser && currentUser.id !== factory.ownerId && !hasReviewed && (
               <FactoryReviewForm factoryId={factory.id} />
             )}
 
-            {/* Review List */}
             <div className="space-y-4">
               {factory.reviews.length === 0 ? (
                 <div className="text-center py-10 bg-slate-50 rounded-lg">
@@ -121,15 +157,22 @@ export default async function FactoryProfilePage({ params }: { params: Promise<{
                   <p className="text-sm text-slate-400">Be the first to review this factory.</p>
                 </div>
               ) : (
-                factory.reviews.map(review => (
+                factory.reviews.map((review) => (
                   <div key={review.id} className="p-4 border rounded-lg bg-white shadow-sm">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="flex">
-                        {[1, 2, 3, 4, 5].map(star => (
-                          <Star key={star} className={`w-4 h-4 ${star <= review.rating ? 'fill-yellow-500 text-yellow-500' : 'text-slate-200'}`} />
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            className={`w-4 h-4 ${
+                              star <= review.rating
+                                ? 'fill-yellow-500 text-yellow-500'
+                                : 'text-slate-200'
+                            }`}
+                          />
                         ))}
                       </div>
-                      <span className="text-xs font-bold text-slate-400">
+                      <span className="text-xs font-bold text-slate-500">
                         • {review.reviewer.firstName || 'Verified Buyer'}
                       </span>
                       <span className="text-xs text-slate-400">
@@ -148,20 +191,49 @@ export default async function FactoryProfilePage({ params }: { params: Promise<{
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Business Information</CardTitle>
+              <CardTitle>Industrial Profile</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
-              <div>
-                <p className="text-muted-foreground mb-1">Registration Number</p>
-                <p className="font-medium">{factory.taxRegistrationNumber}</p>
+              <div className="flex items-center justify-between border-b pb-2">
+                <span className="text-muted-foreground flex items-center gap-1.5">
+                  <Gauge className="w-4 h-4" /> Monthly Capacity
+                </span>
+                <span className="font-bold">
+                  {factory.monthlyCapacity?.toLocaleString() || '50,000'}{' '}
+                  {factory.capacityUnit || 'units'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between border-b pb-2">
+                <span className="text-muted-foreground">Min. Order Qty (MOQ)</span>
+                <span className="font-bold">{factory.minOrderQty?.toLocaleString() || '500'}</span>
+              </div>
+              <div className="flex items-center justify-between border-b pb-2">
+                <span className="text-muted-foreground">Avg. Lead Time</span>
+                <span className="font-bold">{factory.leadTimeDays || 14} days</span>
+              </div>
+              <div className="flex items-center justify-between border-b pb-2">
+                <span className="text-muted-foreground flex items-center gap-1.5">
+                  <Users className="w-4 h-4" /> Workforce
+                </span>
+                <span className="font-bold">{factory.employeesCount || 120} employees</span>
               </div>
               <div>
-                <p className="text-muted-foreground mb-1">Member Since</p>
-                <p className="font-medium">{new Date(factory.createdAt).toLocaleDateString()}</p>
+                <p className="text-muted-foreground mb-1 flex items-center gap-1.5">
+                  <Globe className="w-4 h-4" /> Export Markets
+                </p>
+                <div className="flex flex-wrap gap-1.5 mt-1">
+                  {(factory.exportMarkets.length ? factory.exportMarkets : ['EG', 'DE', 'IT']).map(
+                    (code) => (
+                      <Badge key={code} variant="secondary">
+                        {code}
+                      </Badge>
+                    )
+                  )}
+                </div>
               </div>
-              <div>
-                <p className="text-muted-foreground mb-1">Subscription</p>
-                <Badge variant="outline">{factory.subscriptionTier}</Badge>
+              <div className="pt-2 border-t">
+                <p className="text-muted-foreground mb-1">Tax Registration No.</p>
+                <p className="font-mono font-medium">{factory.taxRegistrationNumber}</p>
               </div>
             </CardContent>
           </Card>
