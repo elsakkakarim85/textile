@@ -74,6 +74,7 @@ export default async function ClusterHubPage({ params }: { params: Promise<{ loc
       mods: [
         { href: 'maturity', icon: Gauge, en: 'Digital Maturity', ar: 'النضج الرقمي', descEn: 'Industry 4.0 readiness assessment with a personalized 90-day roadmap.', descAr: 'تقييم الجاهزية للصناعة 4.0 مع خارطة طريق مخصصة لمدة 90 يومًا.', stat: c.assessments },
         { href: 'academy', icon: GraduationCap, en: 'Cluster Academy', ar: 'أكاديمية التجمع', descEn: 'Practical courses for workers and managers with verifiable certificates.', descAr: 'دورات عملية للعمال والمديرين بشهادات قابلة للتحقق.', stat: c.courses },
+        { href: 'academy/studio', icon: Sparkles, en: 'AI Course Studio', ar: 'منشئ الدورات الذكي', descEn: 'Generate Beginner-to-Advanced multimedia courses from your factory needs & authorized UNIDO/ZDHC/ISO standards.', descAr: 'إنشاء دورات متعددة الوسائط (مبتدئ ← متقدم) حسب احتياجات مصنعك وبمراجع دولية معتمدة.' },
         { href: 'sustainability', icon: Leaf, en: 'Sustainability & CBAM', ar: 'الاستدامة و CBAM', descEn: 'Track energy, water, chemicals and CO₂e; get EU-market ready.', descAr: 'تتبع الطاقة والمياه والكيماويات والانبعاثات واستعد للسوق الأوروبي.' },
         { href: 'funding', icon: Landmark, en: 'Funding & Grants', ar: 'التمويل والمنح', descEn: 'Grants, green loans and technical assistance matched to your gaps.', descAr: 'منح وقروض خضراء ودعم فني مطابق لاحتياجاتك.', stat: c.programs },
       ],
