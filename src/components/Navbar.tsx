@@ -10,7 +10,7 @@ import { ThemeToggle } from './ThemeToggle';
 import { NotificationsDropdown } from './NotificationsDropdown';
 import { PersonaSwitcher } from './PersonaSwitcher';
 import { tr } from '@/lib/i18n-inline';
-import { Menu, X, Network, BarChart3, Building2, ShoppingBag, Sparkles, Briefcase, Recycle } from 'lucide-react';
+import { Menu, X, Network, BarChart3, Building2, ShoppingBag, Sparkles, Briefcase, Recycle, GraduationCap } from 'lucide-react';
 
 export default function Navbar({ locale }: { locale: string }) {
   const { isSignedIn } = useUser();
@@ -27,11 +27,12 @@ export default function Navbar({ locale }: { locale: string }) {
 
   const navLinks = [
     { href: `/${locale}/cluster`, label: t('Cluster Hub', 'مركز التجمع'), highlight: true, icon: Network },
+    { href: `/${locale}/cluster/academy`, label: t('Academy & AI Studio', 'الأكاديمية والدورات'), green: true, icon: GraduationCap },
     { href: `/${locale}/cluster/observatory`, label: t('Observatory', 'المرصد'), icon: BarChart3 },
     { href: `/${locale}/factories`, label: t('Factories', 'المصانع'), icon: Building2 },
     { href: `/${locale}/marketplaces/products`, label: t('Products', 'المنتجات'), icon: ShoppingBag },
     { href: `/${locale}/marketplaces/resources`, label: t('Resources', 'الموارد') },
-    { href: `/${locale}/marketplaces/waste`, label: t('Circular Waste', 'العوادم'), green: true, icon: Recycle },
+    { href: `/${locale}/marketplaces/waste`, label: t('Circular Waste', 'العوادم'), icon: Recycle },
     { href: `/${locale}/marketplaces/matchmaking`, label: t('RFQs', 'المناقصات') },
     { href: `/${locale}/recruitment`, label: t('Jobs', 'الوظائف'), icon: Briefcase },
     { href: `/${locale}/ai`, label: t('AI Advisor', 'المستشار الذكي'), icon: Sparkles },

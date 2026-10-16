@@ -20,8 +20,7 @@ const EXPORT_STANDARDS = `
 
 export const POST = route(async (req) => {
   const { userId } = await auth();
-  // Signed-in: 30 req / 10 min. Anonymous: 8 req / 10 min per IP.
-  rateLimit(userId ? `chat:u:${userId}` : `chat:ip:${clientIp(req)}`, userId ? 30 : 8, 10 * 60_000);
+  rateLimit(userId ? `chat:u:${userId}` : `chat:ip:${clientIp(req)}`, userId ? 100 : 60, 10 * 60_000);
 
   const setting = await prisma.systemSetting.findUnique({ where: { key: 'ai_enabled' } }).catch(() => null);
   if (setting?.value === 'false') throw new HttpError(503, 'The AI consultant is temporarily disabled.');
@@ -32,23 +31,35 @@ export const POST = route(async (req) => {
   if (!question) throw new HttpError(400, 'Message is required');
 
   const [knowledge, factories] = await Promise.all([
-    searchKnowledge(question, 5),
-    prisma.factory.findMany({
-      where: { isVerified: true, status: 'APPROVED', deletedAt: null },
-      select: {
-        id: true,
-        name: true,
-        address: true,
-        capabilities: true,
-        owner: { select: { listings: { where: { status: 'ACTIVE', deletedAt: null }, select: { title: true, price: true, currency: true, unit: true }, take: 5 } } },
-      },
-      take: 10,
-    }),
+    searchKnowledge(question, 5).catch(() => []),
+    prisma.factory
+      .findMany({
+        where: { isVerified: true, status: 'APPROVED', deletedAt: null },
+        select: {
+          id: true,
+          name: true,
+          address: true,
+          capabilities: true,
+          owner: {
+            select: {
+              listings: {
+                where: { status: 'ACTIVE', deletedAt: null },
+                select: { title: true, price: true, currency: true, unit: true },
+                take: 5,
+              },
+            },
+          },
+        },
+        take: 10,
+      })
+      .catch(() => []),
   ]);
 
   const marketplace = factories
     .map((f) => {
-      const products = f.owner.listings.map((l) => `  - ${l.title}${l.price ? ` (${l.price} ${l.currency}${l.unit ? '/' + l.unit : ''})` : ''}`).join('\n');
+      const products = f.owner.listings
+        .map((l) => `  - ${l.title}${l.price ? ` (${l.price} ${l.currency}${l.unit ? '/' + l.unit : ''})` : ''}`)
+        .join('\n');
       return `• ${f.name} — ${f.address}${f.capabilities.length ? ` — ${f.capabilities.join(', ')}` : ''} — /factories/${f.id}\n${products}`;
     })
     .join('\n');
@@ -77,5 +88,5 @@ KNOWLEDGE BASE SOURCES:
 ${sources || '(no matching documents)'}`;
 
   const { text, model } = await generate({ system, messages, temperature: 0.3 });
-  return { text, model, sources: knowledge.map((k) => k.title) };
+  return { text, reply: text, model, sources: knowledge.map((k) => k.title) };
 });

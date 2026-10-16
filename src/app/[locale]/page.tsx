@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { prisma } from '@/lib/prisma';
 import { tr, fmtNumber, fmtMoney } from '@/lib/i18n-inline';
 import { Pill, ProgressBar } from '@/components/cluster/ui';
+import { InstantTopicCourseBar } from '@/components/cluster/modern/InstantTopicCourseBar';
 import {
   Factory,
   Package,
@@ -22,6 +23,7 @@ import {
   Sparkles,
   BarChart3,
   QrCode,
+  Bot,
 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -94,27 +96,37 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
           <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             {t(
-              'Uniting Egyptian spinning, weaving, dyeing, and garment factories to pool raw-material procurement, exchange idle capacity, form export consortia, modernize for Industry 4.0 & EU CBAM, and trade globally.',
-              'توحيد مصانع الغزل والنسيج والصباغة والملابس بالمحلة الكبرى للشراء المشترك للخامات، وتبادل الطاقات الإنتاجية، وتشكيل التحالفات التصديرية، والتحول للصناعة 4.0 ومعايير التصدير الأوروبية.'
+              'Uniting Egyptian spinning, weaving, dyeing, and garment factories to pool raw-material procurement, exchange idle capacity, form export consortia, modernize for Industry 4.0 & EU CBAM, and train teams on any topic with AI.',
+              'توحيد مصانع الغزل والنسيج والصباغة والملابس بالمحلة الكبرى للشراء المشترك للخامات، وتبادل الطاقات الإنتاجية، وتشكيل التحالفات التصديرية، والتحول للصناعة 4.0، وتوليد دورات تدريبية احترافية لأي موضوع بالذكاء الاصطناعي.'
             )}
           </p>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-4">
             <Link href={`/${locale}/cluster`}>
               <Button size="lg" className="h-13 px-7 text-base rounded-full shadow-lg shadow-primary/20">
                 <Network className="w-5 h-5 me-2" />
                 {t('Enter Cluster Collaboration Hub', 'دخول مركز تعاون وتحديث التجمع')}
               </Button>
             </Link>
-            <Link href={`/${locale}/cluster/observatory`}>
-              <Button variant="outline" size="lg" className="h-13 px-7 text-base rounded-full">
-                <BarChart3 className="w-5 h-5 me-2" />
-                {t('Live Cluster Observatory', 'مرصد مؤشرات التجمع')}
+            <Link href={`/${locale}/cluster/academy`}>
+              <Button
+                size="lg"
+                className="h-13 px-7 text-base rounded-full bg-gradient-to-r from-indigo-600 to-emerald-600 hover:from-indigo-700 hover:to-emerald-700 text-white shadow-lg"
+              >
+                <GraduationCap className="w-5 h-5 me-2" />
+                {t('Academy & AI Course Studio', 'الأكاديمية واستوديو الدورات الذكي')}
               </Button>
             </Link>
-            <Link href={`/${locale}/marketplaces/products`}>
-              <Button variant="secondary" size="lg" className="h-13 px-7 text-base rounded-full">
-                {t('B2B Marketplace', 'سوق المنتجات والعوادم')} <ArrowRight className="ms-2 w-4 h-4" />
+            <Link href={`/${locale}/ai`}>
+              <Button variant="outline" size="lg" className="h-13 px-6 text-base rounded-full">
+                <Bot className="w-5 h-5 me-2 text-primary" />
+                {t('AI Trade & Engineering Advisor', 'المستشار الهندسي والتصديري الذكي')}
+              </Button>
+            </Link>
+            <Link href={`/${locale}/cluster/observatory`}>
+              <Button variant="secondary" size="lg" className="h-13 px-6 text-base rounded-full">
+                <BarChart3 className="w-5 h-5 me-2" />
+                {t('Live Observatory', 'مرصد التجمع')} <ArrowRight className="ms-1.5 w-4 h-4" />
               </Button>
             </Link>
           </div>
@@ -157,6 +169,11 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Instant Any-Topic AI Course Generator Spotlight */}
+      <section className="container mx-auto pt-12 px-4">
+        <InstantTopicCourseBar locale={locale} />
       </section>
 
       {/* Core Cluster Modules Grid */}
