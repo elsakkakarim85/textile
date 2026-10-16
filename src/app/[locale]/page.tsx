@@ -24,6 +24,7 @@ import {
   BarChart3,
   QrCode,
   Bot,
+  Megaphone,
 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -96,8 +97,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
           <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             {t(
-              'Uniting Egyptian spinning, weaving, dyeing, and garment factories to pool raw-material procurement, exchange idle capacity, form export consortia, modernize for Industry 4.0 & EU CBAM, and train teams on any topic with AI.',
-              'توحيد مصانع الغزل والنسيج والصباغة والملابس بالمحلة الكبرى للشراء المشترك للخامات، وتبادل الطاقات الإنتاجية، وتشكيل التحالفات التصديرية، والتحول للصناعة 4.0، وتوليد دورات تدريبية احترافية لأي موضوع بالذكاء الاصطناعي.'
+              'Uniting Egyptian spinning, weaving, dyeing, and garment factories to pool raw-material procurement, exchange idle capacity, form export consortia, build global textile brands & marketing campaigns, and train teams on any topic with AI.',
+              'توحيد مصانع الغزل والنسيج والصباغة والملابس بالمحلة الكبرى للشراء المشترك للخامات، وتبادل الطاقات الإنتاجية، وتشكيل التحالفات التصديرية، وبناء العلامات التجارية وأتمتة التسويق، وتوليد دورات تدريبية احترافية لأي موضوع بالذكاء الاصطناعي.'
             )}
           </p>
 
@@ -106,6 +107,15 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               <Button size="lg" className="h-13 px-7 text-base rounded-full shadow-lg shadow-primary/20">
                 <Network className="w-5 h-5 me-2" />
                 {t('Enter Cluster Collaboration Hub', 'دخول مركز تعاون وتحديث التجمع')}
+              </Button>
+            </Link>
+            <Link href={`/${locale}/cluster/brand-studio`}>
+              <Button
+                size="lg"
+                className="h-13 px-7 text-base rounded-full bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white shadow-lg"
+              >
+                <Megaphone className="w-5 h-5 me-2" />
+                {t('AI Brand & Marketing Studio', 'استوديو الهوية والتسويق الذكي')}
               </Button>
             </Link>
             <Link href={`/${locale}/cluster/academy`}>
@@ -121,12 +131,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               <Button variant="outline" size="lg" className="h-13 px-6 text-base rounded-full">
                 <Bot className="w-5 h-5 me-2 text-primary" />
                 {t('AI Trade & Engineering Advisor', 'المستشار الهندسي والتصديري الذكي')}
-              </Button>
-            </Link>
-            <Link href={`/${locale}/cluster/observatory`}>
-              <Button variant="secondary" size="lg" className="h-13 px-6 text-base rounded-full">
-                <BarChart3 className="w-5 h-5 me-2" />
-                {t('Live Observatory', 'مرصد التجمع')} <ArrowRight className="ms-1.5 w-4 h-4" />
               </Button>
             </Link>
           </div>
@@ -190,8 +194,15 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {[
+            {
+              href: `/${locale}/cluster/brand-studio`,
+              icon: Megaphone,
+              title: t('AI Brand, Marketing & Collateral Studio', 'استوديو الهوية والتسويق والمطبوعات الذكي'),
+              desc: t('Create textile brands, 90-day export marketing plans, automated campaigns, promo videos, studio photos, 6-panel brochures, flyers & trade-show posters.', 'إنشاء علامات تجارية، خطط تسويق تصديرية، أتمتة حملات، وتوليد فيديوهات وصور وبروشورات وفلايرز وبوسترات للمعارض.'),
+              badge: t('New • Full Studio', 'جديد • استوديو متكامل'),
+            },
             {
               href: `/${locale}/cluster/procurement`,
               icon: ShoppingCart,
@@ -237,8 +248,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             {
               href: `/${locale}/cluster/academy`,
               icon: GraduationCap,
-              title: t('Cluster Academy', 'أكاديمية التجمع'),
-              desc: t('Upskill engineers & workers in Lean, ZDHC, and ERP with verifiable certificates.', 'دورات تدريبية عملية مع إصدار شهادات رقمية قابلة للتحقق.'),
+              title: t('Cluster Academy & AI Course Studio', 'أكاديمية التجمع واستوديو الدورات الذكي'),
+              desc: t('Generate Beginner-to-Advanced multimedia courses on any topic with QR-verifiable certificates.', 'توليد دورات تدريبية متعددة الوسائط لأي موضوع مع إصدار شهادات رقمية قابلة للتحقق.'),
               badge: t('Certified', 'شهادات معتمدة'),
             },
             {

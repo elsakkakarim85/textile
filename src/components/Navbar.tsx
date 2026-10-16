@@ -10,7 +10,7 @@ import { ThemeToggle } from './ThemeToggle';
 import { NotificationsDropdown } from './NotificationsDropdown';
 import { PersonaSwitcher } from './PersonaSwitcher';
 import { tr } from '@/lib/i18n-inline';
-import { Menu, X, Network, BarChart3, Building2, ShoppingBag, Sparkles, Briefcase, Recycle, GraduationCap } from 'lucide-react';
+import { Menu, X, Network, BarChart3, Building2, ShoppingBag, Sparkles, Briefcase, Recycle, GraduationCap, Megaphone } from 'lucide-react';
 
 export default function Navbar({ locale }: { locale: string }) {
   const { isSignedIn } = useUser();
@@ -28,6 +28,7 @@ export default function Navbar({ locale }: { locale: string }) {
   const navLinks = [
     { href: `/${locale}/cluster`, label: t('Cluster Hub', 'مركز التجمع'), highlight: true, icon: Network },
     { href: `/${locale}/cluster/academy`, label: t('Academy & AI Studio', 'الأكاديمية والدورات'), green: true, icon: GraduationCap },
+    { href: `/${locale}/cluster/brand-studio`, label: t('Brand & Marketing AI', 'استوديو الهوية والتسويق'), green: true, icon: Megaphone },
     { href: `/${locale}/cluster/observatory`, label: t('Observatory', 'المرصد'), icon: BarChart3 },
     { href: `/${locale}/factories`, label: t('Factories', 'المصانع'), icon: Building2 },
     { href: `/${locale}/marketplaces/products`, label: t('Products', 'المنتجات'), icon: ShoppingBag },

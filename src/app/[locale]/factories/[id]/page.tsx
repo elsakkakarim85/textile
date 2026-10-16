@@ -199,6 +199,21 @@ export default async function FactoryProfilePage({
                   {t('AI Workforce Training Track', 'مسار التدريب الذكي للتخصص')}
                 </Button>
               </Link>
+              <Link
+                href={`/${locale}/cluster/brand-studio?brand=${encodeURIComponent(
+                  factory.name
+                )}&topic=${encodeURIComponent(
+                  factory.description || `${factory.capabilities.join(' & ')} Export Collection`
+                )}`}
+              >
+                <Button
+                  variant="outline"
+                  className="border-amber-400/40 bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 gap-1.5 text-xs"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  {t('AI Brand & Brochure Studio', 'استوديو الهوية والبروشور الذكي')}
+                </Button>
+              </Link>
             </div>
           </div>
 
