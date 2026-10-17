@@ -357,6 +357,243 @@ export function BrandMarketingStudioClient({
     URL.revokeObjectURL(url);
   };
 
+  // Download Automation Schedule as .ICS Calendar (Outlook / Google / Apple Calendar)
+  const downloadCalendarIcs = () => {
+    const baseDate = new Date();
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const fmtIcsDate = (d: Date) =>
+      `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}T${pad(
+        d.getUTCHours()
+      )}${pad(d.getUTCMinutes())}00Z`;
+
+    const events = kit.calendar.map((c, idx) => {
+      const start = new Date(baseDate.getTime() + (idx * 3 + 1) * 24 * 60 * 60 * 1000);
+      start.setUTCHours(9, 30, 0, 0);
+      const end = new Date(start.getTime() + 60 * 60 * 1000);
+      const summary = `[${c.channel}] ${isAr ? c.headlineAr : c.headlineEn}`;
+      const desc = `${isAr ? c.captionAr : c.captionEn} | CTA: ${isAr ? c.ctaAr : c.ctaEn}`;
+      return [
+        'BEGIN:VEVENT',
+        `UID:${c.id}-${Date.now()}@mahalla-cluster.eg`,
+        `DTSTAMP:${fmtIcsDate(new Date())}`,
+        `DTSTART:${fmtIcsDate(start)}`,
+        `DTEND:${fmtIcsDate(end)}`,
+        `SUMMARY:${summary.replace(/\n/g, ' ')}`,
+        `DESCRIPTION:${desc.replace(/\n/g, ' ')}`,
+        'END:VEVENT',
+      ].join('\r\n');
+    });
+
+    const ics = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//El-Mahalla El-Kubra Textile Cluster//AI Brand Studio//EN',
+      ...events,
+      'END:VCALENDAR',
+    ].join('\r\n');
+
+    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${kit.brandNameEn.toLowerCase().replace(/\s+/g, '-')}-campaign-calendar.ics`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Render & Download Playable .WEBM Promotional Video via HTML5 Canvas + MediaRecorder
+  const [renderingVideo, setRenderingVideo] = useState(false);
+  const downloadCommercialVideoWebm = async () => {
+    if (renderingVideo || typeof window === 'undefined') return;
+    setRenderingVideo(true);
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1280;
+      canvas.height = 720;
+      const ctx = canvas.getContext('2d');
+      if (!ctx || typeof MediaRecorder === 'undefined') {
+        setRenderingVideo(false);
+        return;
+      }
+
+      const stream = canvas.captureStream(30);
+      const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+        ? 'video/webm;codecs=vp9'
+        : 'video/webm';
+      const recorder = new MediaRecorder(stream, { mimeType });
+      const chunks: BlobPart[] = [];
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) chunks.push(e.data);
+      };
+
+      const donePromise = new Promise<void>((resolve) => {
+        recorder.onstop = () => {
+          const blob = new Blob(chunks, { type: 'video/webm' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${kit.brandNameEn.toLowerCase().replace(/\s+/g, '-')}-commercial.webm`;
+          a.click();
+          URL.revokeObjectURL(url);
+          resolve();
+        };
+      });
+
+      recorder.start();
+      const scenes = kit.videoSpec.scenes;
+      const framesPerScene = 36; // ~1.2s per scene in fast render mode (total ~4.8s HD reel)
+      const primary = kit.palette[0]?.hex || '#0F172A';
+      const gold = kit.palette[1]?.hex || '#D4AF37';
+
+      for (let sIdx = 0; sIdx < scenes.length; sIdx++) {
+        const sc = scenes[sIdx];
+        for (let f = 0; f < framesPerScene; f++) {
+          const progress = (sIdx * framesPerScene + f) / (scenes.length * framesPerScene);
+          const grad = ctx.createLinearGradient(0, 0, 1280, 720);
+          grad.addColorStop(0, sc.accentHex || primary);
+          grad.addColorStop(1, '#050811');
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, 1280, 720);
+
+          // Border & Crest
+          ctx.strokeStyle = gold;
+          ctx.lineWidth = 4;
+          ctx.strokeRect(40, 40, 1200, 640);
+
+          ctx.fillStyle = gold;
+          ctx.font = 'bold 22px sans-serif';
+          ctx.fillText(
+            `SCENE 0${sc.sceneNumber} • ${isAr ? sc.onScreenTextAr : sc.onScreenTextEn}`,
+            80,
+            105
+          );
+
+          ctx.fillStyle = '#FFFFFF';
+          ctx.font = 'bold 42px sans-serif';
+          const vo = isAr ? sc.voiceoverAr : sc.voiceoverEn;
+          ctx.fillText(vo.slice(0, 58), 80, 320);
+          if (vo.length > 58) {
+            ctx.fillText(vo.slice(58, 116), 80, 380);
+          }
+
+          ctx.fillStyle = '#CBD5E1';
+          ctx.font = '24px monospace';
+          ctx.fillText(
+            `${isAr ? kit.brandNameAr : kit.brandNameEn} • ISO 17025 • OEKO-TEX 100 • EU DPP`,
+            80,
+            610
+          );
+
+          // Progress bar
+          ctx.fillStyle = gold;
+          ctx.fillRect(40, 672, Math.round(1200 * progress), 8);
+
+          await new Promise((r) => setTimeout(r, 33));
+        }
+      }
+
+      recorder.stop();
+      await donePromise;
+    } catch {
+      // Fallback
+    } finally {
+      setRenderingVideo(false);
+    }
+  };
+
+  // Download High-Res Print PNG for Brochure, Flyer, or Roll-Up Poster
+  const downloadPrintCollateralPng = (kind: 'BROCHURE' | 'FLYER' | 'POSTER') => {
+    const canvas = document.createElement('canvas');
+    const isPoster = kind === 'POSTER';
+    canvas.width = isPoster ? 1200 : 1600;
+    canvas.height = isPoster ? 2000 : 1100;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const primary = kit.palette[0]?.hex || '#0F172A';
+    const gold = kit.palette[1]?.hex || '#D4AF37';
+
+    ctx.fillStyle = primary;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.strokeStyle = gold;
+    ctx.lineWidth = 8;
+    ctx.strokeRect(36, 36, canvas.width - 72, canvas.height - 72);
+
+    ctx.fillStyle = gold;
+    ctx.font = 'bold 28px sans-serif';
+    ctx.fillText(
+      kind === 'POSTER'
+        ? `${isAr ? kit.posterSpec.exhibitionNameAr : kit.posterSpec.exhibitionNameEn} (${kit.posterSpec.boothNumber})`
+        : kind === 'FLYER'
+        ? isAr
+          ? kit.flyerSpec.badgeAr
+          : kit.flyerSpec.badgeEn
+        : `${isAr ? kit.brandNameAr : kit.brandNameEn} — 6-PANEL TRI-FOLD BROCHURE`,
+      84,
+      110
+    );
+
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 58px sans-serif';
+    ctx.fillText(isAr ? kit.brandNameAr : kit.brandNameEn, 84, 200);
+
+    ctx.fillStyle = '#E2E8F0';
+    ctx.font = '28px sans-serif';
+    ctx.fillText((isAr ? kit.taglineAr : kit.taglineEn).slice(0, 80), 84, 255);
+
+    if (kind === 'BROCHURE') {
+      kit.brochurePanels.forEach((p, idx) => {
+        const col = idx % 3;
+        const row = Math.floor(idx / 3);
+        const x = 84 + col * 480;
+        const y = 310 + row * 360;
+        ctx.fillStyle = 'rgba(255,255,255,0.08)';
+        ctx.fillRect(x, y, 450, 330);
+        ctx.strokeStyle = gold;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, 450, 330);
+        ctx.fillStyle = gold;
+        ctx.font = 'bold 20px sans-serif';
+        ctx.fillText(isAr ? p.panelRoleAr : p.panelRoleEn, x + 20, y + 40);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 24px sans-serif';
+        ctx.fillText((isAr ? p.titleAr : p.titleEn).slice(0, 32), x + 20, y + 80);
+        (isAr ? p.bulletsAr : p.bulletsEn).slice(0, 3).forEach((b, bIdx) => {
+          ctx.fillStyle = '#CBD5E1';
+          ctx.font = '18px sans-serif';
+          ctx.fillText(`• ${b.slice(0, 42)}`, x + 20, y + 135 + bIdx * 42);
+        });
+      });
+    } else {
+      kit.flyerSpec.keySpecs.forEach((sp, idx) => {
+        const y = 340 + idx * 140;
+        ctx.fillStyle = 'rgba(255,255,255,0.08)';
+        ctx.fillRect(84, y, canvas.width - 168, 115);
+        ctx.fillStyle = gold;
+        ctx.font = 'bold 24px sans-serif';
+        ctx.fillText(isAr ? sp.labelAr : sp.labelEn, 110, y + 42);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 28px sans-serif';
+        ctx.fillText(isAr ? sp.valueAr : sp.valueEn, 110, y + 85);
+      });
+    }
+
+    ctx.fillStyle = gold;
+    ctx.font = 'bold 24px monospace';
+    ctx.fillText(
+      `mahalla-cluster-app.vercel.app • ISO 17025 • OEKO-TEX 100 • EU DPP QR VERIFIED`,
+      84,
+      canvas.height - 75
+    );
+
+    const url = canvas.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${kit.brandNameEn.toLowerCase().replace(/\s+/g, '-')}-${kind.toLowerCase()}.png`;
+    a.click();
+  };
+
   // Download Printable Standalone HTML Collateral (Brochure / Flyer / Poster)
   const downloadStandaloneCollateralHtml = (kind: 'BROCHURE' | 'FLYER' | 'POSTER') => {
     const primary = kit.palette[0]?.hex || '#0F172A';
@@ -1206,15 +1443,26 @@ export function BrandMarketingStudioClient({
                 )}
               </p>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={downloadCalendarCsv}
-              className="gap-2 font-bold"
-            >
-              <Download className="w-4 h-4" />
-              {t('Export Automation Schedule (.CSV)', 'تصدير جدول الأتمتة (.CSV)')}
-            </Button>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={downloadCalendarIcs}
+                className="gap-2 font-bold"
+              >
+                <Calendar className="w-4 h-4 text-primary" />
+                {t('Download Calendar (.ICS)', 'تحميل التقويم (.ICS)')}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={downloadCalendarCsv}
+                className="gap-2 font-bold"
+              >
+                <Download className="w-4 h-4" />
+                {t('Export Schedule (.CSV)', 'تصدير الجدول (.CSV)')}
+              </Button>
+            </div>
           </div>
 
           {/* Automation Flows */}
@@ -1424,7 +1672,7 @@ export function BrandMarketingStudioClient({
                 </h3>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <Button
                   variant="outline"
                   size="sm"
@@ -1439,6 +1687,18 @@ export function BrandMarketingStudioClient({
                   {voiceEnabled
                     ? t('Voiceover ON', 'التعليق الصوتي مفعل')
                     : t('Muted', 'صامت')}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={renderingVideo}
+                  onClick={downloadCommercialVideoWebm}
+                  className="gap-1.5 font-semibold"
+                >
+                  <Download className="w-4 h-4 text-primary" />
+                  {renderingVideo
+                    ? t('Rendering HD .WEBM...', 'جاري تصدير الفيديو .WEBM...')
+                    : t('Download Video (.WEBM)', 'تحميل الفيديو (.WEBM)')}
                 </Button>
                 <Button
                   size="sm"
@@ -1709,7 +1969,7 @@ export function BrandMarketingStudioClient({
               ))}
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Button
                 size="sm"
                 variant="outline"
@@ -1721,11 +1981,20 @@ export function BrandMarketingStudioClient({
               </Button>
               <Button
                 size="sm"
+                variant="outline"
+                onClick={() => downloadPrintCollateralPng(printSubTab)}
+                className="gap-1.5 font-semibold"
+              >
+                <Download className="w-4 h-4 text-primary" />
+                {t('Export High-Res PNG', 'تحميل كصورة PNG')}
+              </Button>
+              <Button
+                size="sm"
                 onClick={() => downloadStandaloneCollateralHtml(printSubTab)}
                 className="gap-1.5 font-bold"
               >
                 <Download className="w-4 h-4" />
-                {t('Download Print-Ready File (.HTML)', 'تحميل ملف التصميم جاهز للطباعة')}
+                {t('Download Print HTML', 'تحميل ملف HTML للطباعة')}
               </Button>
             </div>
           </div>

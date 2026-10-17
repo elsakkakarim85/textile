@@ -8,6 +8,7 @@ import { prisma } from '@/lib/prisma';
 import { safeQuery, currentUserId, findUserFactory } from '@/server/cluster';
 import { tr, fmtNumber } from '@/lib/i18n-inline';
 import { PageHeader, StatCard, DbOfflineBanner } from '@/components/cluster/ui';
+import { InstantBrandStudioBar } from '@/components/cluster/modern/InstantBrandStudioBar';
 
 export const dynamic = 'force-dynamic';
 
@@ -118,11 +119,15 @@ export default async function ClusterHubPage({ params }: { params: Promise<{ loc
         }
       />
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <StatCard label={t('Approved member factories', 'المصانع الأعضاء المعتمدة')} value={fmtNumber(locale, c.factories)} icon={FactoryIcon} />
         <StatCard label={t('Active collaborations', 'التعاونات النشطة')} value={fmtNumber(locale, c.pools + c.capacity + c.consortia)} icon={Handshake} tone="blue" />
         <StatCard label={t('Maturity assessments', 'تقييمات النضج')} value={fmtNumber(locale, c.assessments)} icon={Gauge} tone="green" />
         <StatCard label={t('Certificates earned', 'الشهادات المكتسبة')} value={fmtNumber(locale, c.completions)} icon={GraduationCap} tone="amber" />
+      </div>
+
+      <div className="mb-10">
+        <InstantBrandStudioBar locale={locale} />
       </div>
 
       {factory && (

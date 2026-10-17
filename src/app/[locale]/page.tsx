@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { tr, fmtNumber, fmtMoney } from '@/lib/i18n-inline';
 import { Pill, ProgressBar } from '@/components/cluster/ui';
 import { InstantTopicCourseBar } from '@/components/cluster/modern/InstantTopicCourseBar';
+import { InstantBrandStudioBar } from '@/components/cluster/modern/InstantBrandStudioBar';
 import {
   Factory,
   Package,
@@ -175,9 +176,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </div>
       </section>
 
-      {/* Instant Any-Topic AI Course Generator Spotlight */}
-      <section className="container mx-auto pt-12 px-4">
+      {/* Instant Any-Topic AI Course & Brand Studio Spotlights */}
+      <section className="container mx-auto pt-12 px-4 space-y-6">
         <InstantTopicCourseBar locale={locale} />
+        <InstantBrandStudioBar locale={locale} />
       </section>
 
       {/* Core Cluster Modules Grid */}
