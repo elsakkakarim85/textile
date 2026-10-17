@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { tr } from '@/lib/i18n-inline';
-import { Plus } from 'lucide-react';
+import { Plus, Sparkles, Cpu } from 'lucide-react';
 
 const PROCESSES = [
   'spinning', 'weaving', 'knitting', 'dyeing', 'printing', 
@@ -20,6 +20,8 @@ export function CapacityForm({ locale }: { locale: string }) {
   
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiModelBadge, setAiModelBadge] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
     kind: 'OFFER',
@@ -31,6 +33,42 @@ export function CapacityForm({ locale }: { locale: string }) {
     quantity: '',
     uom: 'kg',
   });
+
+  const handleAiAutoFill = async () => {
+    setAiLoading(true);
+    try {
+      const res = await fetch('/api/cluster/ai-autofill', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kind: 'capacity_post',
+          context: {
+            kind: formData.kind,
+            process: formData.process,
+            hint: formData.title,
+          },
+          locale,
+        }),
+      });
+      const data = await res.json();
+      if (data?.fields) {
+        setFormData((prev) => ({
+          ...prev,
+          title: data.fields.title || prev.title,
+          description: data.fields.description || prev.description,
+          availableFrom: data.fields.availableFrom || prev.availableFrom,
+          availableUntil: data.fields.availableUntil || prev.availableUntil,
+          quantity: String(data.fields.quantity || prev.quantity),
+          uom: data.fields.uom || prev.uom,
+        }));
+        setAiModelBadge(data.modelUsed || 'Free LLM');
+      }
+    } catch {
+      // ignore
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,9 +100,30 @@ export function CapacityForm({ locale }: { locale: string }) {
 
   return (
     <Card className="p-6 mb-8 border-primary/20 bg-card">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="font-semibold">{t('New Capacity Post', 'إضافة عرض/طلب طاقة إنتاجية جديد')}</h3>
-        <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)}>{t('Cancel', 'إلغاء')}</Button>
+      <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="font-semibold">{t('New Capacity Post', 'إضافة عرض/طلب طاقة إنتاجية جديد')}</h3>
+          {aiModelBadge && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
+              <Cpu className="w-3 h-3" /> {aiModelBadge}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            size="sm"
+            onClick={handleAiAutoFill}
+            disabled={aiLoading}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold gap-1.5"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            {aiLoading
+              ? t('AI Drafting SLA...', 'جاري صياغة المواصفات بالذكاء الاصطناعي...')
+              : t('✨ AI Auto-Draft Spec & SLA', '✨ صياغة تلقائية للمواصفات بالذكاء الاصطناعي')}
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)}>{t('Cancel', 'إلغاء')}</Button>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">

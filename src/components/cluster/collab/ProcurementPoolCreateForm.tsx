@@ -7,13 +7,15 @@ import { tr } from '@/lib/i18n-inline';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Plus, Settings2 } from 'lucide-react';
+import { Plus, Settings2, Sparkles, Cpu } from 'lucide-react';
 
 export function ProcurementPoolCreateForm({ locale }: { locale: string }) {
   const router = useRouter();
   const t = (en: string, ar: string) => tr(locale, en, ar);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiModelBadge, setAiModelBadge] = useState<string | null>(null);
 
   const [form, setForm] = useState({
     title: '',
@@ -28,6 +30,41 @@ export function ProcurementPoolCreateForm({ locale }: { locale: string }) {
     supplierName: '',
     deadline: new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
   });
+
+  const handleAiAutoFill = async () => {
+    setAiLoading(true);
+    try {
+      const res = await fetch('/api/cluster/ai-autofill', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kind: 'procurement_pool',
+          context: { category: form.category, hint: form.title },
+          locale,
+        }),
+      });
+      const data = await res.json();
+      if (data?.fields) {
+        setForm((prev) => ({
+          ...prev,
+          title: data.fields.title || prev.title,
+          description: data.fields.description || prev.description,
+          specification: data.fields.specification || prev.specification,
+          targetQty: String(data.fields.targetQty || prev.targetQty),
+          minCommitQty: String(data.fields.minCommitQty || prev.minCommitQty),
+          unit: data.fields.unit || prev.unit,
+          benchmarkUnitPrice: String(data.fields.benchmarkUnitPrice || prev.benchmarkUnitPrice),
+          targetUnitPrice: String(data.fields.targetUnitPrice || prev.targetUnitPrice),
+          supplierName: data.fields.supplierName || prev.supplierName,
+        }));
+        setAiModelBadge(data.modelUsed || 'Free LLM');
+      }
+    } catch {
+      // ignore
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,11 +103,32 @@ export function ProcurementPoolCreateForm({ locale }: { locale: string }) {
 
   return (
     <Card className="p-6 mb-8 border-primary/30">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="font-bold text-lg">{t('Launch Joint Procurement Pool', 'إطلاق مجموعة شراء مشترك')}</h3>
-        <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
-          {t('Cancel', 'إلغاء')}
-        </Button>
+      <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="font-bold text-lg">{t('Launch Joint Procurement Pool', 'إطلاق مجموعة شراء مشترك')}</h3>
+          {aiModelBadge && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
+              <Cpu className="w-3 h-3" /> {aiModelBadge}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            size="sm"
+            onClick={handleAiAutoFill}
+            disabled={aiLoading}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold gap-1.5"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            {aiLoading
+              ? t('AI Generating Spec & Tier Pricing...', 'جاري توليد المواصفات والأسعار بالذكاء الاصطناعي...')
+              : t('✨ Auto-Fill Spec & Pricing with Free AI', '✨ ملء تلقائي للمواصفات والأسعار بالذكاء الاصطناعي')}
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
+            {t('Cancel', 'إلغاء')}
+          </Button>
+        </div>
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">

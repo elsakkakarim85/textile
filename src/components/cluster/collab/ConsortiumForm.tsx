@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { tr } from '@/lib/i18n-inline';
-import { Plus } from 'lucide-react';
+import { Plus, Sparkles, Cpu } from 'lucide-react';
 
 export function ConsortiumForm({ locale }: { locale: string }) {
   const router = useRouter();
@@ -15,6 +15,8 @@ export function ConsortiumForm({ locale }: { locale: string }) {
   
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiModelBadge, setAiModelBadge] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -22,6 +24,36 @@ export function ConsortiumForm({ locale }: { locale: string }) {
     targetMarket: '',
     leadRole: '',
   });
+
+  const handleAiAutoFill = async () => {
+    setAiLoading(true);
+    try {
+      const res = await fetch('/api/cluster/ai-autofill', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kind: 'consortium',
+          context: { hint: formData.name || formData.targetMarket },
+          locale,
+        }),
+      });
+      const data = await res.json();
+      if (data?.fields) {
+        setFormData((prev) => ({
+          ...prev,
+          name: data.fields.name || prev.name,
+          description: data.fields.description || prev.description,
+          targetMarket: data.fields.targetMarket || prev.targetMarket,
+          leadRole: data.fields.leadRole || prev.leadRole,
+        }));
+        setAiModelBadge(data.modelUsed || 'Free LLM');
+      }
+    } catch {
+      // ignore
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,9 +80,30 @@ export function ConsortiumForm({ locale }: { locale: string }) {
 
   return (
     <Card className="p-6 mb-8 border-primary/20 bg-card">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="font-semibold">{t('New Consortium', 'تحالف جديد')}</h3>
-        <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)}>{t('Cancel', 'إلغاء')}</Button>
+      <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="font-semibold">{t('New Consortium', 'تحالف جديد')}</h3>
+          {aiModelBadge && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
+              <Cpu className="w-3 h-3" /> {aiModelBadge}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            size="sm"
+            onClick={handleAiAutoFill}
+            disabled={aiLoading}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold gap-1.5"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            {aiLoading
+              ? t('AI Generating JV Plan...', 'جاري توليد خطة التحالف بالذكاء الاصطناعي...')
+              : t('✨ AI Generate Export JV Charter', '✨ توليد ميثاق التحالف التصديري بالذكاء الاصطناعي')}
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)}>{t('Cancel', 'إلغاء')}</Button>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">

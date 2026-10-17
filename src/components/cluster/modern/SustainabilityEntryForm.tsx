@@ -6,8 +6,10 @@ import { api } from '@/lib/api-client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { tr } from '@/lib/i18n-inline';
-import { Plus, Download } from 'lucide-react';
+import { Plus, Download, Sparkles, Cpu } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export default function SustainabilityEntryForm({
   locale,
@@ -21,6 +23,9 @@ export default function SustainabilityEntryForm({
 
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiAuditReport, setAiAuditReport] = useState<string | null>(null);
+  const [aiModelBadge, setAiModelBadge] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     period: new Date().toISOString().slice(0, 7),
     productionKg: '52000',
@@ -33,6 +38,35 @@ export default function SustainabilityEntryForm({
     recycledWasteKg: '680',
     notes: 'ZDHC Level 2 & OEKO-TEX Standard 100 Verified',
   });
+
+  const handleAiAudit = async () => {
+    setAiLoading(true);
+    try {
+      const res = await fetch('/api/cluster/ai-autofill', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kind: 'sustainability_audit',
+          context: formData,
+          locale,
+        }),
+      });
+      const data = await res.json();
+      if (data?.fields) {
+        if (data.fields.notes) {
+          setFormData((prev) => ({ ...prev, notes: data.fields.notes }));
+        }
+        if (data.fields.auditReport) {
+          setAiAuditReport(data.fields.auditReport);
+        }
+        setAiModelBadge(data.modelUsed || 'Free LLM');
+      }
+    } catch {
+      // ignore
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handleExportCsv = () => {
     const header = [
@@ -119,12 +153,39 @@ export default function SustainabilityEntryForm({
 
   return (
     <Card className="p-6 mb-8 border-primary/20">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="font-semibold text-lg">{t('Log Monthly ESG & Resource Record', 'تسجيل بيانات الموارد والانبعاثات الشهرية')}</h3>
-        <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)}>
-          {t('Cancel', 'إلغاء')}
-        </Button>
+      <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="font-semibold text-lg">{t('Log Monthly ESG & Resource Record', 'تسجيل بيانات الموارد والانبعاثات الشهرية')}</h3>
+          {aiModelBadge && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
+              <Cpu className="w-3 h-3" /> {aiModelBadge}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            size="sm"
+            onClick={handleAiAudit}
+            disabled={aiLoading}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold gap-1.5"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            {aiLoading
+              ? t('AI Auditing CBAM...', 'جاري التدقيق الكربوني بالذكاء الاصطناعي...')
+              : t('✨ AI CBAM Audit & Abatement Plan', '✨ تدقيق CBAM وخطة خفض الانبعاثات بالذكاء الاصطناعي')}
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)}>
+            {t('Cancel', 'إلغاء')}
+          </Button>
+        </div>
       </div>
+
+      {aiAuditReport && (
+        <div className="mb-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4 prose prose-sm dark:prose-invert max-w-none">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{aiAuditReport}</ReactMarkdown>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

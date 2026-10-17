@@ -6,6 +6,7 @@ import { api } from '@/lib/api-client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { tr } from '@/lib/i18n-inline';
+import { Sparkles } from 'lucide-react';
 
 export function FundingApplyForm({ programId, hasApplied, locale }: { programId: string, hasApplied: boolean, locale: string }) {
   const router = useRouter();
@@ -13,6 +14,7 @@ export function FundingApplyForm({ programId, hasApplied, locale }: { programId:
   
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
   const [amount, setAmount] = useState('');
   const [purpose, setPurpose] = useState('');
 
@@ -31,6 +33,34 @@ export function FundingApplyForm({ programId, hasApplied, locale }: { programId:
       </Button>
     );
   }
+
+  const handleAiDraftJustification = async () => {
+    setAiLoading(true);
+    try {
+      const res = await fetch('/api/cluster/ai-autofill', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kind: 'funding_application',
+          context: { programId, amount },
+          locale,
+        }),
+      });
+      const data = await res.json();
+      if (data?.fields) {
+        if (data.fields.amountRequested && !amount) {
+          setAmount(String(data.fields.amountRequested));
+        }
+        if (data.fields.purpose) {
+          setPurpose(data.fields.purpose);
+        }
+      }
+    } catch {
+      // ignore
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,10 +84,23 @@ export function FundingApplyForm({ programId, hasApplied, locale }: { programId:
         <Input type="number" min="0" value={amount} onChange={e => setAmount(e.target.value)} placeholder={t('Optional', 'اختياري')} className="h-8 text-sm" />
       </div>
       <div>
-        <label className="block text-xs font-medium mb-1">{t('Purpose / Justification', 'الغرض / المبرر')}</label>
+        <div className="flex items-center justify-between mb-1">
+          <label className="block text-xs font-medium">{t('Purpose / Justification', 'الغرض / المبرر')}</label>
+          <button
+            type="button"
+            onClick={handleAiDraftJustification}
+            disabled={aiLoading}
+            className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 hover:underline cursor-pointer"
+          >
+            <Sparkles className="w-3 h-3" />
+            {aiLoading
+              ? t('AI Writing...', 'جاري الصياغة...')
+              : t('✨ AI Write Bankable Justification', '✨ صياغة دراسة جدوى بالذكاء الاصطناعي')}
+          </button>
+        </div>
         <textarea 
           required 
-          className="flex min-h-[60px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex min-h-[85px] w-full rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
           value={purpose} 
           onChange={e => setPurpose(e.target.value)} 
           placeholder={t('Briefly explain how you will use the funds...', 'اشرح باختصار كيف ستستخدم الأموال...')}

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /** Shared presentational building blocks for cluster modules (server-safe, no hooks). */
@@ -21,6 +22,15 @@ export function PageHeader({ icon: Icon, title, subtitle, actions, accent = 'fro
           <div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{title}</h1>
             {subtitle && <p className="mt-1.5 text-muted-foreground max-w-3xl">{subtitle}</p>}
+            <div className="mt-2.5 flex flex-wrap items-center gap-2">
+              <a
+                href="#mahalla-universal-ai-copilot"
+                className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/35 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 transition"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>✨ Free AI Module Specialist (Llama 3.3 • DeepSeek R1 • Mistral • Qwen 2.5) ↓</span>
+              </a>
+            </div>
           </div>
         </div>
         {actions && <div className="flex flex-wrap gap-2">{actions}</div>}

@@ -194,16 +194,41 @@ export function UniversalModuleAiCopilot({
     window.speechSynthesis.speak(utter);
   };
 
+  const scrollToCopilot = () => {
+    setExpanded(true);
+    const el = document.getElementById('mahalla-universal-ai-copilot');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
-    <section className="container mx-auto px-4 py-6 print:hidden">
-      <div className="rounded-3xl border-2 border-emerald-500/35 bg-gradient-to-br from-slate-950 via-emerald-950/90 to-slate-900 text-white shadow-xl overflow-hidden">
-        {/* Top Header Bar */}
-        <div className="px-6 py-4 border-b border-white/10 flex flex-wrap items-center justify-between gap-3 bg-white/[0.03]">
-          <div className="flex flex-wrap items-center gap-2.5">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/40 bg-emerald-500/20 px-3 py-1 text-xs font-extrabold text-emerald-300">
-              <Bot className="h-3.5 w-3.5" />
-              {isAr ? cfg.badgeAr : cfg.badgeEn}
-            </span>
+    <>
+      {/* Floating Quick-Launch AI Specialist Pill */}
+      <div className="fixed bottom-5 end-5 z-40 print:hidden">
+        <button
+          type="button"
+          onClick={scrollToCopilot}
+          className="inline-flex items-center gap-2 rounded-full border-2 border-emerald-400/60 bg-slate-950/95 px-4 py-2.5 text-xs font-extrabold text-white shadow-2xl hover:bg-emerald-950 transition cursor-pointer"
+        >
+          <Bot className="h-4 w-4 text-emerald-400 animate-pulse" />
+          <span className="hidden sm:inline">{isAr ? cfg.badgeAr : cfg.badgeEn}</span>
+          <span className="sm:hidden">{t('Free AI Copilot', 'المساعد الذكي')}</span>
+          <span className="rounded-full bg-emerald-500/20 border border-emerald-400/40 px-2 py-0.5 text-[10px] text-emerald-300">
+            Free LLM
+          </span>
+        </button>
+      </div>
+
+      <section id="mahalla-universal-ai-copilot" className="container mx-auto px-4 py-6 print:hidden scroll-mt-20">
+        <div className="rounded-3xl border-2 border-emerald-500/35 bg-gradient-to-br from-slate-950 via-emerald-950/90 to-slate-900 text-white shadow-xl overflow-hidden">
+          {/* Top Header Bar */}
+          <div className="px-6 py-4 border-b border-white/10 flex flex-wrap items-center justify-between gap-3 bg-white/[0.03]">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/40 bg-emerald-500/20 px-3 py-1 text-xs font-extrabold text-emerald-300">
+                <Bot className="h-3.5 w-3.5" />
+                {isAr ? cfg.badgeAr : cfg.badgeEn}
+              </span>
             <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-500/15 px-2.5 py-0.5 text-[11px] font-bold text-amber-300">
               <Zap className="h-3 w-3" />
               {t(
@@ -503,6 +528,7 @@ export function UniversalModuleAiCopilot({
         )}
       </div>
     </section>
+    </>
   );
 }
 

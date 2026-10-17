@@ -7,17 +7,43 @@ import { tr } from '@/lib/i18n-inline';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Plus, MessageSquare, CheckCircle2, CalendarPlus, UserCheck, Megaphone } from 'lucide-react';
+import { Plus, MessageSquare, CheckCircle2, CalendarPlus, UserCheck, Megaphone, Sparkles } from 'lucide-react';
 
 export function ForumNewThreadForm({ locale }: { locale: string }) {
   const router = useRouter();
   const t = (en: string, ar: string) => tr(locale, en, ar);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('TECHNICAL');
   const [body, setBody] = useState('');
   const [tags, setTags] = useState('Dyeing, Quality');
+
+  const handleAiDraftQuestion = async () => {
+    setAiLoading(true);
+    try {
+      const res = await fetch('/api/cluster/ai-autofill', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kind: 'forum_thread',
+          context: { category, hint: title },
+          locale,
+        }),
+      });
+      const data = await res.json();
+      if (data?.fields) {
+        setTitle(data.fields.title || title);
+        setBody(data.fields.body || body);
+        setTags(data.fields.tags || tags);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,11 +79,22 @@ export function ForumNewThreadForm({ locale }: { locale: string }) {
 
   return (
     <Card className="p-4 border-primary/30 space-y-3">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-wrap justify-between items-center gap-2">
         <h4 className="font-bold text-sm">{t('Start New Discussion', 'موضوع نقاش جديد')}</h4>
-        <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
-          {t('Cancel', 'إلغاء')}
-        </Button>
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={handleAiDraftQuestion}
+            disabled={aiLoading}
+            className="inline-flex items-center gap-1 rounded-md bg-emerald-600 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-emerald-500 cursor-pointer"
+          >
+            <Sparkles className="w-3 h-3" />
+            {aiLoading ? t('AI Drafting...', 'جاري الصياغة...') : t('✨ AI Structure Question', '✨ صياغة فنية بالذكاء الاصطناعي')}
+          </button>
+          <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
+            {t('Cancel', 'إلغاء')}
+          </Button>
+        </div>
       </div>
       <form onSubmit={handleSubmit} className="space-y-3 text-xs">
         <div>
@@ -114,6 +151,30 @@ export function ForumReplySection({
   const t = (en: string, ar: string) => tr(locale, en, ar);
   const [body, setBody] = useState('');
   const [loading, setLoading] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const handleAiDraftSolution = async () => {
+    setAiLoading(true);
+    try {
+      const res = await fetch('/api/cluster/ai-autofill', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kind: 'forum_reply',
+          context: { threadId },
+          locale,
+        }),
+      });
+      const data = await res.json();
+      if (data?.fields?.body) {
+        setBody(data.fields.body);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handleReply = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -184,7 +245,21 @@ export function ForumReplySection({
       </div>
 
       <Card className="p-6 border-primary/20">
-        <h4 className="font-bold mb-3">{t('Post Your Answer or Technical Advice', 'أضف إجابتك أو نصيحتك الفنية')}</h4>
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <h4 className="font-bold">{t('Post Your Answer or Technical Advice', 'أضف إجابتك أو نصيحتك الفنية')}</h4>
+          <Button
+            type="button"
+            size="sm"
+            onClick={handleAiDraftSolution}
+            disabled={aiLoading}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold gap-1.5"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            {aiLoading
+              ? t('AI Synthesizing Engineering Answer...', 'جاري توليد الحل الهندسي بالذكاء الاصطناعي...')
+              : t('✨ AI Draft Engineering Solution (ISO/UNIDO)', '✨ صياغة حل هندسي بالذكاء الاصطناعي (ISO/UNIDO)')}
+          </Button>
+        </div>
         <form onSubmit={handleReply} className="space-y-3">
           <textarea
             required
@@ -272,9 +347,34 @@ export function ExpertRequestModal({
   const t = (en: string, ar: string) => tr(locale, en, ar);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [topic, setTopic] = useState('');
   const [message, setMessage] = useState('');
+
+  const handleAiDraftRequest = async () => {
+    setAiLoading(true);
+    try {
+      const res = await fetch('/api/cluster/ai-autofill', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kind: 'expert_request',
+          context: { expertName: expert.displayName || 'Expert', headline: expert.headline },
+          locale,
+        }),
+      });
+      const data = await res.json();
+      if (data?.fields) {
+        setTopic(data.fields.topic || topic);
+        setMessage(data.fields.message || message);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -317,7 +417,18 @@ export function ExpertRequestModal({
       {open && (
         <form onSubmit={handleSubmit} className="rounded-xl border bg-muted/30 p-3.5 space-y-2.5 text-xs">
           <div>
-            <label className="block font-medium mb-1">{t('Consultation Topic', 'موضوع الاستشارة')}</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block font-medium">{t('Consultation Topic', 'موضوع الاستشارة')}</label>
+              <button
+                type="button"
+                onClick={handleAiDraftRequest}
+                disabled={aiLoading}
+                className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 hover:underline cursor-pointer"
+              >
+                <Sparkles className="w-3 h-3" />
+                {aiLoading ? t('AI Drafting...', 'جاري الصياغة...') : t('✨ AI Draft TOR', '✨ صياغة بالذكاء الاصطناعي')}
+              </button>
+            </div>
             <Input
               required
               placeholder={t('e.g. Reactive dyeing shade consistency / CBAM audit', 'مثال: ضبط ثبات الألوان / تدقيق CBAM')}
@@ -349,12 +460,38 @@ export function BecomeExpertModal({ locale }: { locale: string }) {
   const t = (en: string, ar: string) => tr(locale, en, ar);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
   const [displayName, setDisplayName] = useState('');
   const [headline, setHeadline] = useState('');
   const [bio, setBio] = useState('');
   const [expertise, setExpertise] = useState('Spinning, Lean Manufacturing, ISO 9001');
   const [yearsExp, setYearsExp] = useState('15');
   const [hourlyRate, setHourlyRate] = useState('0');
+
+  const handleAiPolishProfile = async () => {
+    setAiLoading(true);
+    try {
+      const res = await fetch('/api/cluster/ai-autofill', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kind: 'expert_profile',
+          context: { displayName, headline, expertise },
+          locale,
+        }),
+      });
+      const data = await res.json();
+      if (data?.fields) {
+        setHeadline(data.fields.headline || headline);
+        setExpertise(data.fields.expertise || expertise);
+        setBio(data.fields.bio || bio);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -390,11 +527,23 @@ export function BecomeExpertModal({ locale }: { locale: string }) {
 
   return (
     <Card className="p-6 mb-8 border-primary/30 w-full">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-wrap justify-between items-center gap-2 mb-4">
         <h3 className="font-bold">{t('Register Expert / Consultant Profile', 'تسجيل ملف خبير / استشاري صناعي')}</h3>
-        <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
-          {t('Cancel', 'إلغاء')}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            size="sm"
+            onClick={handleAiPolishProfile}
+            disabled={aiLoading}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold gap-1.5"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            {aiLoading ? t('AI Polishing...', 'جاري التحسين...') : t('✨ AI Polish Bio & Specialties', '✨ تحسين السيرة والخبرات بالذكاء الاصطناعي')}
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
+            {t('Cancel', 'إلغاء')}
+          </Button>
+        </div>
       </div>
       <form onSubmit={handleSubmit} className="grid sm:grid-cols-2 gap-4 text-xs">
         <div>
@@ -444,11 +593,38 @@ export function AnnouncementComposer({ locale }: { locale: string }) {
   const t = (en: string, ar: string) => tr(locale, en, ar);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
   const [title, setTitle] = useState('');
   const [titleAr, setTitleAr] = useState('');
   const [body, setBody] = useState('');
   const [bodyAr, setBodyAr] = useState('');
   const [isPinned, setIsPinned] = useState(true);
+
+  const handleAiDraftBulletin = async () => {
+    setAiLoading(true);
+    try {
+      const res = await fetch('/api/cluster/ai-autofill', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kind: 'announcement',
+          context: { hint: title || titleAr },
+          locale,
+        }),
+      });
+      const data = await res.json();
+      if (data?.fields) {
+        setTitle(data.fields.title || title);
+        setTitleAr(data.fields.titleAr || titleAr);
+        setBody(data.fields.body || body);
+        setBodyAr(data.fields.bodyAr || bodyAr);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -482,11 +658,25 @@ export function AnnouncementComposer({ locale }: { locale: string }) {
 
   return (
     <Card className="p-5 mb-6 border-primary/30">
-      <div className="flex justify-between items-center mb-3">
+      <div className="flex flex-wrap justify-between items-center gap-2 mb-3">
         <h3 className="font-bold text-sm">{t('Broadcast Cluster Bulletin (CMO)', 'نشر تعميم رسمي من إدارة التجمع')}</h3>
-        <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
-          {t('Cancel', 'إلغاء')}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            size="sm"
+            onClick={handleAiDraftBulletin}
+            disabled={aiLoading}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold gap-1.5"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            {aiLoading
+              ? t('AI Translating & Drafting...', 'جاري الصياغة باللغتين...')
+              : t('✨ AI Draft Bilingual EN+AR Bulletin', '✨ صياغة التعميم باللغتين بالذكاء الاصطناعي')}
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
+            {t('Cancel', 'إلغاء')}
+          </Button>
+        </div>
       </div>
       <form onSubmit={handleSubmit} className="space-y-3 text-xs">
         <div className="grid sm:grid-cols-2 gap-3">
@@ -533,3 +723,4 @@ export function AnnouncementComposer({ locale }: { locale: string }) {
     </Card>
   );
 }
+

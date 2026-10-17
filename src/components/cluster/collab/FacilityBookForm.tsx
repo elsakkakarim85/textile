@@ -6,7 +6,7 @@ import { api } from '@/lib/api-client';
 import { tr, fmtMoney, fmtDate } from '@/lib/i18n-inline';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Calendar, Clock, CheckCircle2 } from 'lucide-react';
+import { Calendar, Clock, CheckCircle2, Sparkles } from 'lucide-react';
 
 export function FacilityBookForm({
   facility,
@@ -19,6 +19,7 @@ export function FacilityBookForm({
   const t = (en: string, ar: string) => tr(locale, en, ar);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
 
   const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
   const [date, setDate] = useState(tomorrow);
@@ -30,6 +31,29 @@ export function FacilityBookForm({
   const endDateTime = new Date(`${date}T${endTime}:00`);
   const hours = Math.max(0, (endDateTime.getTime() - startDateTime.getTime()) / 3600000);
   const estimatedCost = Math.round(hours * Number(facility.ratePerHour || 0));
+
+  const handleAiSuggestProtocol = async () => {
+    setAiLoading(true);
+    try {
+      const res = await fetch('/api/cluster/ai-autofill', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kind: 'facility_booking',
+          context: { facilityName: facility.name, facilityType: facility.type },
+          locale,
+        }),
+      });
+      const data = await res.json();
+      if (data?.fields?.purpose) {
+        setPurpose(data.fields.purpose);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handleBook = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,7 +104,18 @@ export function FacilityBookForm({
             </div>
           </div>
           <div>
-            <label className="block font-medium mb-1">{t('Testing / Usage Purpose', 'الغرض من الحجز أو الاختبار')}</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block font-medium">{t('Testing / Usage Purpose', 'الغرض من الحجز أو الاختبار')}</label>
+              <button
+                type="button"
+                onClick={handleAiSuggestProtocol}
+                disabled={aiLoading}
+                className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 hover:underline cursor-pointer"
+              >
+                <Sparkles className="w-3 h-3" />
+                {aiLoading ? t('AI Drafting...', 'جاري التوليد...') : t('✨ AI Suggest ISO Protocol', '✨ اقتراح اختبارات ISO بالذكاء الاصطناعي')}
+              </button>
+            </div>
             <Input
               required
               placeholder={t('e.g. ISO 105 Color Fastness & Yarn Tensile Test', 'مثال: اختبار ثبات اللون وشد الخيوط')}
