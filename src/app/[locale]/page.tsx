@@ -7,6 +7,7 @@ import { Pill, ProgressBar } from '@/components/cluster/ui';
 import { InstantTopicCourseBar } from '@/components/cluster/modern/InstantTopicCourseBar';
 import { InstantBrandStudioBar } from '@/components/cluster/modern/InstantBrandStudioBar';
 import { InstantExportIntelligenceBar } from '@/components/cluster/modern/InstantExportIntelligenceBar';
+import { InstantLeanStudioBar } from '@/components/cluster/modern/InstantLeanStudioBar';
 import {
   Factory,
   Package,
@@ -178,8 +179,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </div>
       </section>
 
-      {/* Instant Any-Topic AI Export Intelligence, Course & Brand Studio Spotlights */}
+      {/* Instant Any-Topic AI Lean, Export Intelligence, Course & Brand Studio Spotlights */}
       <section className="container mx-auto pt-12 px-4 space-y-6">
+        <InstantLeanStudioBar locale={locale} />
         <InstantExportIntelligenceBar locale={locale} />
         <InstantTopicCourseBar locale={locale} />
         <InstantBrandStudioBar locale={locale} />
@@ -201,6 +203,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {[
+            {
+              href: `/${locale}/cluster/lean-manufacturing`,
+              icon: Gauge,
+              title: t('Lean Management & Manufacturing Hub', 'مركز الإدارة الرشيقة والتصنيع الرشيق (Lean)'),
+              desc: t('Apply Toyota Production System (TPS), Value Stream Mapping (VSM), 8 Wastes (DOWNTIME), 5S Gemba Audits, OEE/TPM, SMED Changeover, Line Balancing, Kanban Pull & A3 Reports.', 'تطبيق شامل لتدفق القيمة VSM، الفواقد الـ ٨، تدقيق 5S، مؤشر OEE و SMED، موازنة الخطوط، نظام كانبان، منع الأخطاء Poka-Yoke، وتقارير A3.'),
+              badge: t('New • TPS & Six Sigma', 'جديد • اللين و 6 سيجما'),
+            },
             {
               href: `/${locale}/cluster/export-intelligence`,
               icon: Globe2,

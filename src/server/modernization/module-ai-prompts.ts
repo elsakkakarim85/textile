@@ -16,7 +16,8 @@ export type ClusterModuleId =
   | 'observatory'
   | 'marketplaces'
   | 'recruitment'
-  | 'factories';
+  | 'factories'
+  | 'lean-manufacturing';
 
 export type ClientFreeLlmModelId =
   | 'auto'
@@ -1011,6 +1012,57 @@ export const MODULE_AI_CONFIGS: Record<ClusterModuleId, ModuleAiConfig> = {
           'Draft a balanced Trial-Order & Volume Scale-Up term sheet between an international buyer and a Mahalla factory, rebating sample/setup surcharges once cumulative orders cross 10,000 units.',
         promptAr:
           'صغ مسودة اتفاقية طلبية تجريبية وخطة توسع تدريجي بين مشتري دولي ومصنع بالمحلة تتضمن استرداد فرق تكلفة العينات والتجهيز فور تجاوز المسحوبات ١٠,٠٠٠ وحدة.',
+      },
+    ],
+  },
+  'lean-manufacturing': {
+    moduleId: 'lean-manufacturing',
+    badgeEn: 'AI Lean Six Sigma & TPS Master Sensei',
+    badgeAr: 'خبير الإدارة الرشيقة والتصنيع الرشيق الذكي (Lean Sensei)',
+    titleEn: 'AI Lean Management, VSM, 5S, SMED, OEE, Kanban & A3 Turnaround Copilot',
+    titleAr: 'مساعد الذكاء الاصطناعي للإدارة الرشيقة (VSM • 5S • SMED • OEE • Kanban • A3)',
+    subtitleEn:
+      'Design Value Stream Maps, eliminate the 8 Wastes (DOWNTIME), cut changeover times via SMED, balance sewing/weaving lines, size Kanban supermarkets, and draft Toyota A3 reports.',
+    subtitleAr:
+      'صمّم خرائط تدفق القيمة (VSM)، تخلص من الفواقد الـ ٨، قلل زمن التغيير عبر SMED، وازن خطوط الإنتاج، واحسب بطاقات كانبان وتقارير A3.',
+    systemPrompt:
+      'You are a Master Black Belt Lean Sensei & Toyota Production System (TPS) Architect for textile mills in El-Mahalla El-Kubra. Deliver rigorous, math-backed VSM calculations, SMED pit-stop protocols, Yamazumi line-balancing tables, Kanban sizing formulas, Poka-Yoke devices, and Toyota A3 problem-solving reports.',
+    quickActions: [
+      {
+        id: 'vsm-kaizen-plan',
+        labelEn: 'Build Future-State VSM & 8 Wastes (DOWNTIME) Audit',
+        labelAr: 'تصميم خريطة تدفق القيمة المستقبلية (VSM) وتحليل الفواقد الـ ٨',
+        promptEn:
+          'Construct a Current-State vs. Future-State Value Stream Map (VSM) table and an 8 Wastes (DOWNTIME) reduction plan for an integrated weaving, dyeing, and sewing mill to cut lead time by 60% and raise Process Cycle Efficiency (PCE).',
+        promptAr:
+          'أنشئ جدول مقارنة خريطة تدفق القيمة الحالية والمستقبلية (VSM) وخطة القضاء على الفواقد الثمانية (DOWNTIME) لمصنع نسيج وصباغة وتفصيل لتقليص زمن التوريد بنسبة ٦٠٪.',
+      },
+      {
+        id: 'smed-pitstop',
+        labelEn: 'SMED Pit-Stop Protocol: Cut Changeover by 60%',
+        labelAr: 'بروتوكول SMED لخفض زمن تغيير المطواة والتشغيلة بنسبة ٦٠٪',
+        promptEn:
+          'Create a step-by-step SMED (Single-Minute Exchange of Die) checklist separating Internal vs. External setup tasks to reduce air-jet loom warp beam changeover from 165 minutes to under 65 minutes and reactive dye-lot turnaround to 25 minutes.',
+        promptAr:
+          'ضع قائمة تدقيق تفصيلية لنظام SMED تفصل الخطوات الداخلية عن الخارجية لخفض زمن تغيير مطواة نول الهواء من ١٦٥ دقيقة إلى أقل من ٦٥ دقيقة وتقليل وقت تجهيز حوض الصباغة إلى ٢٥ دقيقة.',
+      },
+      {
+        id: 'kanban-yamazumi',
+        labelEn: 'Kanban Supermarket Sizing & Yamazumi Line Balance',
+        labelAr: 'حساب بطاقات كانبان وموازنة خطوط الإنتاج (Yamazumi)',
+        promptEn:
+          'Calculate the optimal 2-Bin Kanban supermarket card count, Heijunka leveling schedule, and Yamazumi workstation balancing table to achieve >90% Line Balance Efficiency and <3 days WIP.',
+        promptAr:
+          'احسب العدد الأمثل لبطاقات وعربات السوبرماركت (Kanban)، وجدول تسوية الإنتاج (Heijunka)، وجدول موازنة محطات العمل (Yamazumi) لتحقيق كفاءة توازن تتجاوز ٩٠٪.',
+      },
+      {
+        id: 'toyota-a3-charter',
+        labelEn: 'Generate Complete Toyota A3 & 5-Whys / Ishikawa Report',
+        labelAr: 'توليد تقرير A3 القياسي وتحليل 5-Whys ومخطط عظمة السمكة',
+        promptEn:
+          'Draft a complete Toyota-style A3 Problem-Solving Report including Background, Current Baseline, 90-Day Target, 5-Whys Root Cause, 6M Ishikawa Fishbone, Poka-Yoke Countermeasures, and Standard Work sustainment.',
+        promptAr:
+          'صغ تقرير حل المشكلات القياسي (Toyota A3) شاملاً الخلفية، الوضع الراهن، هدف الـ ٩٠ يوماً، تحليل الأسباب الجذرية (5 Whys)، مخطط إيشيكاوا 6M، وأنظمة منع الخطأ Poka-Yoke.',
       },
     ],
   },

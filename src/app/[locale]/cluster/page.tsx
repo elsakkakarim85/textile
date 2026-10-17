@@ -10,6 +10,7 @@ import { tr, fmtNumber } from '@/lib/i18n-inline';
 import { PageHeader, StatCard, DbOfflineBanner } from '@/components/cluster/ui';
 import { InstantBrandStudioBar } from '@/components/cluster/modern/InstantBrandStudioBar';
 import { InstantExportIntelligenceBar } from '@/components/cluster/modern/InstantExportIntelligenceBar';
+import { InstantLeanStudioBar } from '@/components/cluster/modern/InstantLeanStudioBar';
 
 export const dynamic = 'force-dynamic';
 
@@ -74,6 +75,7 @@ export default async function ClusterHubPage({ params }: { params: Promise<{ loc
     {
       titleEn: 'Modernize & Export Globally', titleAr: 'التحديث والتصدير العالمي', tone: 'from-emerald-500/15',
       mods: [
+        { href: 'lean-manufacturing', icon: Gauge, en: 'Lean Management & Manufacturing', ar: 'الإدارة الرشيقة والتصنيع الرشيق (Lean)', descEn: 'Apply VSM, 8 Wastes (DOWNTIME), 5S Gemba Audits, TPM/OEE, SMED Changeover, Line Balancing, Kanban Pull, Poka-Yoke & Toyota A3 reports.', descAr: 'تطبيق شامل لتدفق القيمة VSM، الفواقد الـ ٨، تدقيق 5S، مؤشر OEE و SMED، موازنة الخطوط، نظام كانبان، منع الأخطاء Poka-Yoke، وتقارير A3.' },
         { href: 'export-intelligence', icon: Globe2, en: 'AI Export Intelligence, Buyers & NTMs', ar: 'ذكاء التصدير والمشترين والمواصفات الدولية', descEn: 'Market studies, entry strategies, live international tenders, export promotion plans, verified buyer outreach, and country NTM standards.', descAr: 'دراسات الأسواق، استراتيجيات الدخول، المناقصات الدولية، خطط الترويج، كشاف المشترين الموثوقين، وتحليل المواصفات القياسية والعوائق غير الجمركية.' },
         { href: 'maturity', icon: Gauge, en: 'Digital Maturity', ar: 'النضج الرقمي', descEn: 'Industry 4.0 readiness assessment with a personalized 90-day roadmap.', descAr: 'تقييم الجاهزية للصناعة 4.0 مع خارطة طريق مخصصة لمدة 90 يومًا.', stat: c.assessments },
         { href: 'academy', icon: GraduationCap, en: 'Cluster Academy', ar: 'أكاديمية التجمع', descEn: 'Practical courses for workers and managers with verifiable certificates.', descAr: 'دورات عملية للعمال والمديرين بشهادات قابلة للتحقق.', stat: c.courses },
@@ -129,6 +131,7 @@ export default async function ClusterHubPage({ params }: { params: Promise<{ loc
       </div>
 
       <div className="mb-10 space-y-6">
+        <InstantLeanStudioBar locale={locale} />
         <InstantExportIntelligenceBar locale={locale} />
         <InstantBrandStudioBar locale={locale} />
       </div>

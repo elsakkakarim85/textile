@@ -42,6 +42,7 @@ interface Props {
 function inferModuleFromPathname(pathname: string): ClusterModuleId | null {
   const p = pathname.toLowerCase();
   if (p.includes('/sign-in') || p.includes('/sign-up')) return null;
+  if (p.includes('/cluster/lean-manufacturing')) return 'lean-manufacturing';
   if (p.includes('/cluster/procurement')) return 'procurement';
   if (p.includes('/cluster/capacity')) return 'capacity';
   if (p.includes('/cluster/consortia')) return 'consortia';

@@ -115,6 +115,7 @@ const MODULE_ROUTE_MAP: Record<ClusterModuleId, string> = {
   marketplaces: 'marketplaces',
   recruitment: 'recruitment',
   factories: 'factories',
+  'lean-manufacturing': 'cluster/lean-manufacturing',
 };
 
 const ALL_MODULE_IDS = Object.keys(MODULE_AI_CONFIGS) as ClusterModuleId[];
