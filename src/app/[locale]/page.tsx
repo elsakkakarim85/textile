@@ -26,6 +26,7 @@ import {
   QrCode,
   Bot,
   Megaphone,
+  Globe2,
 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -198,6 +199,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {[
+            {
+              href: `/${locale}/cluster/export-intelligence`,
+              icon: Globe2,
+              title: t('AI Global Export Intelligence, Buyers & NTMs', 'ذكاء التصدير العالمي، المشترون والمواصفات القياسية'),
+              desc: t('Generate market studies, landed-cost entry strategies, live international tenders, promotional plans, verified buyers with 5-stage outreach, and country NTM standards.', 'دراسات سوق، استراتيجيات دخول الأسواق، مناقصات دولية موثقة، خطط ترويج، كشاف المشترين الموثوقين والتواصل معهم، وتحليل المواصفات والعوائق غير الجمركية.'),
+              badge: t('New • 190+ Countries', 'جديد • ١٩٠+ دولة'),
+            },
             {
               href: `/${locale}/cluster/brand-studio`,
               icon: Megaphone,

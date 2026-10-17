@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import {
   Network, ShoppingCart, Factory as FactoryIcon, Handshake, FlaskConical, Gauge, GraduationCap, Leaf,
-  Landmark, MessagesSquare, CalendarDays, UserCheck, Megaphone, BarChart3, ArrowUpRight, Sparkles, CheckCircle2,
+  Landmark, MessagesSquare, CalendarDays, UserCheck, Megaphone, BarChart3, ArrowUpRight, Sparkles, CheckCircle2, Globe2,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
@@ -71,8 +71,9 @@ export default async function ClusterHubPage({ params }: { params: Promise<{ loc
       ],
     },
     {
-      titleEn: 'Modernize', titleAr: 'التحديث', tone: 'from-emerald-500/15',
+      titleEn: 'Modernize & Export Globally', titleAr: 'التحديث والتصدير العالمي', tone: 'from-emerald-500/15',
       mods: [
+        { href: 'export-intelligence', icon: Globe2, en: 'AI Export Intelligence, Buyers & NTMs', ar: 'ذكاء التصدير والمشترين والمواصفات الدولية', descEn: 'Market studies, entry strategies, live international tenders, export promotion plans, verified buyer outreach, and country NTM standards.', descAr: 'دراسات الأسواق، استراتيجيات الدخول، المناقصات الدولية، خطط الترويج، كشاف المشترين الموثوقين، وتحليل المواصفات القياسية والعوائق غير الجمركية.' },
         { href: 'maturity', icon: Gauge, en: 'Digital Maturity', ar: 'النضج الرقمي', descEn: 'Industry 4.0 readiness assessment with a personalized 90-day roadmap.', descAr: 'تقييم الجاهزية للصناعة 4.0 مع خارطة طريق مخصصة لمدة 90 يومًا.', stat: c.assessments },
         { href: 'academy', icon: GraduationCap, en: 'Cluster Academy', ar: 'أكاديمية التجمع', descEn: 'Practical courses for workers and managers with verifiable certificates.', descAr: 'دورات عملية للعمال والمديرين بشهادات قابلة للتحقق.', stat: c.courses },
         { href: 'academy/studio', icon: Sparkles, en: 'AI Course Studio', ar: 'منشئ الدورات الذكي', descEn: 'Generate Beginner-to-Advanced multimedia courses from your factory needs & authorized UNIDO/ZDHC/ISO standards.', descAr: 'إنشاء دورات متعددة الوسائط (مبتدئ ← متقدم) حسب احتياجات مصنعك وبمراجع دولية معتمدة.' },
