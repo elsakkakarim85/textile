@@ -17,6 +17,24 @@ export function Footer({ locale }: { locale: string }) {
   return (
     <footer className="border-t bg-slate-950 text-slate-300 mt-16 print:hidden">
       <div className="container mx-auto px-4 py-12 space-y-10">
+        {/* Institutional Partners Footer Showcase Card */}
+        <div className="rounded-2xl bg-white text-slate-900 p-4 sm:p-6 shadow-xl border border-slate-200 flex flex-col items-center gap-3">
+          <div className="text-[11px] font-extrabold uppercase tracking-wider text-slate-600 text-center">
+            {t(
+              'Implemented under the TIGARA Project • Funded by the European Union • In Partnership with UNIDO & the Government of Egypt',
+              'ينفذ في إطار مشروع تجارة (TIGARA) • بتمويل من الاتحاد الأوروبي • وبالشراكة مع منظمة اليونيدو وحكومة جمهورية مصر العربية'
+            )}
+          </div>
+          <svg
+            viewBox="45 18 916 112"
+            className="w-full max-w-4xl h-16 sm:h-20 md:h-24"
+            role="img"
+            aria-label="TIGARA Project Partners: European Union, UNIDO, Ministry of Foreign Affairs, Ministry of Industry"
+          >
+            <image href="/tigara-logos.png" width="1024" height="183" />
+          </svg>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* Column 1: Platform Identity */}
           <div className="lg:col-span-2 space-y-3">

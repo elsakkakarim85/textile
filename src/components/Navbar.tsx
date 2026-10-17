@@ -413,26 +413,189 @@ export default function Navbar({ locale }: { locale: string }) {
     cat.items.some((item) => pathname === item.href || pathname.startsWith(item.href + '/'));
 
   return (
-    <div ref={navRef} className="flex flex-col w-full sticky top-0 z-50">
-      {/* Compact TIGARA Sponsorship Banner */}
-      <div className="w-full bg-white border-b py-1.5 md:py-2 flex justify-center items-center px-4">
-        <img
-          src="/tigara-logos.png"
-          alt="TIGARA Project Partners: EU, UNIDO, Egyptian Government"
-          className="h-10 md:h-12 object-contain"
-        />
+    <div ref={navRef} className="contents">
+      {/* Top Sovereign & European Tri-Color Accent Ribbon */}
+      <div className="h-1.5 w-full bg-gradient-to-r from-[#003399] via-[#009fe3] via-[#f36f21] to-[#c59b27]" />
+
+      {/* Grand Institutional Partner Logos Showcase Header */}
+      <div className="w-full bg-gradient-to-b from-slate-50 via-white to-slate-50/90 border-b border-slate-200/90 px-3 sm:px-6 py-3 md:py-4 shadow-2xs">
+        <div className="container mx-auto max-w-7xl space-y-2.5">
+          {/* Top Endorsement Micro-Header */}
+          <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] sm:text-[11px] font-bold tracking-wide text-slate-600 border-b border-slate-200/70 pb-1.5">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+              <span className="uppercase text-slate-800 font-extrabold">
+                {t(
+                  'Official National & International Industrial Cluster Initiative',
+                  'المبادرة الوطنية والدولية لتطوير التجمع الصناعي للغزل والنسيج بالمحلة الكبرى'
+                )}
+              </span>
+            </div>
+            <div className="hidden md:flex items-center gap-2 text-[10px] font-extrabold text-slate-700">
+              <span className="px-2 py-0.5 rounded-full bg-blue-50 text-[#003399] border border-blue-200">
+                🇪🇺 {t('EU Funded', 'بتمويل الاتحاد الأوروبي')}
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-sky-50 text-[#0077b6] border border-sky-200">
+                🇺🇳 {t('UNIDO Implemented', 'تنفيذ منظمة اليونيدو')}
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-orange-50 text-[#d9531e] border border-orange-200">
+                🤝 {t('TIGARA Trade Growth', 'مشروع تجارة')}
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200">
+                🇪🇬 {t('Arab Republic of Egypt', 'جمهورية مصر العربية')}
+              </span>
+            </div>
+          </div>
+
+          {/* 5 High-Impact Framed Partner Logo Cards */}
+          <div
+            dir="ltr"
+            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-12 items-center gap-2.5 md:gap-3.5 pt-0.5"
+          >
+            {/* 1. European Union */}
+            <div className="col-span-1 lg:col-span-2 group rounded-xl bg-white border border-blue-200/80 hover:border-[#003399] shadow-xs hover:shadow-md transition-all px-3 py-2 flex flex-col items-center justify-center">
+              <svg
+                viewBox="48 24 94 98"
+                className="h-14 sm:h-16 md:h-20 w-auto"
+                role="img"
+                aria-label="Funded by the European Union"
+              >
+                <image href="/tigara-logos.png" width="1024" height="183" />
+              </svg>
+              <span className="mt-1 text-[9px] sm:text-[10px] font-extrabold text-[#003399] tracking-tight text-center leading-tight">
+                {t('European Union', 'الاتحاد الأوروبي')}
+              </span>
+            </div>
+
+            {/* 2. UNIDO */}
+            <div className="col-span-1 lg:col-span-3 group rounded-xl bg-white border border-sky-200/80 hover:border-[#009fe3] shadow-xs hover:shadow-md transition-all px-3 py-2 flex flex-col items-center justify-center">
+              <svg
+                viewBox="158 24 184 98"
+                className="h-14 sm:h-16 md:h-20 w-auto"
+                role="img"
+                aria-label="UNIDO - United Nations Industrial Development Organization"
+              >
+                <image href="/tigara-logos.png" width="1024" height="183" />
+              </svg>
+              <span className="mt-1 text-[9px] sm:text-[10px] font-extrabold text-[#0077b6] tracking-tight text-center leading-tight">
+                {t('UNIDO Organization', 'منظمة الأمم المتحدة للتنمية الصناعية')}
+              </span>
+            </div>
+
+            {/* 3. TIGARA Flagship Centerpiece */}
+            <div className="col-span-2 sm:col-span-3 lg:col-span-3 group rounded-2xl bg-white border-2 border-[#f36f21]/40 hover:border-[#f36f21] shadow-sm hover:shadow-lg transition-all px-4 py-2 flex flex-col items-center justify-center ring-4 ring-orange-500/5">
+              <svg
+                viewBox="360 22 304 102"
+                className="h-16 sm:h-20 md:h-22 w-auto"
+                role="img"
+                aria-label="TIGARA - Driving Trade Growth"
+              >
+                <image href="/tigara-logos.png" width="1024" height="183" />
+              </svg>
+              <span className="mt-1 text-[10px] sm:text-[11px] font-black text-[#d9531e] uppercase tracking-wider text-center leading-tight">
+                {t('TIGARA • Driving Trade Growth', 'مشروع تجارة • تعزيز النمو التجاري والصناعي')}
+              </span>
+            </div>
+
+            {/* 4. Ministry of Foreign Affairs & International Cooperation */}
+            <div className="col-span-1 sm:col-span-2 lg:col-span-2 group rounded-xl bg-white border border-amber-200/90 hover:border-[#c59b27] shadow-xs hover:shadow-md transition-all px-3 py-2 flex flex-col items-center justify-center">
+              <svg
+                viewBox="680 24 174 98"
+                className="h-14 sm:h-16 md:h-20 w-auto"
+                role="img"
+                aria-label="Ministry of Foreign Affairs and International Cooperation"
+              >
+                <image href="/tigara-logos.png" width="1024" height="183" />
+              </svg>
+              <span className="mt-1 text-[9px] sm:text-[10px] font-extrabold text-amber-900 tracking-tight text-center leading-tight">
+                {t('MOFAIC Egypt', 'وزارة الخارجية والتعاون الدولي')}
+              </span>
+            </div>
+
+            {/* 5. Ministry of Industry */}
+            <div className="col-span-1 lg:col-span-2 group rounded-xl bg-white border border-amber-200/90 hover:border-[#c59b27] shadow-xs hover:shadow-md transition-all px-3 py-2 flex flex-col items-center justify-center">
+              <svg
+                viewBox="878 24 76 98"
+                className="h-14 sm:h-16 md:h-20 w-auto"
+                role="img"
+                aria-label="Ministry of Industry - Egypt"
+              >
+                <image href="/tigara-logos.png" width="1024" height="183" />
+              </svg>
+              <span className="mt-1 text-[9px] sm:text-[10px] font-extrabold text-amber-900 tracking-tight text-center leading-tight">
+                {t('Ministry of Industry', 'وزارة الصناعة المصرية')}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85 shadow-xs">
-        <div className="container mx-auto px-4 h-15 flex items-center justify-between gap-3">
-          {/* Left: Brand + 5 Categorized Mega-Menus */}
-          <div className="flex items-center gap-2 lg:gap-4">
+      {/* Sticky Main Navigation Bar with Bespoke Mahalla Cluster Crest */}
+      <nav className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85 shadow-sm">
+        <div className="container mx-auto px-4 h-16 md:h-18 flex items-center justify-between gap-3">
+          {/* Left: Bespoke Brand Emblem + 5 Categorized Mega-Menus */}
+          <div className="flex items-center gap-3 lg:gap-5">
             <Link
               href={`/${locale}`}
-              className="text-lg md:text-xl font-extrabold text-primary whitespace-nowrap flex items-center gap-2 pe-2"
+              className="group flex items-center gap-3 pe-2 whitespace-nowrap"
             >
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              {t('Mahalla Cluster', 'تجمع المحلة')}
+              {/* Custom SVG Industrial Textile & Gear Crest */}
+              <div className="relative w-11 h-11 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-emerald-900 via-slate-900 to-teal-950 p-1.5 shadow-md border border-emerald-500/40 group-hover:border-emerald-400 transition-all flex items-center justify-center shrink-0">
+                <svg viewBox="0 0 48 48" className="w-full h-full" fill="none">
+                  {/* Outer Precision Gear Ring */}
+                  <circle
+                    cx="24"
+                    cy="24"
+                    r="20"
+                    stroke="url(#mahallaGold)"
+                    strokeWidth="2"
+                    strokeDasharray="4 3"
+                  />
+                  {/* Interlocking Warp & Weft Textile Threads */}
+                  <path
+                    d="M14 18H34M14 24H34M14 30H34"
+                    stroke="#10b981"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M18 14V34M24 14V34M30 14V34"
+                    stroke="#fbbf24"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeOpacity="0.9"
+                  />
+                  {/* Center Diamond Node */}
+                  <rect
+                    x="20.5"
+                    y="20.5"
+                    width="7"
+                    height="7"
+                    rx="1.5"
+                    transform="rotate(45 24 24)"
+                    fill="#10b981"
+                    stroke="#ffffff"
+                    strokeWidth="1.2"
+                  />
+                  <defs>
+                    <linearGradient id="mahallaGold" x1="0" y1="0" x2="48" y2="48">
+                      <stop offset="0%" stopColor="#34d399" />
+                      <stop offset="50%" stopColor="#fbbf24" />
+                      <stop offset="100%" stopColor="#0ea5e9" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <span className="absolute -top-1 -end-1 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-background animate-pulse" />
+              </div>
+
+              <div className="flex flex-col">
+                <span className="text-base md:text-xl font-black tracking-tight text-foreground group-hover:text-primary transition-colors leading-none">
+                  {t('Mahalla Cluster', 'تجمع المحلة الكبرى')}
+                </span>
+                <span className="text-[9px] md:text-[10px] font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mt-1">
+                  {t('Industrial Textile Hub', 'قلعة صناعة الغزل والنسيج')}
+                </span>
+              </div>
             </Link>
 
             {/* Desktop Categorized Navigation */}
