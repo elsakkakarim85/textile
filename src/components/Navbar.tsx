@@ -25,6 +25,7 @@ import {
   Globe2,
   Gauge,
   ChevronDown,
+  ChevronUp,
   ShoppingCart,
   ArrowRightLeft,
   Handshake,
@@ -41,6 +42,9 @@ import {
   BookOpen,
   Wrench,
   LayoutDashboard,
+  Search,
+  Award,
+  ArrowRight,
 } from 'lucide-react';
 
 interface NavSubItem {
@@ -57,6 +61,9 @@ interface NavCategory {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   columns?: 1 | 2;
+  spotlightTitle: string;
+  spotlightHref: string;
+  spotlightCta: string;
   items: NavSubItem[];
 }
 
@@ -67,6 +74,7 @@ export default function Navbar({ locale }: { locale: string }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileExpandedCat, setMobileExpandedCat] = useState<string | null>('excellence');
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [compactHeader, setCompactHeader] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
 
   const t = (en: string, ar: string) => tr(locale, en, ar);
@@ -94,12 +102,22 @@ export default function Navbar({ locale }: { locale: string }) {
     window.location.href = newPath;
   };
 
+  const triggerQuickSearch = () => {
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }));
+  };
+
   const categories: NavCategory[] = [
     {
       id: 'excellence',
       label: t('Industrial Excellence', 'التميز الصناعي والتحديث'),
       icon: Gauge,
       columns: 1,
+      spotlightTitle: t(
+        'Run a 9-Pillar Lean Six Sigma & OEE Diagnostic',
+        'شغّل تشخيص اللين 6 سيجما وكفاءة المعدات OEE'
+      ),
+      spotlightHref: `/${locale}/cluster/lean-manufacturing`,
+      spotlightCta: t('Open Lean Hub', 'افتح مركز اللين'),
       items: [
         {
           href: `/${locale}/cluster/lean-manufacturing`,
@@ -159,6 +177,12 @@ export default function Navbar({ locale }: { locale: string }) {
       label: t('Marketplaces & Export', 'البورصات والتصدير'),
       icon: Globe2,
       columns: 2,
+      spotlightTitle: t(
+        'Discover Verified International Buyers & Live Tenders across 190+ Countries',
+        'اكتشف المشترين الدوليين الموثقين والمناقصات العالمية في أكثر من 190 دولة'
+      ),
+      spotlightHref: `/${locale}/cluster/export-intelligence`,
+      spotlightCta: t('Launch Export AI', 'افتح ذكاء التصدير'),
       items: [
         {
           href: `/${locale}/cluster/export-intelligence`,
@@ -244,6 +268,12 @@ export default function Navbar({ locale }: { locale: string }) {
       label: t('Cluster Collaboration', 'التعاون الصناعي'),
       icon: Handshake,
       columns: 1,
+      spotlightTitle: t(
+        'Save 12–18% on Giza Yarn & ZDHC Dyes via Joint Procurement',
+        'وفّر ١٢–١٨٪ من تكلفة الغزول والصبغات عبر الشراء المجمع'
+      ),
+      spotlightHref: `/${locale}/cluster/procurement`,
+      spotlightCta: t('Join Buying Pools', 'انضم للشراء المجمع'),
       items: [
         {
           href: `/${locale}/cluster/procurement`,
@@ -299,6 +329,12 @@ export default function Navbar({ locale }: { locale: string }) {
       label: t('AI Studios & Academy', 'الذكاء الاصطناعي والأكاديمية'),
       icon: Sparkles,
       columns: 1,
+      spotlightTitle: t(
+        'Compare 7 Free LLMs Side-by-Side or Generate Certified Courses',
+        'قارن بين ٧ نماذج ذكاء اصطناعي مجانية أو ولّد دورات تدريبية معتمدة'
+      ),
+      spotlightHref: `/${locale}/ai`,
+      spotlightCta: t('Open AI Arena', 'افتح مركز الذكاء'),
       items: [
         {
           href: `/${locale}/ai`,
@@ -348,6 +384,12 @@ export default function Navbar({ locale }: { locale: string }) {
       label: t('Observatory & Community', 'المرصد والمجتمع'),
       icon: BarChart3,
       columns: 1,
+      spotlightTitle: t(
+        'Live Cluster Macro KPIs, Capacity Heatmaps & Peer Percentiles',
+        'المؤشرات الكلية الحية للتجمع وخرائط الطاقات وترتيب المصانع'
+      ),
+      spotlightHref: `/${locale}/cluster/observatory`,
+      spotlightCta: t('View Observatory', 'استعرض المرصد'),
       items: [
         {
           href: `/${locale}/cluster/observatory`,
@@ -414,130 +456,259 @@ export default function Navbar({ locale }: { locale: string }) {
 
   return (
     <div ref={navRef} className="contents">
-      {/* Top Sovereign & European Tri-Color Accent Ribbon */}
-      <div className="h-1.5 w-full bg-gradient-to-r from-[#003399] via-[#009fe3] via-[#f36f21] to-[#c59b27]" />
+      {/* Top Sovereign & European Multi-Color Protocol Ribbon */}
+      <div className="h-2 w-full bg-gradient-to-r from-[#003399] via-[#009fe3] via-[#f36f21] to-[#c59b27]" />
 
-      {/* Grand Institutional Partner Logos Showcase Header */}
-      <div className="w-full bg-gradient-to-b from-slate-50 via-white to-slate-50/90 border-b border-slate-200/90 px-3 sm:px-6 py-3 md:py-4 shadow-2xs">
-        <div className="container mx-auto max-w-7xl space-y-2.5">
-          {/* Top Endorsement Micro-Header */}
-          <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] sm:text-[11px] font-bold tracking-wide text-slate-600 border-b border-slate-200/70 pb-1.5">
+      {/* Museum-Grade Institutional Partner Logos Showcase Header */}
+      <div className="w-full bg-gradient-to-b from-slate-50 via-white to-slate-100/80 border-b border-slate-200/90 px-3 sm:px-6 py-3.5 md:py-5 shadow-xs relative overflow-hidden">
+        {/* Subtle decorative background radial glow */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(243,111,33,0.06),_transparent_70%)]"
+        />
+
+        <div className="container mx-auto max-w-7xl space-y-3 relative">
+          {/* Top Diplomatic Protocol & Endorsement Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] sm:text-xs font-bold tracking-wide text-slate-700 border-b border-slate-200/80 pb-2">
             <div className="flex items-center gap-2">
-              <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-              <span className="uppercase text-slate-800 font-extrabold">
+              <span className="inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-500/15" />
+              <Award className="w-3.5 h-3.5 text-[#d9531e] shrink-0" />
+              <span className="uppercase text-slate-900 font-black tracking-wider">
                 {t(
-                  'Official National & International Industrial Cluster Initiative',
-                  'المبادرة الوطنية والدولية لتطوير التجمع الصناعي للغزل والنسيج بالمحلة الكبرى'
+                  'Official National & International Industrial Cluster Initiative • El-Mahalla El-Kubra',
+                  'المبادرة الوطنية والدولية الرسمية لتطوير التجمع الصناعي للغزل والنسيج بالمحلة الكبرى'
                 )}
               </span>
             </div>
-            <div className="hidden md:flex items-center gap-2 text-[10px] font-extrabold text-slate-700">
-              <span className="px-2 py-0.5 rounded-full bg-blue-50 text-[#003399] border border-blue-200">
-                🇪🇺 {t('EU Funded', 'بتمويل الاتحاد الأوروبي')}
-              </span>
-              <span className="px-2 py-0.5 rounded-full bg-sky-50 text-[#0077b6] border border-sky-200">
-                🇺🇳 {t('UNIDO Implemented', 'تنفيذ منظمة اليونيدو')}
-              </span>
-              <span className="px-2 py-0.5 rounded-full bg-orange-50 text-[#d9531e] border border-orange-200">
-                🤝 {t('TIGARA Trade Growth', 'مشروع تجارة')}
-              </span>
-              <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200">
-                🇪🇬 {t('Arab Republic of Egypt', 'جمهورية مصر العربية')}
-              </span>
+
+            <div className="flex items-center gap-2">
+              <div className="hidden lg:flex items-center gap-1.5 text-[10px] font-extrabold">
+                <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-[#003399] border border-blue-200/90 shadow-2xs">
+                  🇪🇺 {t('Funded by the European Union', 'بتمويل الاتحاد الأوروبي')}
+                </span>
+                <span className="px-2.5 py-0.5 rounded-full bg-sky-50 text-[#0077b6] border border-sky-200/90 shadow-2xs">
+                  🇺🇳 {t('Implemented by UNIDO', 'بتنفيذ منظمة اليونيدو')}
+                </span>
+                <span className="px-2.5 py-0.5 rounded-full bg-orange-50 text-[#d9531e] border border-orange-200/90 shadow-2xs">
+                  🤝 {t('TIGARA Flagship Project', 'مشروع تجارة الرائد')}
+                </span>
+                <span className="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-300/90 shadow-2xs">
+                  🇪🇬 {t('Arab Republic of Egypt', 'جمهورية مصر العربية')}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setCompactHeader((v) => !v)}
+                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-[10px] font-extrabold transition-colors cursor-pointer"
+                title={t('Toggle Logo Showcase Size', 'تبديل حجم عرض الشعارات الرسمية')}
+              >
+                {compactHeader ? (
+                  <>
+                    <ChevronDown className="w-3 h-3" />
+                    {t('Full Gallery', 'عرض كامل')}
+                  </>
+                ) : (
+                  <>
+                    <ChevronUp className="w-3 h-3" />
+                    {t('Compact View', 'عرض مدمج')}
+                  </>
+                )}
+              </button>
             </div>
           </div>
 
-          {/* 5 High-Impact Framed Partner Logo Cards */}
-          <div
-            dir="ltr"
-            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-12 items-center gap-2.5 md:gap-3.5 pt-0.5"
-          >
-            {/* 1. European Union */}
-            <div className="col-span-1 lg:col-span-2 group rounded-xl bg-white border border-blue-200/80 hover:border-[#003399] shadow-xs hover:shadow-md transition-all px-3 py-2 flex flex-col items-center justify-center">
-              <svg
-                viewBox="48 24 94 98"
-                className="h-14 sm:h-16 md:h-20 w-auto"
-                role="img"
-                aria-label="Funded by the European Union"
-              >
-                <image href="/tigara-logos.png" width="1024" height="183" />
-              </svg>
-              <span className="mt-1 text-[9px] sm:text-[10px] font-extrabold text-[#003399] tracking-tight text-center leading-tight">
-                {t('European Union', 'الاتحاد الأوروبي')}
-              </span>
+          {/* 5 Museum-Grade Framed Institutional Partner Logo Cards */}
+          {compactHeader ? (
+            <div
+              dir="ltr"
+              className="grid grid-cols-2 sm:grid-cols-5 items-center gap-2.5 pt-0.5"
+            >
+              <div className="rounded-xl bg-white border border-blue-200 px-3 py-1.5 flex items-center justify-center gap-2 shadow-2xs">
+                <svg viewBox="48 24 94 98" className="h-11 sm:h-12 w-auto shrink-0" role="img" aria-label="European Union">
+                  <image href="/tigara-logos.png" width="1024" height="183" />
+                </svg>
+                <span className="text-[10px] font-black text-[#003399] leading-tight">
+                  {t('European Union', 'الاتحاد الأوروبي')}
+                </span>
+              </div>
+              <div className="rounded-xl bg-white border border-sky-200 px-3 py-1.5 flex items-center justify-center gap-2 shadow-2xs">
+                <svg viewBox="158 24 184 98" className="h-11 sm:h-12 w-auto shrink-0" role="img" aria-label="UNIDO">
+                  <image href="/tigara-logos.png" width="1024" height="183" />
+                </svg>
+                <span className="text-[10px] font-black text-[#0077b6] leading-tight">
+                  {t('UNIDO', 'اليونيدو')}
+                </span>
+              </div>
+              <div className="col-span-2 sm:col-span-1 rounded-xl bg-white border-2 border-[#f36f21]/60 px-3 py-1.5 flex items-center justify-center gap-2 shadow-xs">
+                <svg viewBox="360 22 304 102" className="h-12 sm:h-14 w-auto shrink-0" role="img" aria-label="TIGARA">
+                  <image href="/tigara-logos.png" width="1024" height="183" />
+                </svg>
+              </div>
+              <div className="rounded-xl bg-white border border-amber-200 px-3 py-1.5 flex items-center justify-center gap-2 shadow-2xs">
+                <svg viewBox="680 24 174 98" className="h-11 sm:h-12 w-auto shrink-0" role="img" aria-label="MOFAIC Egypt">
+                  <image href="/tigara-logos.png" width="1024" height="183" />
+                </svg>
+                <span className="text-[10px] font-black text-amber-900 leading-tight">
+                  {t('MOFAIC Egypt', 'الخارجية والتعاون الدولي')}
+                </span>
+              </div>
+              <div className="rounded-xl bg-white border border-amber-200 px-3 py-1.5 flex items-center justify-center gap-2 shadow-2xs">
+                <svg viewBox="878 24 76 98" className="h-11 sm:h-12 w-auto shrink-0" role="img" aria-label="Ministry of Industry">
+                  <image href="/tigara-logos.png" width="1024" height="183" />
+                </svg>
+                <span className="text-[10px] font-black text-amber-900 leading-tight">
+                  {t('Ministry of Industry', 'وزارة الصناعة')}
+                </span>
+              </div>
             </div>
+          ) : (
+            <div
+              dir="ltr"
+              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-12 items-stretch gap-3 md:gap-4 pt-0.5"
+            >
+              {/* 1. European Union */}
+              <div className="col-span-1 lg:col-span-2 group relative rounded-2xl bg-white border-2 border-blue-200/90 hover:border-[#003399] shadow-sm hover:shadow-lg transition-all duration-200 px-3.5 py-3 flex flex-col items-center justify-between overflow-hidden">
+                <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#003399] to-[#ffcc00]" />
+                <span className="text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-50 text-[#003399] border border-blue-200/80">
+                  {t('Strategic Donor', 'الجهة المانحة')}
+                </span>
+                <div className="my-2 flex items-center justify-center">
+                  <svg
+                    viewBox="48 24 94 98"
+                    className="h-20 sm:h-24 md:h-28 w-auto group-hover:scale-105 transition-transform duration-200"
+                    role="img"
+                    aria-label="Funded by the European Union"
+                  >
+                    <image href="/tigara-logos.png" width="1024" height="183" />
+                  </svg>
+                </div>
+                <div className="text-center">
+                  <div className="text-[11px] sm:text-xs font-black text-[#003399] tracking-tight leading-tight">
+                    {t('European Union', 'الاتحاد الأوروبي')}
+                  </div>
+                  <div className="text-[9px] font-semibold text-slate-500 mt-0.5">
+                    {t('Funded by the EU', 'بتمويل من الاتحاد الأوروبي')}
+                  </div>
+                </div>
+              </div>
 
-            {/* 2. UNIDO */}
-            <div className="col-span-1 lg:col-span-3 group rounded-xl bg-white border border-sky-200/80 hover:border-[#009fe3] shadow-xs hover:shadow-md transition-all px-3 py-2 flex flex-col items-center justify-center">
-              <svg
-                viewBox="158 24 184 98"
-                className="h-14 sm:h-16 md:h-20 w-auto"
-                role="img"
-                aria-label="UNIDO - United Nations Industrial Development Organization"
-              >
-                <image href="/tigara-logos.png" width="1024" height="183" />
-              </svg>
-              <span className="mt-1 text-[9px] sm:text-[10px] font-extrabold text-[#0077b6] tracking-tight text-center leading-tight">
-                {t('UNIDO Organization', 'منظمة الأمم المتحدة للتنمية الصناعية')}
-              </span>
-            </div>
+              {/* 2. UNIDO */}
+              <div className="col-span-1 lg:col-span-3 group relative rounded-2xl bg-white border-2 border-sky-200/90 hover:border-[#009fe3] shadow-sm hover:shadow-lg transition-all duration-200 px-4 py-3 flex flex-col items-center justify-between overflow-hidden">
+                <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#009fe3] to-[#0077b6]" />
+                <span className="text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-sky-50 text-[#0077b6] border border-sky-200/80">
+                  {t('UN Implementing Agency', 'الوكالة الأممية المنفذة')}
+                </span>
+                <div className="my-2 flex items-center justify-center">
+                  <svg
+                    viewBox="158 24 184 98"
+                    className="h-20 sm:h-24 md:h-28 w-auto group-hover:scale-105 transition-transform duration-200"
+                    role="img"
+                    aria-label="UNIDO - United Nations Industrial Development Organization"
+                  >
+                    <image href="/tigara-logos.png" width="1024" height="183" />
+                  </svg>
+                </div>
+                <div className="text-center">
+                  <div className="text-[11px] sm:text-xs font-black text-[#0077b6] tracking-tight leading-tight">
+                    {t('UNIDO Organization', 'منظمة الأمم المتحدة للتنمية الصناعية')}
+                  </div>
+                  <div className="text-[9px] font-semibold text-slate-500 mt-0.5">
+                    {t('Inclusive & Sustainable Industry', 'تنمية صناعية شاملة ومستدامة')}
+                  </div>
+                </div>
+              </div>
 
-            {/* 3. TIGARA Flagship Centerpiece */}
-            <div className="col-span-2 sm:col-span-3 lg:col-span-3 group rounded-2xl bg-white border-2 border-[#f36f21]/40 hover:border-[#f36f21] shadow-sm hover:shadow-lg transition-all px-4 py-2 flex flex-col items-center justify-center ring-4 ring-orange-500/5">
-              <svg
-                viewBox="360 22 304 102"
-                className="h-16 sm:h-20 md:h-22 w-auto"
-                role="img"
-                aria-label="TIGARA - Driving Trade Growth"
-              >
-                <image href="/tigara-logos.png" width="1024" height="183" />
-              </svg>
-              <span className="mt-1 text-[10px] sm:text-[11px] font-black text-[#d9531e] uppercase tracking-wider text-center leading-tight">
-                {t('TIGARA • Driving Trade Growth', 'مشروع تجارة • تعزيز النمو التجاري والصناعي')}
-              </span>
-            </div>
+              {/* 3. TIGARA Flagship Centerpiece */}
+              <div className="col-span-2 sm:col-span-3 lg:col-span-3 group relative rounded-2xl bg-gradient-to-b from-white via-orange-50/20 to-white border-2 border-[#f36f21]/70 hover:border-[#f36f21] shadow-md hover:shadow-xl transition-all duration-200 px-4 py-3 flex flex-col items-center justify-between ring-4 ring-orange-500/10 overflow-hidden">
+                <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#f36f21] via-amber-500 to-[#003399]" />
+                <span className="text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-orange-50 text-[#d9531e] border border-orange-300/90">
+                  {t('National Flagship Program', 'البرنامج الوطني الرائد')}
+                </span>
+                <div className="my-1.5 flex items-center justify-center">
+                  <svg
+                    viewBox="360 22 304 102"
+                    className="h-24 sm:h-28 md:h-32 w-auto group-hover:scale-105 transition-transform duration-200"
+                    role="img"
+                    aria-label="TIGARA - Driving Trade Growth"
+                  >
+                    <image href="/tigara-logos.png" width="1024" height="183" />
+                  </svg>
+                </div>
+                <div className="text-center">
+                  <div className="text-xs sm:text-sm font-black text-[#d9531e] uppercase tracking-wider leading-tight">
+                    {t('TIGARA • Driving Trade Growth', 'مشروع تجارة • تعزيز النمو التجاري والصناعي')}
+                  </div>
+                  <div className="text-[9px] font-bold text-slate-600 mt-0.5">
+                    {t('EU-Egypt Trade & Industrial Competitiveness', 'تعزيز التنافسية الصناعية والتجارية المصرية')}
+                  </div>
+                </div>
+              </div>
 
-            {/* 4. Ministry of Foreign Affairs & International Cooperation */}
-            <div className="col-span-1 sm:col-span-2 lg:col-span-2 group rounded-xl bg-white border border-amber-200/90 hover:border-[#c59b27] shadow-xs hover:shadow-md transition-all px-3 py-2 flex flex-col items-center justify-center">
-              <svg
-                viewBox="680 24 174 98"
-                className="h-14 sm:h-16 md:h-20 w-auto"
-                role="img"
-                aria-label="Ministry of Foreign Affairs and International Cooperation"
-              >
-                <image href="/tigara-logos.png" width="1024" height="183" />
-              </svg>
-              <span className="mt-1 text-[9px] sm:text-[10px] font-extrabold text-amber-900 tracking-tight text-center leading-tight">
-                {t('MOFAIC Egypt', 'وزارة الخارجية والتعاون الدولي')}
-              </span>
-            </div>
+              {/* 4. Ministry of Foreign Affairs & International Cooperation */}
+              <div className="col-span-1 sm:col-span-2 lg:col-span-2 group relative rounded-2xl bg-white border-2 border-amber-200/90 hover:border-[#c59b27] shadow-sm hover:shadow-lg transition-all duration-200 px-3.5 py-3 flex flex-col items-center justify-between overflow-hidden">
+                <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#c59b27] to-amber-700" />
+                <span className="text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200/90">
+                  {t('International Cooperation', 'التعاون الدولي')}
+                </span>
+                <div className="my-2 flex items-center justify-center">
+                  <svg
+                    viewBox="680 24 174 98"
+                    className="h-20 sm:h-24 md:h-28 w-auto group-hover:scale-105 transition-transform duration-200"
+                    role="img"
+                    aria-label="Ministry of Foreign Affairs and International Cooperation"
+                  >
+                    <image href="/tigara-logos.png" width="1024" height="183" />
+                  </svg>
+                </div>
+                <div className="text-center">
+                  <div className="text-[11px] sm:text-xs font-black text-amber-950 tracking-tight leading-tight">
+                    {t('MOFAIC Egypt', 'وزارة الخارجية والتعاون الدولي')}
+                  </div>
+                  <div className="text-[9px] font-semibold text-slate-500 mt-0.5">
+                    {t('Arab Republic of Egypt', 'جمهورية مصر العربية')}
+                  </div>
+                </div>
+              </div>
 
-            {/* 5. Ministry of Industry */}
-            <div className="col-span-1 lg:col-span-2 group rounded-xl bg-white border border-amber-200/90 hover:border-[#c59b27] shadow-xs hover:shadow-md transition-all px-3 py-2 flex flex-col items-center justify-center">
-              <svg
-                viewBox="878 24 76 98"
-                className="h-14 sm:h-16 md:h-20 w-auto"
-                role="img"
-                aria-label="Ministry of Industry - Egypt"
-              >
-                <image href="/tigara-logos.png" width="1024" height="183" />
-              </svg>
-              <span className="mt-1 text-[9px] sm:text-[10px] font-extrabold text-amber-900 tracking-tight text-center leading-tight">
-                {t('Ministry of Industry', 'وزارة الصناعة المصرية')}
-              </span>
+              {/* 5. Ministry of Industry */}
+              <div className="col-span-1 lg:col-span-2 group relative rounded-2xl bg-white border-2 border-amber-200/90 hover:border-[#c59b27] shadow-sm hover:shadow-lg transition-all duration-200 px-3.5 py-3 flex flex-col items-center justify-between overflow-hidden">
+                <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-amber-700 to-[#c59b27]" />
+                <span className="text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200/90">
+                  {t('Industrial Governance', 'الحوكمة الصناعية')}
+                </span>
+                <div className="my-2 flex items-center justify-center">
+                  <svg
+                    viewBox="878 24 76 98"
+                    className="h-20 sm:h-24 md:h-28 w-auto group-hover:scale-105 transition-transform duration-200"
+                    role="img"
+                    aria-label="Ministry of Industry - Egypt"
+                  >
+                    <image href="/tigara-logos.png" width="1024" height="183" />
+                  </svg>
+                </div>
+                <div className="text-center">
+                  <div className="text-[11px] sm:text-xs font-black text-amber-950 tracking-tight leading-tight">
+                    {t('Ministry of Industry', 'وزارة الصناعة المصرية')}
+                  </div>
+                  <div className="text-[9px] font-semibold text-slate-500 mt-0.5">
+                    {t('National Industrial Strategy', 'الاستراتيجية الوطنية للصناعة')}
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
       {/* Sticky Main Navigation Bar with Bespoke Mahalla Cluster Crest */}
       <nav className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85 shadow-sm">
-        <div className="container mx-auto px-4 h-16 md:h-18 flex items-center justify-between gap-3">
+        <div className="container mx-auto px-4 h-16 md:h-18 flex items-center justify-between gap-2.5">
           {/* Left: Bespoke Brand Emblem + 5 Categorized Mega-Menus */}
-          <div className="flex items-center gap-3 lg:gap-5">
+          <div className="flex items-center gap-3 lg:gap-4">
             <Link
               href={`/${locale}`}
-              className="group flex items-center gap-3 pe-2 whitespace-nowrap"
+              className="group flex items-center gap-3 pe-1 whitespace-nowrap"
             >
               {/* Custom SVG Industrial Textile & Gear Crest */}
               <div className="relative w-11 h-11 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-emerald-900 via-slate-900 to-teal-950 p-1.5 shadow-md border border-emerald-500/40 group-hover:border-emerald-400 transition-all flex items-center justify-center shrink-0">
@@ -629,7 +800,7 @@ export default function Navbar({ locale }: { locale: string }) {
                     <button
                       type="button"
                       onClick={() => setOpenMenu(isOpen ? null : cat.id)}
-                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                         isOpen || active
                           ? 'bg-muted text-primary'
                           : 'text-foreground/85 hover:text-primary hover:bg-muted/60'
@@ -648,11 +819,11 @@ export default function Navbar({ locale }: { locale: string }) {
                     {isOpen && (
                       <div
                         className={`absolute top-full start-0 pt-2 z-50 ${
-                          cat.columns === 2 ? 'w-[640px]' : 'w-[380px]'
+                          cat.columns === 2 ? 'w-[660px]' : 'w-[400px]'
                         }`}
                       >
-                        <div className="rounded-2xl border bg-popover/98 backdrop-blur-xl text-popover-foreground shadow-2xl p-3 ring-1 ring-black/5">
-                          <div className="flex items-center justify-between px-2.5 pb-2 mb-2 border-b text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                        <div className="rounded-2xl border bg-popover/98 backdrop-blur-xl text-popover-foreground shadow-2xl p-3.5 ring-1 ring-black/5 space-y-2.5">
+                          <div className="flex items-center justify-between px-2.5 pb-2 border-b text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                             <span className="flex items-center gap-1.5">
                               <Icon className="w-3.5 h-3.5 text-primary" />
                               {cat.label}
@@ -716,6 +887,21 @@ export default function Navbar({ locale }: { locale: string }) {
                               );
                             })}
                           </div>
+
+                          {/* Mega-Menu Quick-Launch Spotlight Footer */}
+                          <div className="pt-2 border-t flex items-center justify-between gap-2 px-2">
+                            <span className="text-[11px] font-medium text-muted-foreground truncate">
+                              {cat.spotlightTitle}
+                            </span>
+                            <Link
+                              href={cat.spotlightHref}
+                              onClick={() => setOpenMenu(null)}
+                              className="inline-flex items-center gap-1 text-[11px] font-extrabold text-primary hover:underline shrink-0"
+                            >
+                              {cat.spotlightCta}
+                              <ArrowRight className="w-3 h-3" />
+                            </Link>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -725,8 +911,25 @@ export default function Navbar({ locale }: { locale: string }) {
             </div>
           </div>
 
-          {/* Right Controls: Persona, Currency, Language, Theme, Dashboard, Auth */}
-          <div className="flex items-center gap-2">
+          {/* Right Controls: Quick Search (Ctrl+K), Persona, Currency, Language, Theme, Dashboard, Auth */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* Quick Search & Engineering Calculators Trigger (Ctrl+K) */}
+            <button
+              type="button"
+              onClick={triggerQuickSearch}
+              className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-muted/40 hover:bg-muted text-xs font-bold text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+              title={t(
+                'Open Quick Module Search & Textile Calculators (Ctrl+K)',
+                'البحث السريع وحاسبات الغزل والنسيج (Ctrl+K)'
+              )}
+            >
+              <Search className="w-3.5 h-3.5 text-primary" />
+              <span className="hidden 2xl:inline">{t('Quick Tools', 'الأدوات السريعة')}</span>
+              <kbd className="text-[10px] font-mono bg-background px-1.5 py-0.5 rounded border text-foreground/80">
+                Ctrl+K
+              </kbd>
+            </button>
+
             <div className="hidden md:block">
               <PersonaSwitcher locale={locale} />
             </div>
@@ -744,7 +947,7 @@ export default function Navbar({ locale }: { locale: string }) {
 
             <button
               onClick={toggleLocale}
-              className="text-xs font-bold px-2.5 py-1.5 rounded-lg border hover:bg-muted transition-colors"
+              className="text-xs font-bold px-2.5 py-1.5 rounded-lg border hover:bg-muted transition-colors cursor-pointer"
             >
               {locale === 'ar' ? 'EN' : 'عربي'}
             </button>
@@ -787,14 +990,27 @@ export default function Navbar({ locale }: { locale: string }) {
           <div className="xl:hidden border-t bg-background px-4 py-4 space-y-3 max-h-[82vh] overflow-y-auto">
             <div className="flex items-center justify-between gap-2 pb-2 border-b">
               <PersonaSwitcher locale={locale} />
-              <Link
-                href={`/${locale}/dashboard`}
-                onClick={() => setMobileOpen(false)}
-                className="px-3 py-1.5 rounded-lg border border-primary/40 bg-primary/10 text-primary text-xs font-bold flex items-center gap-1.5"
-              >
-                <LayoutDashboard className="w-3.5 h-3.5" />
-                {t('Dashboard', 'لوحة التحكم')}
-              </Link>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    triggerQuickSearch();
+                  }}
+                  className="px-2.5 py-1.5 rounded-lg border bg-muted/50 text-xs font-bold flex items-center gap-1.5"
+                >
+                  <Search className="w-3.5 h-3.5 text-primary" />
+                  {t('Tools', 'الأدوات')}
+                </button>
+                <Link
+                  href={`/${locale}/dashboard`}
+                  onClick={() => setMobileOpen(false)}
+                  className="px-3 py-1.5 rounded-lg border border-primary/40 bg-primary/10 text-primary text-xs font-bold flex items-center gap-1.5"
+                >
+                  <LayoutDashboard className="w-3.5 h-3.5" />
+                  {t('Dashboard', 'لوحة التحكم')}
+                </Link>
+              </div>
             </div>
 
             <Link

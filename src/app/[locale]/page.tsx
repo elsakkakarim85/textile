@@ -12,7 +12,6 @@ import {
   Factory,
   Package,
   Briefcase,
-  ArrowRight,
   Network,
   ShoppingCart,
   ArrowRightLeft,
@@ -24,7 +23,6 @@ import {
   Landmark,
   ShieldCheck,
   Sparkles,
-  BarChart3,
   QrCode,
   Bot,
   Megaphone,
@@ -33,20 +31,100 @@ import {
 
 export const dynamic = 'force-dynamic';
 
+const FALLBACK_HOME_POOLS = [
+  {
+    id: 'demo-pool-giza86',
+    title: 'Giza 86 Combed Compact Ring Yarn Ne 30/1 (Export Lot)',
+    titleAr: 'شراء مجمع: غزل قطن جيزة 86 ممشط كومباكت نمرة 30/1 للتصدير',
+    targetUnitPrice: 215,
+    currency: 'EGP',
+    unit: 'kg',
+    targetQty: 25000,
+    commitments: [{ quantity: 19500 }],
+  },
+  {
+    id: 'demo-pool-zdhc-dyes',
+    title: 'ZDHC Level-3 Reactive Dyestuffs & Auxiliaries Bundle',
+    titleAr: 'شراء مجمع: صبغات نشطة وكيماويات متوافقة مع ZDHC المستوى الثالث',
+    targetUnitPrice: 340,
+    currency: 'EGP',
+    unit: 'kg',
+    targetQty: 12000,
+    commitments: [{ quantity: 8400 }],
+  },
+  {
+    id: 'demo-pool-solar-ppa',
+    title: 'Mahalla Industrial Rooftop Solar PPA & Smart Sub-Meters',
+    titleAr: 'اتفاقية طاقة شمسية مجمعة وعدادات ذكية لمصانع المحلة الكبرى',
+    targetUnitPrice: 1.85,
+    currency: 'EGP',
+    unit: 'kWh',
+    targetQty: 500000,
+    commitments: [{ quantity: 410000 }],
+  },
+];
+
+const FALLBACK_HOME_FACTORIES = [
+  {
+    id: 'demo-factory-misr',
+    name: 'Misr Spinning & Weaving Co. (El-Mahalla)',
+    description:
+      'Flagship vertical spinning, weaving, dyeing & finishing complex • Giza 86/94 ELS Cotton • ISO 9001 & OEKO-TEX® Standard 100.',
+    subscriptionTier: 'ENTERPRISE',
+  },
+  {
+    id: 'demo-factory-rowad',
+    name: 'Al-Rowad Dyeing, Printing & Finishing Mill',
+    description:
+      'ZDHC Level-3 jet dyeing, digital reactive printing & ZLD water recycling for European home-textile & apparel brands.',
+    subscriptionTier: 'PRO',
+  },
+  {
+    id: 'demo-factory-delta',
+    name: 'Delta Linen & Hotel Terry Export Mills',
+    description:
+      '550 GSM combed Egyptian cotton terry towels & 400TCpercale hospitality bedlinen • BSCI & GOTS Certified.',
+    subscriptionTier: 'PRO',
+  },
+];
+
+const FALLBACK_HOME_DPPS = [
+  {
+    id: 'demo-dpp-1',
+    listingId: 'demo-giza-yarn',
+    carbonFootprint: '1.82 kg CO2e/kg • ESPR Tier-A',
+    listing: {
+      id: 'demo-giza-yarn',
+      title: 'Giza 86 Combed Compact Yarn Ne 40/1 • SHA-256 Verified Origin',
+      price: 6.4,
+    },
+  },
+  {
+    id: 'demo-dpp-2',
+    listingId: 'demo-hotel-terry',
+    carbonFootprint: '2.15 kg CO2e/kg • 78% ZLD Recycled Water',
+    listing: {
+      id: 'demo-hotel-terry',
+      title: '550 GSM Luxury Hotel Bath Towel • OEKO-TEX Made in Green',
+      price: 8.9,
+    },
+  },
+];
+
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const t = (en: string, ar: string) => tr(locale, en, ar);
 
   let stats = {
     factories: 6,
-    products: 8,
-    jobs: 4,
+    products: 12,
+    jobs: 6,
     pools: 4,
     consortia: 3,
-    courses: 6,
-    featuredFactories: [] as any[],
-    activePools: [] as any[],
-    dppPassports: [] as any[],
+    courses: 8,
+    featuredFactories: FALLBACK_HOME_FACTORIES as any[],
+    activePools: FALLBACK_HOME_POOLS as any[],
+    dppPassports: FALLBACK_HOME_DPPS as any[],
   };
 
   try {
@@ -74,7 +152,17 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           take: 2,
         }),
       ]);
-    stats = { factories, products, jobs, pools, consortia, courses, featuredFactories, activePools, dppPassports };
+    stats = {
+      factories: factories || 6,
+      products: products || 12,
+      jobs: jobs || 6,
+      pools: pools || 4,
+      consortia: consortia || 3,
+      courses: courses || 8,
+      featuredFactories: featuredFactories.length > 0 ? featuredFactories : FALLBACK_HOME_FACTORIES,
+      activePools: activePools.length > 0 ? activePools : FALLBACK_HOME_POOLS,
+      dppPassports: dppPassports.length > 0 ? dppPassports : FALLBACK_HOME_DPPS,
+    };
   } catch (e) {
     console.error('Failed to fetch homepage stats', e);
   }
@@ -82,59 +170,77 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   return (
     <div className="flex-1 flex flex-col">
       {/* Hero Section */}
-      <section className="w-full bg-gradient-to-br from-primary/15 via-background to-emerald-500/10 py-20 px-4 border-b">
-        <div className="container mx-auto max-w-5xl text-center space-y-6">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary">
+      <section className="w-full bg-gradient-to-br from-primary/15 via-background to-emerald-500/10 py-18 md:py-22 px-4 border-b">
+        <div className="container mx-auto max-w-6xl text-center space-y-6">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-bold text-primary shadow-2xs">
             <Sparkles className="w-3.5 h-3.5" />
             {t(
               'EU • UNIDO • Egyptian Ministry of Industry — TIGARA Digital Ecosystem',
-              'الاتحاد الأوروبي • اليونيدو • وزارة الصناعة — المنصة الرقمية لتجمع المحلة الكبرى (تيجارا)'
+              'الاتحاد الأوروبي • اليونيدو • وزارة الصناعة — المنصة الرقمية لتجمع المحلة الكبرى (مشروع تجارة)'
             )}
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-foreground leading-tight">
+          <h1 className="text-4xl md:text-6xl font-black tracking-tight text-foreground leading-tight">
             {t(
               'El-Mahalla El-Kubra Industrial Textile Cluster Platform',
               'المنصة المتكاملة لتجمع المحلة الكبرى لصناعة الغزل والنسيج'
             )}
           </h1>
 
-          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg md:text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
             {t(
-              'Uniting Egyptian spinning, weaving, dyeing, and garment factories to pool raw-material procurement, exchange idle capacity, form export consortia, build global textile brands & marketing campaigns, and train teams on any topic with AI.',
-              'توحيد مصانع الغزل والنسيج والصباغة والملابس بالمحلة الكبرى للشراء المشترك للخامات، وتبادل الطاقات الإنتاجية، وتشكيل التحالفات التصديرية، وبناء العلامات التجارية وأتمتة التسويق، وتوليد دورات تدريبية احترافية لأي موضوع بالذكاء الاصطناعي.'
+              'Uniting Egyptian spinning, weaving, dyeing, and garment factories to apply Lean Six Sigma & OEE, discover global export buyers across 190+ countries, pool raw-material procurement, form export consortia, and train teams on any topic with 7 free AI models.',
+              'توحيد مصانع الغزل والنسيج والصباغة والملابس بالمحلة الكبرى لتطبيق التصنيع الرشيق ولين 6 سيجما، واستكشاف المشترين الدوليين في 190+ دولة، والشراء المجمع للخامات، وتشكيل التحالفات التصديرية، وتدريب الكوادر بالذكاء الاصطناعي.'
             )}
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3 pt-4">
             <Link href={`/${locale}/cluster`}>
-              <Button size="lg" className="h-13 px-7 text-base rounded-full shadow-lg shadow-primary/20">
+              <Button size="lg" className="h-12 px-6 text-sm md:text-base font-bold rounded-full shadow-lg shadow-primary/20">
                 <Network className="w-5 h-5 me-2" />
-                {t('Enter Cluster Collaboration Hub', 'دخول مركز تعاون وتحديث التجمع')}
+                {t('Cluster Command Hub', 'مركز قيادة التجمع')}
+              </Button>
+            </Link>
+            <Link href={`/${locale}/cluster/lean-manufacturing`}>
+              <Button
+                size="lg"
+                className="h-12 px-6 text-sm md:text-base font-bold rounded-full bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white shadow-lg"
+              >
+                <Gauge className="w-5 h-5 me-2" />
+                {t('Lean Six Sigma & OEE Hub', 'مركز اللين 6 سيجما و OEE')}
+              </Button>
+            </Link>
+            <Link href={`/${locale}/cluster/export-intelligence`}>
+              <Button
+                size="lg"
+                className="h-12 px-6 text-sm md:text-base font-bold rounded-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white shadow-lg"
+              >
+                <Globe2 className="w-5 h-5 me-2" />
+                {t('Global Export & Buyers AI', 'ذكاء التصدير والمشترين الدوليين')}
               </Button>
             </Link>
             <Link href={`/${locale}/cluster/brand-studio`}>
               <Button
                 size="lg"
-                className="h-13 px-7 text-base rounded-full bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white shadow-lg"
+                className="h-12 px-6 text-sm md:text-base font-bold rounded-full bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white shadow-lg"
               >
                 <Megaphone className="w-5 h-5 me-2" />
-                {t('AI Brand & Marketing Studio', 'استوديو الهوية والتسويق الذكي')}
+                {t('AI Brand & Print Studio', 'استوديو الهوية والمطبوعات')}
               </Button>
             </Link>
             <Link href={`/${locale}/cluster/academy`}>
               <Button
                 size="lg"
-                className="h-13 px-7 text-base rounded-full bg-gradient-to-r from-indigo-600 to-emerald-600 hover:from-indigo-700 hover:to-emerald-700 text-white shadow-lg"
+                className="h-12 px-6 text-sm md:text-base font-bold rounded-full bg-gradient-to-r from-indigo-600 to-emerald-600 hover:from-indigo-700 hover:to-emerald-700 text-white shadow-lg"
               >
                 <GraduationCap className="w-5 h-5 me-2" />
-                {t('Academy & AI Course Studio', 'الأكاديمية واستوديو الدورات الذكي')}
+                {t('Academy & AI Course Studio', 'الأكاديمية واستوديو الدورات')}
               </Button>
             </Link>
             <Link href={`/${locale}/ai`}>
-              <Button variant="outline" size="lg" className="h-13 px-6 text-base rounded-full">
+              <Button variant="outline" size="lg" className="h-12 px-6 text-sm md:text-base font-bold rounded-full">
                 <Bot className="w-5 h-5 me-2 text-primary" />
-                {t('AI Trade & Engineering Advisor', 'المستشار الهندسي والتصديري الذكي')}
+                {t('7-LLM AI Arena', 'مركز الذكاء الاصطناعي')}
               </Button>
             </Link>
           </div>
@@ -147,32 +253,32 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           <div className="grid grid-cols-2 md:grid-cols-6 gap-6 text-center">
             <div className="space-y-1">
               <Factory className="w-7 h-7 mx-auto text-primary" />
-              <div className="text-3xl font-extrabold">{fmtNumber(locale, stats.factories || 6)}</div>
+              <div className="text-3xl font-extrabold">{fmtNumber(locale, stats.factories)}</div>
               <p className="text-xs text-muted-foreground font-medium">{t('Verified Factories', 'مصانع معتمدة')}</p>
             </div>
             <div className="space-y-1">
               <ShoppingCart className="w-7 h-7 mx-auto text-sky-600" />
-              <div className="text-3xl font-extrabold">{fmtNumber(locale, stats.pools || 4)}</div>
+              <div className="text-3xl font-extrabold">{fmtNumber(locale, stats.pools)}</div>
               <p className="text-xs text-muted-foreground font-medium">{t('Joint Buying Pools', 'مجموعات شراء مشترك')}</p>
             </div>
             <div className="space-y-1">
               <Handshake className="w-7 h-7 mx-auto text-emerald-600" />
-              <div className="text-3xl font-extrabold">{fmtNumber(locale, stats.consortia || 3)}</div>
+              <div className="text-3xl font-extrabold">{fmtNumber(locale, stats.consortia)}</div>
               <p className="text-xs text-muted-foreground font-medium">{t('Export Consortia', 'تحالفات تصديرية')}</p>
             </div>
             <div className="space-y-1">
               <Package className="w-7 h-7 mx-auto text-amber-600" />
-              <div className="text-3xl font-extrabold">{fmtNumber(locale, stats.products || 8)}</div>
+              <div className="text-3xl font-extrabold">{fmtNumber(locale, stats.products)}</div>
               <p className="text-xs text-muted-foreground font-medium">{t('Active B2B Listings', 'عروض المنتجات والموارد')}</p>
             </div>
             <div className="space-y-1">
               <GraduationCap className="w-7 h-7 mx-auto text-violet-600" />
-              <div className="text-3xl font-extrabold">{fmtNumber(locale, stats.courses || 6)}</div>
+              <div className="text-3xl font-extrabold">{fmtNumber(locale, stats.courses)}</div>
               <p className="text-xs text-muted-foreground font-medium">{t('Academy Programs', 'برامج الأكاديمية')}</p>
             </div>
             <div className="space-y-1">
               <Briefcase className="w-7 h-7 mx-auto text-primary" />
-              <div className="text-3xl font-extrabold">{fmtNumber(locale, stats.jobs || 4)}</div>
+              <div className="text-3xl font-extrabold">{fmtNumber(locale, stats.jobs)}</div>
               <p className="text-xs text-muted-foreground font-medium">{t('Industrial Jobs', 'وظائف صناعية')}</p>
             </div>
           </div>
@@ -321,7 +427,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 return (
                   <Link key={p.id} href={`/${locale}/cluster/procurement/${p.id}`} className="block">
                     <Card className="p-4 hover:border-primary/50 transition-colors space-y-2">
-                      <div className="flex justify-between items-center">
+                      <div className="flex justify-between items-center gap-2">
                         <span className="font-bold text-sm">{locale === 'ar' ? p.titleAr || p.title : p.title}</span>
                         <Pill tone="emerald">
                           {fmtMoney(locale, Number(p.targetUnitPrice || 0), p.currency)}/{p.unit}
