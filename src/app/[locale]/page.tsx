@@ -6,6 +6,7 @@ import { tr, fmtNumber, fmtMoney } from '@/lib/i18n-inline';
 import { Pill, ProgressBar } from '@/components/cluster/ui';
 import { InstantTopicCourseBar } from '@/components/cluster/modern/InstantTopicCourseBar';
 import { InstantBrandStudioBar } from '@/components/cluster/modern/InstantBrandStudioBar';
+import { InstantExportIntelligenceBar } from '@/components/cluster/modern/InstantExportIntelligenceBar';
 import {
   Factory,
   Package,
@@ -177,8 +178,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </div>
       </section>
 
-      {/* Instant Any-Topic AI Course & Brand Studio Spotlights */}
+      {/* Instant Any-Topic AI Export Intelligence, Course & Brand Studio Spotlights */}
       <section className="container mx-auto pt-12 px-4 space-y-6">
+        <InstantExportIntelligenceBar locale={locale} />
         <InstantTopicCourseBar locale={locale} />
         <InstantBrandStudioBar locale={locale} />
       </section>

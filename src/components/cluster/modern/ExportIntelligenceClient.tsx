@@ -40,10 +40,14 @@ import {
   synthesizeExportIntelligence,
   type ExportIntelligenceReport,
   type ExportOpportunityTender,
+  type TrustedBuyerLead,
 } from '@/server/modernization/export-intelligence';
 
 interface Props {
   locale: string;
+  initialProduct?: string;
+  initialCountry?: string;
+  initialTab?: string;
 }
 
 type ActiveTab =
@@ -53,6 +57,15 @@ type ActiveTab =
   | 'PROMOTION'
   | 'BUYERS'
   | 'NTM_STANDARDS';
+
+const VALID_TABS: ActiveTab[] = [
+  'MARKET_STUDY',
+  'MARKET_ENTRY',
+  'TENDERS',
+  'PROMOTION',
+  'BUYERS',
+  'NTM_STANDARDS',
+];
 
 const QUICK_COUNTRIES = [
   { en: 'Germany', ar: 'ألمانيا', flag: '🇩🇪' },
@@ -67,25 +80,32 @@ const QUICK_COUNTRIES = [
   { en: 'Canada', ar: 'كندا', flag: '🇨🇦' },
 ];
 
-export function ExportIntelligenceClient({ locale }: Props) {
+export function ExportIntelligenceClient({
+  locale,
+  initialProduct,
+  initialCountry,
+  initialTab,
+}: Props) {
   const isAr = locale === 'ar';
 
-  const [productInput, setProductInput] = useState(
-    EXPORT_INTELLIGENCE_PRESETS[0].product
-  );
-  const [countryInput, setCountryInput] = useState(
-    EXPORT_INTELLIGENCE_PRESETS[0].country
-  );
+  const startProduct = initialProduct?.trim() || EXPORT_INTELLIGENCE_PRESETS[0].product;
+  const startCountry = initialCountry?.trim() || EXPORT_INTELLIGENCE_PRESETS[0].country;
+  const startTab: ActiveTab = VALID_TABS.includes(initialTab as ActiveTab)
+    ? (initialTab as ActiveTab)
+    : 'MARKET_STUDY';
+
+  const [productInput, setProductInput] = useState(startProduct);
+  const [countryInput, setCountryInput] = useState(startCountry);
   const [loading, setLoading] = useState(false);
 
   const [report, setReport] = useState<ExportIntelligenceReport>(() =>
     synthesizeExportIntelligence({
-      product: EXPORT_INTELLIGENCE_PRESETS[0].product,
-      country: EXPORT_INTELLIGENCE_PRESETS[0].country,
+      product: startProduct,
+      country: startCountry,
     })
   );
 
-  const [activeTab, setActiveTab] = useState<ActiveTab>('MARKET_STUDY');
+  const [activeTab, setActiveTab] = useState<ActiveTab>(startTab);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Interactive Pricing Calculator state
@@ -101,12 +121,14 @@ export function ExportIntelligenceClient({ locale }: Props) {
   const [bidCompanyName, setBidCompanyName] = useState('El-Mahalla Heritage Textiles Co.');
   const [bidLeadTimeWeeks, setBidLeadTimeWeeks] = useState(4);
 
-  // Buyer Outreach Studio state
+  // Buyer Outreach Studio & Custom Buyer Finder state
   const [selectedBuyerIdx, setSelectedBuyerIdx] = useState(0);
   const [selectedStageIdx, setSelectedStageIdx] = useState(0);
   const [outreachLang, setOutreachLang] = useState<'en' | 'ar'>('en');
   const [senderName, setSenderName] = useState('Karim El-Sakka — Head of Global Exports');
   const [senderFactory, setSenderFactory] = useState('El-Mahalla Premier Spinning & Weaving');
+  const [customBuyerQuery, setCustomBuyerQuery] = useState('');
+  const [showProformaModal, setShowProformaModal] = useState(false);
 
   // AI Buyer Negotiation Copilot state
   const [objectionPrompt, setObjectionPrompt] = useState('');
@@ -1553,7 +1575,7 @@ ${bidCompanyName}`;
       {activeTab === 'BUYERS' && (
         <div className="space-y-6">
           <div className="grid gap-6 lg:grid-cols-12">
-            {/* Left Column: Verified Buyers List */}
+            {/* Left Column: Verified Buyers List + Custom Buyer Synthesizer */}
             <div className="lg:col-span-5 space-y-3">
               <div className="flex items-center justify-between">
                 <h3 className="text-base font-bold">
@@ -1566,6 +1588,69 @@ ${bidCompanyName}`;
                 <Pill tone="emerald">
                   {report.trustedBuyers.length} {tr(locale, 'Verified', 'مشتري موثق')}
                 </Pill>
+              </div>
+
+              {/* Custom Buyer Search / Add Any Specific Buyer Company */}
+              <div className="rounded-2xl border bg-muted/30 p-3 space-y-2">
+                <div className="text-[11px] font-bold text-muted-foreground">
+                  {tr(
+                    locale,
+                    'Target a Specific Buyer or Retail Chain (Instant Profile & Outreach Pack):',
+                    'استهدف شركة مستوردة أو سلسلة تجزئة محددة (توليد ملف تواصل فوري):'
+                  )}
+                </div>
+                <div className="flex gap-1.5">
+                  <div className="relative flex-1">
+                    <Search className="h-3.5 w-3.5 text-muted-foreground absolute top-2.5 start-2.5" />
+                    <input
+                      type="text"
+                      value={customBuyerQuery}
+                      onChange={(e) => setCustomBuyerQuery(e.target.value)}
+                      placeholder={tr(
+                        locale,
+                        'e.g., IKEA, Carrefour, Zara Home, Marriott...',
+                        'مثال: إيكيا، كارفور، زارا هوم، ماريوت...'
+                      )}
+                      className="w-full rounded-xl border bg-background ps-8 pe-2.5 py-1.5 text-xs"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const name = customBuyerQuery.trim();
+                      if (!name) return;
+                      const templateBuyer = report.trustedBuyers[0];
+                      const slug = name
+                        .toLowerCase()
+                        .replace(/[^a-z0-9]+/g, '')
+                        .slice(0, 18) || 'buyer';
+                      const newBuyer: TrustedBuyerLead = {
+                        ...templateBuyer,
+                        id: `custom-buyer-${Date.now()}`,
+                        companyName: name,
+                        trustScore: 95,
+                        websiteDomain: `www.${slug}.com`,
+                        contactEmailPattern: `sourcing@${slug}.com`,
+                        outreachTemplates: templateBuyer.outreachTemplates.map((tpl) => ({
+                          ...tpl,
+                          subjectEn: tpl.subjectEn.replace(templateBuyer.companyName, name),
+                          subjectAr: tpl.subjectAr.replace(templateBuyer.companyName, name),
+                          bodyEn: tpl.bodyEn.replaceAll(templateBuyer.companyName, name),
+                          bodyAr: tpl.bodyAr.replaceAll(templateBuyer.companyName, name),
+                        })),
+                      };
+                      setReport((prev) => ({
+                        ...prev,
+                        trustedBuyers: [newBuyer, ...prev.trustedBuyers],
+                      }));
+                      setSelectedBuyerIdx(0);
+                      setCustomBuyerQuery('');
+                    }}
+                    className="rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-500 transition cursor-pointer shrink-0"
+                  >
+                    + {tr(locale, 'Add Buyer', 'إضافة المشتري')}
+                  </button>
+                </div>
               </div>
 
               {report.trustedBuyers.map((buyer, idx) => {
@@ -1827,7 +1912,93 @@ ${bidCompanyName}`;
                       <MessageSquare className="h-3.5 w-3.5 text-emerald-600" />
                       {tr(locale, 'Send via WhatsApp B2B', 'إرسال عبر واتساب للأعمال')}
                     </a>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowProformaModal((prev) => !prev)}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3.5 py-2 text-xs font-bold text-amber-700 dark:text-amber-300 hover:bg-amber-500/20 transition cursor-pointer"
+                    >
+                      <FileCheck2 className="h-3.5 w-3.5" />
+                      {tr(
+                        locale,
+                        'Generate Export Proforma Invoice (PI)',
+                        'إصدار فاتورة مبدئية للتصدير (Proforma Invoice)'
+                      )}
+                    </button>
                   </div>
+
+                  {/* Expandable Official Export Proforma Invoice (PI) Dossier */}
+                  {showProformaModal && (
+                    <div className="mt-4 rounded-2xl border-2 border-amber-500/40 bg-background p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Pill tone="amber">
+                          {tr(
+                            locale,
+                            'Incoterms® 2020 Export Proforma Invoice (PI)',
+                            'فاتورة تصدير مبدئية معتمدة (Incoterms® 2020)'
+                          )}
+                        </Pill>
+                        <button
+                          type="button"
+                          onClick={() => setShowProformaModal(false)}
+                          className="text-xs text-muted-foreground hover:text-foreground"
+                        >
+                          ✕ {tr(locale, 'Close', 'إغلاق')}
+                        </button>
+                      </div>
+                      {(() => {
+                        const piNo = `PI-MHL-${new Date().getFullYear()}-${activeBuyer.trustScore}08`;
+                        const piText = `COMMERCIAL PROFORMA INVOICE — ${piNo}
+Exporter: ${senderFactory} (El-Mahalla El-Kubra Industrial Zone, Egypt)
+Consignee / Buyer: ${activeBuyer.companyName} (${activeBuyer.cityCountryEn})
+Attention: ${activeBuyer.decisionMakerRoleEn} | Domain: ${activeBuyer.websiteDomain}
+------------------------------------------------------------------------
+Commodity Description: ${report.productQueryEn}
+Harmonized System (HS) Code: ${report.hsCode} (${report.hsDescriptionEn})
+Country of Origin: Arab Republic of Egypt (El-Mahalla El-Kubra Cluster)
+Preferential Trade Treaty: ${report.tradeAgreement.nameEn}
+Origin Certificate Included: ${report.tradeAgreement.originCertificate} (Destination Duty: ${report.tradeAgreement.egyptPreferentialTariffPct} vs MFN ${report.tradeAgreement.mfnTariffPct})
+------------------------------------------------------------------------
+Order Quantity: ${orderQty.toLocaleString()} Units (${pricing.unitName})
+Unit Price (FOB Alexandria/Damietta, Incoterms® 2020): $${pricing.fob.toFixed(2)} USD
+Total FOB Value: $${pricing.totalFobOrder.toLocaleString()} USD
+Unit Price (CIF ${report.marketStudy.seaPortRouteEn}): $${pricing.cifUnit.toFixed(2)} USD
+Total CIF Value: $${Math.round(pricing.cifUnit * orderQty).toLocaleString()} USD
+------------------------------------------------------------------------
+Payment Terms: ${activeBuyer.preferredPaymentTerms}
+Estimated Sea Transit: ${report.marketStudy.seaTransitDays}
+NTM & Lab Compliance Warranty: Certified compliant with ${report.ntmAndStandards.measures
+                          .slice(0, 3)
+                          .map((m) => m.code)
+                          .join(', ')} (ISO/IEC 17025 Lab Report attached).
+
+Authorized Exporter Signatory: ${senderName}`;
+                        return (
+                          <div className="space-y-2">
+                            <pre className="whitespace-pre-wrap rounded-xl border bg-muted/40 p-3.5 text-xs font-mono leading-relaxed overflow-x-auto">
+                              {piText}
+                            </pre>
+                            <div className="flex flex-wrap gap-2">
+                              <button
+                                type="button"
+                                onClick={() => copyText('pi-doc', piText)}
+                                className="inline-flex items-center gap-1.5 rounded-xl bg-amber-600 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-amber-500 transition cursor-pointer"
+                              >
+                                {copiedId === 'pi-doc' ? (
+                                  <Check className="h-3.5 w-3.5" />
+                                ) : (
+                                  <Copy className="h-3.5 w-3.5" />
+                                )}
+                                {copiedId === 'pi-doc'
+                                  ? tr(locale, 'Copied Proforma Invoice!', 'تم نسخ الفاتورة المبدئية!')
+                                  : tr(locale, 'Copy Proforma Invoice', 'نسخ الفاتورة المبدئية')}
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  )}
                 </div>
 
                 {/* AI Live Buyer Objection & Negotiation Copilot */}

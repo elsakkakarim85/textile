@@ -16,10 +16,13 @@ export const dynamic = 'force-dynamic';
 
 export default async function ExportIntelligencePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ product?: string; country?: string; tab?: string }>;
 }) {
   const { locale } = await params;
+  const sp = await searchParams;
   const t = (en: string, ar: string) => tr(locale, en, ar);
 
   return (
@@ -80,7 +83,12 @@ export default async function ExportIntelligencePage({
         />
       </div>
 
-      <ExportIntelligenceClient locale={locale} />
+      <ExportIntelligenceClient
+        locale={locale}
+        initialProduct={sp.product}
+        initialCountry={sp.country}
+        initialTab={sp.tab}
+      />
     </div>
   );
 }

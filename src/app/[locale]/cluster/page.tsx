@@ -9,6 +9,7 @@ import { safeQuery, currentUserId, findUserFactory } from '@/server/cluster';
 import { tr, fmtNumber } from '@/lib/i18n-inline';
 import { PageHeader, StatCard, DbOfflineBanner } from '@/components/cluster/ui';
 import { InstantBrandStudioBar } from '@/components/cluster/modern/InstantBrandStudioBar';
+import { InstantExportIntelligenceBar } from '@/components/cluster/modern/InstantExportIntelligenceBar';
 
 export const dynamic = 'force-dynamic';
 
@@ -127,7 +128,8 @@ export default async function ClusterHubPage({ params }: { params: Promise<{ loc
         <StatCard label={t('Certificates earned', 'الشهادات المكتسبة')} value={fmtNumber(locale, c.completions)} icon={GraduationCap} tone="amber" />
       </div>
 
-      <div className="mb-10">
+      <div className="mb-10 space-y-6">
+        <InstantExportIntelligenceBar locale={locale} />
         <InstantBrandStudioBar locale={locale} />
       </div>
 
