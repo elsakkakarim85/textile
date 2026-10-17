@@ -55,8 +55,43 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
     {
       href: `/${locale}/cluster`,
       icon: Network,
-      title: t('Cluster Collaboration Hub', 'مركز تعاون وتحديث التجمع'),
+      title: t('Cluster Collaboration Hub (17 Modules)', 'مركز تعاون وتحديث التجمع (١٧ وحدة)'),
       desc: t('Joint procurement, capacity exchange, export consortia, shared labs, academy & grants.', 'الشراء المشترك، تبادل الطاقات، التحالفات التصديرية، المعامل المشتركة، الأكاديمية والمنح.'),
+      highlight: true,
+    },
+    {
+      href: `/${locale}/cluster/lean-manufacturing`,
+      icon: Gauge,
+      title: t('Lean Management & Six Sigma Hub (9 Pillars)', 'مركز الإدارة الرشيقة ولين 6 سيجما (٩ ركائز)'),
+      desc: t('VSM, Little’s Law, 5S & Red-Tagging, OEE, SMED, Yamazumi, Kanban, Heijunka, FMEA, SPC Cp/Cpk, SQDC & Toyota A3.', 'تخطيط تدفق القيمة VSM، تدقيق 5S، حاسبة OEE و SMED، موازنة الخطوط، كانبان، FMEA، ضبط الجودة Cpk وتقرير A3.'),
+      highlight: true,
+    },
+    {
+      href: `/${locale}/cluster/export-intelligence`,
+      icon: Sparkles,
+      title: t('Export Intelligence, Tenders & Verified Buyers', 'ذكاء التصدير والمناقصات والمشترين المعتمدين'),
+      desc: t('AI market studies, entry strategies, active export tenders, buyer matchmaking, B2B outreach & NTM/CBAM analyzer.', 'دراسات السوق بالذكاء الاصطناعي، استراتيجيات التصدير، المناقصات الدولية، الوصول للمشترين وتحليل المواصفات.'),
+      highlight: true,
+    },
+    {
+      href: `/${locale}/cluster/brand-studio`,
+      icon: Sparkles,
+      title: t('AI Brand, Marketing & Media Studio', 'استوديو بناء العلامات التجارية والتسويق الآلي'),
+      desc: t('Create textile brand identities, 90-day marketing plans, automation workflows, video scripts, flyers & brochures.', 'إنشاء الهوية التجارية، الخطط التسويقية، الأتمتة، وتصميم الكتالوجات والبروشورات والفيديوهات.'),
+      highlight: true,
+    },
+    {
+      href: `/${locale}/cluster/academy/studio`,
+      icon: Sparkles,
+      title: t('AI Course Studio & Workforce Certification', 'استوديو بناء الدورات الذكي والشهادات المعتمدة'),
+      desc: t('Generate Beginner-to-Advanced multimedia courses from your factory needs & authorized UNIDO/ZDHC/ISO standards.', 'بناء دورات تدريبية متعددة الوسائط (مبتدئ ← متقدم) حسب احتياجات مصنعك وبمراجع دولية معتمدة.'),
+      highlight: true,
+    },
+    {
+      href: `/${locale}/ai`,
+      icon: Sparkles,
+      title: t('Multi-LLM Free AI Command Center & Arena', 'مركز قيادة ومقارنة نماذج الذكاء الاصطناعي المجانية'),
+      desc: t('Switch between Llama 3.3 70B, DeepSeek R1, Gemini 2.5 Flash, Qwen 2.5 72B & Mistral or benchmark side-by-side.', 'التبديل بين أقوى النماذج المجانية ومقارنة إجاباتها جنباً إلى جنب لكافة وحدات المنصة.'),
       highlight: true,
     },
     {
@@ -64,6 +99,12 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
       icon: Building2,
       title: t('My Factory Portal & Catalog', 'إدارة مصنعي والكتالوج والجواز الرقمي'),
       desc: t('Manage products, idle machine capacity, Circular Waste listings, and EU Digital Product Passports.', 'إدارة المنتجات، الماكينات، العوادم، وإصدار جواز السفر الرقمي للمنتج (DPP).'),
+    },
+    {
+      href: `/${locale}/dpp/demo-giza86-sateen`,
+      icon: ShieldCheck,
+      title: t('EU Digital Product Passport (DPP) Verifier', 'بوابة التحقق من جواز المنتج الرقمي الأوروبي (DPP)'),
+      desc: t('Cryptographically signed SHA-256 traceability record covering fiber origin, CBAM carbon, water & Six Sigma Cpk.', 'شهادة تتبع رقمية مشفرة لمنشأ القطن والبصمة الكربونية والمياه وجودة التصنيع الرشيق.'),
     },
     {
       href: `/${locale}/dashboard/buyer/rfqs`,
@@ -94,13 +135,6 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
       icon: MessageSquare,
       title: t('B2B Trade Inbox & Negotiations', 'صندوق الرسائل والمفاوضات التجارية'),
       desc: t('Direct messaging between buyers, factories, and consortium partners.', 'التواصل المباشر والمفاوضات بين المشترين والمصانع والشركاء.'),
-    },
-    {
-      href: `/${locale}/cluster/academy/studio`,
-      icon: Sparkles,
-      title: t('AI Course Studio & Workforce Certification', 'استوديو بناء الدورات الذكي والشهادات المعتمدة'),
-      desc: t('Generate Beginner-to-Advanced multimedia courses from your factory needs & authorized UNIDO/ZDHC/ISO standards.', 'بناء دورات تدريبية متعددة الوسائط (مبتدئ ← متقدم) حسب احتياجات مصنعك وبمراجع دولية معتمدة.'),
-      highlight: true,
     },
     {
       href: `/${locale}/dashboard/knowledge`,

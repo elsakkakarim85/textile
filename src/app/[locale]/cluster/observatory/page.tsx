@@ -216,6 +216,77 @@ export default async function ObservatoryPage({ params }: { params: Promise<{ lo
           })}
         </div>
       </Card>
+
+      {/* Cluster-Wide Lean Six Sigma & Export Competitiveness Telemetry */}
+      <Card className="p-6 border-2 border-emerald-500/30 bg-emerald-500/5">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
+          <div>
+            <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-600">
+              {t(
+                'TPS & LEAN SIX SIGMA OPERATIONAL BENCHMARKS',
+                'مؤشرات التصنيع الرشيق ولين 6 سيجما على مستوى التجمع'
+              )}
+            </span>
+            <h3 className="font-extrabold text-lg mt-0.5">
+              {t(
+                'Cluster Operational Excellence, OEE, SMED & Six Sigma Capability',
+                'كفاءة التشغيل الكلية (OEE) وتقليص الفواقد وقدرة العمليات (Cpk) في مصانع المحلة'
+              )}
+            </h3>
+          </div>
+          <Pill tone="emerald">
+            {t('9-Pillar TPS Benchmark Active', 'معيار تويوتا ٩ ركائز نشط')}
+          </Pill>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="rounded-xl border bg-background p-4 space-y-1.5">
+            <div className="text-xs text-muted-foreground">
+              {t('Cluster Median OEE', 'متوسط كفاءة الماكينات OEE')}
+            </div>
+            <div className="text-2xl font-extrabold text-emerald-600">76.8%</div>
+            <div className="text-[11px] text-muted-foreground">
+              {t('Top Quartile: 84.5% (World-Class)', 'الربع الأعلى: ٨٤.٥٪')}
+            </div>
+          </div>
+          <div className="rounded-xl border bg-background p-4 space-y-1.5">
+            <div className="text-xs text-muted-foreground">
+              {t('SMED Setup Time Cut', 'متوسط خفض زمن التغيير SMED')}
+            </div>
+            <div className="text-2xl font-extrabold text-sky-600">-58%</div>
+            <div className="text-[11px] text-muted-foreground">
+              {t('162 min → 68 min avg changeover', 'من ١٦٢ إلى ٦٨ دقيقة')}
+            </div>
+          </div>
+          <div className="rounded-xl border bg-background p-4 space-y-1.5">
+            <div className="text-xs text-muted-foreground">
+              {t('Six Sigma Capability (Cpk)', 'قدرة العملية الإحصائية Cpk')}
+            </div>
+            <div className="text-2xl font-extrabold text-purple-600">1.42</div>
+            <div className="text-[11px] text-muted-foreground">
+              {t('4.3σ • RFT Dyeing & Weaving ≥ 96.2%', 'مطابقة المرة الأولى ٩٦.٢٪')}
+            </div>
+          </div>
+          <div className="rounded-xl border bg-background p-4 space-y-1.5">
+            <div className="text-xs text-muted-foreground">
+              {t('5S Workplace Audit Avg', 'متوسط تدقيق بيئة العمل 5S')}
+            </div>
+            <div className="text-2xl font-extrabold text-amber-600">81%</div>
+            <div className="text-[11px] text-muted-foreground">
+              {t('Silver Shingo Certified Cluster', 'المستوى الفضي المعتمد')}
+            </div>
+          </div>
+          <div className="rounded-xl border bg-background p-4 space-y-1.5">
+            <div className="text-xs text-muted-foreground">
+              {t('EU CBAM & DPP Readiness', 'جاهزية جواز المنتج و CBAM')}
+            </div>
+            <div className="text-2xl font-extrabold text-emerald-600">88%</div>
+            <div className="text-[11px] text-muted-foreground">
+              {t('EUR.1 + ZDHC Level 3 Tracked', 'تتبع كامل لسلسلة التوريد')}
+            </div>
+          </div>
+        </div>
+      </Card>
     </div>
   );
 }

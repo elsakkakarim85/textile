@@ -7,8 +7,10 @@ import { arSA } from '@clerk/localizations';
 import { Metadata, Viewport } from 'next';
 import { Fira_Sans } from 'next/font/google';
 import Navbar from '@/components/Navbar';
+import { Footer } from '@/components/Footer';
 import { Providers } from '@/components/Providers';
 import { UniversalModuleAiCopilot } from '@/components/cluster/UniversalModuleAiCopilot';
+import { GlobalQuickToolsDock } from '@/components/cluster/GlobalQuickToolsDock';
 
 import '../globals.css';
 
@@ -78,6 +80,8 @@ export default async function LocaleLayout({
                 {children}
                 <UniversalModuleAiCopilot locale={locale} />
               </main>
+              <GlobalQuickToolsDock locale={locale} />
+              <Footer locale={locale} />
             </Providers>
           </NextIntlClientProvider>
         </body>
