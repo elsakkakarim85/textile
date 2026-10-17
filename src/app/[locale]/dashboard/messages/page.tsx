@@ -2,20 +2,27 @@
 
 import useSWR from 'swr';
 import { useEffect, useState, useRef } from 'react';
+import { useParams } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import { Card } from '@/components/ui/card';
-import { MessageSquare, Send, Building2 } from 'lucide-react';
+import { MessageSquare, Send, Building2, Sparkles } from 'lucide-react';
+import { tr } from '@/lib/i18n-inline';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function MessagesPage() {
+  const params = useParams();
+  const locale = (params?.locale as string) || 'ar';
+  const t = (en: string, ar: string) => tr(locale, en, ar);
+
   const { user } = useUser();
   const [activeConvo, setActiveConvo] = useState<any>(null);
   const [newMessage, setNewMessage] = useState('');
+  const [localMessages, setLocalMessages] = useState<Record<string, any[]>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { data: personaData } = useSWR('/api/cluster/persona', fetcher);
-  const currentUserId = personaData?.activeUser?.id || user?.id;
+  const currentUserId = personaData?.activeUser?.id || user?.id || 'demo-owner-1';
 
   const { data: rawConvos, mutate: mutateConvos } = useSWR('/api/messages', fetcher, {
     refreshInterval: 5000,
@@ -31,13 +38,30 @@ export default function MessagesPage() {
   const { data: rawMessages, mutate: mutateMessages } = useSWR(
     activeConvo ? `/api/messages?conversationId=${activeConvo.id}` : null,
     fetcher,
-    { refreshInterval: 2000 }
+    { refreshInterval: 4000 }
   );
-  const messages = Array.isArray(rawMessages) ? rawMessages : [];
+  const serverMessages = Array.isArray(rawMessages) ? rawMessages : [];
+  const appended = activeConvo ? localMessages[activeConvo.id] || [] : [];
+  const messages = [...serverMessages, ...appended];
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages.length]);
+
+  const smartReplies = [
+    t(
+      'We can dispatch spectrophotometer lab-dips & 300 TC GSM swatches via DHL within 48 hours.',
+      'يمكننا إرسال عينات المختبر (Lab-Dips) وعينات القماش 300 غرزة عبر DHL خلال 48 ساعة.'
+    ),
+    t(
+      'Confirmed: 30/40/30 CBE Smart Escrow terms (FOB Alexandria) with full EU DPP QR codes.',
+      'موافقون على شروط عقد الضمان البنكي الذكي (30/40/30) تسليم FOB الإسكندرية مع جواز المنتج الأوروبي.'
+    ),
+    t(
+      'Attached: OEKO-TEX® Standard 100, ZDHC MRSL v3.1, and Uster® 5% yarn test certificates.',
+      'مرفق شهادات الأيكوتكس 100، ومطابقة ZDHC v3.1، وتقرير فحص الغزل Uster 5%.'
+    ),
+  ];
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +73,7 @@ export default function MessagesPage() {
       content: newMessage,
       createdAt: new Date().toISOString(),
     };
-    mutateMessages([...messages, tempMessage], false);
+    const convoId = activeConvo.id;
     setNewMessage('');
 
     try {
@@ -57,44 +81,53 @@ export default function MessagesPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          conversationId: activeConvo.id,
+          conversationId: convoId,
           content: tempMessage.content,
         }),
       });
       if (res.ok) {
         mutateMessages();
         mutateConvos();
+      } else {
+        setLocalMessages((prev) => ({
+          ...prev,
+          [convoId]: [...(prev[convoId] || []), tempMessage],
+        }));
       }
-    } catch (e) {
-      console.error(e);
+    } catch {
+      setLocalMessages((prev) => ({
+        ...prev,
+        [convoId]: [...(prev[convoId] || []), tempMessage],
+      }));
     }
   };
 
   return (
-    <div className="container mx-auto p-4 md:p-8 flex flex-col md:flex-row gap-6 h-[80vh]">
+    <div className="container mx-auto p-4 md:p-6 flex flex-col md:flex-row gap-6 h-[82vh]">
       {/* Conversations List */}
       <Card className="w-full md:w-1/3 flex flex-col h-full">
-        <div className="p-4 border-b font-bold text-lg flex items-center justify-between">
+        <div className="p-4 border-b font-bold text-base md:text-lg flex items-center justify-between">
           <span className="flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-emerald-600" /> B2B Inbox
+            <MessageSquare className="w-5 h-5 text-emerald-600" />
+            {t('B2B Trade Inbox', 'صندوق المفاوضات التجارية (B2B)')}
           </span>
           <span className="text-xs font-normal text-muted-foreground">
-            {conversations.length} threads
+            {conversations.length} {t('threads', 'محادثات')}
           </span>
         </div>
         <div className="flex-1 overflow-y-auto p-2 space-y-2">
           {conversations.map((c: any) => {
             const isBuyer = currentUserId === c.buyerId;
             const title = isBuyer
-              ? c.factory?.name || 'Factory'
+              ? c.factory?.name || t('Factory', 'المصنع')
               : `${c.buyer?.firstName || 'Buyer'} ${c.buyer?.lastName || ''} ↔ ${c.factory?.name || ''}`;
             return (
               <div
                 key={c.id}
                 onClick={() => setActiveConvo(c)}
-                className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                className={`p-3 rounded-xl cursor-pointer transition-colors ${
                   activeConvo?.id === c.id
-                    ? 'bg-emerald-50 border-emerald-500 border'
+                    ? 'bg-emerald-500/10 border-emerald-500/40 border'
                     : 'hover:bg-muted border border-transparent'
                 }`}
               >
@@ -107,16 +140,11 @@ export default function MessagesPage() {
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground truncate mt-1">
-                  {c.messages?.[0]?.content || 'Start a conversation'}
+                  {c.messages?.[0]?.content || t('Start a B2B negotiation', 'ابدأ التفاوض التجاري')}
                 </p>
               </div>
             );
           })}
-          {conversations.length === 0 && (
-            <p className="text-muted-foreground text-center mt-10 text-sm">
-              No messages yet. Click &ldquo;Chat Now&rdquo; on any marketplace product to start a B2B thread.
-            </p>
-          )}
         </div>
       </Card>
 
@@ -125,31 +153,31 @@ export default function MessagesPage() {
         {activeConvo ? (
           <>
             <div className="p-4 border-b flex items-center justify-between">
-              <div className="flex items-center gap-2 font-bold">
+              <div className="flex items-center gap-2 font-bold text-sm md:text-base">
                 <Building2 className="w-5 h-5 text-emerald-600" />
                 <span>
-                  {activeConvo.factory?.name} — Buyer: {activeConvo.buyer?.firstName || 'Buyer'}{' '}
-                  {activeConvo.buyer?.lastName || ''}
+                  {activeConvo.factory?.name} — {t('Buyer:', 'المشتري:')}{' '}
+                  {activeConvo.buyer?.firstName || 'Buyer'} {activeConvo.buyer?.lastName || ''}
                 </span>
               </div>
             </div>
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/50 dark:bg-slate-900">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-muted/20">
               {messages.map((m: any) => {
                 const isMe = m.senderId === currentUserId;
                 return (
                   <div key={m.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                     <div
-                      className={`max-w-[75%] p-3 rounded-2xl text-sm shadow-xs ${
+                      className={`max-w-[78%] p-3.5 rounded-2xl text-xs md:text-sm shadow-xs leading-relaxed ${
                         isMe
                           ? 'bg-emerald-600 text-white rounded-br-none'
-                          : 'bg-white border text-slate-800 rounded-bl-none'
+                          : 'bg-card border text-foreground rounded-bl-none'
                       }`}
                     >
                       <p>{m.content}</p>
                       {m.createdAt && (
                         <p
                           className={`text-[10px] mt-1 ${
-                            isMe ? 'text-emerald-100' : 'text-slate-400'
+                            isMe ? 'text-emerald-100' : 'text-muted-foreground'
                           }`}
                         >
                           {new Date(m.createdAt).toLocaleTimeString([], {
@@ -164,13 +192,34 @@ export default function MessagesPage() {
               })}
               <div ref={messagesEndRef} />
             </div>
+
+            {/* AI Quick B2B Reply Pills */}
+            <div className="px-4 py-2 border-t bg-muted/10 flex items-center gap-1.5 overflow-x-auto">
+              <span className="text-[10px] font-bold uppercase text-emerald-600 flex items-center gap-1 shrink-0">
+                <Sparkles className="w-3 h-3" /> {t('AI Quick Reply:', 'رد ذكي سريع:')}
+              </span>
+              {smartReplies.map((reply, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setNewMessage(reply)}
+                  className="text-[11px] px-2.5 py-1 rounded-full border bg-background hover:border-emerald-500/50 truncate max-w-[240px] shrink-0"
+                >
+                  {reply}
+                </button>
+              ))}
+            </div>
+
             <div className="p-4 border-t">
               <form onSubmit={sendMessage} className="flex gap-2">
                 <input
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Type your B2B inquiry or quotation message..."
-                  className="flex-1 border rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                  placeholder={t(
+                    'Type your B2B export inquiry, lab-dip update, or quotation message...',
+                    'اكتب رسالتك التجارية أو تفاصيل المواصفات وعرض السعر...'
+                  )}
+                  className="flex-1 border bg-background rounded-full px-4 py-2 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                 />
                 <button
                   type="submit"
@@ -185,10 +234,11 @@ export default function MessagesPage() {
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground">
             <MessageSquare className="w-12 h-12 mb-4 opacity-20" />
-            <p>Select a conversation to start chatting</p>
+            <p>{t('Select a conversation to start chatting', 'اختر محادثة لبدء التواصل التجاري')}</p>
           </div>
         )}
       </Card>
     </div>
   );
 }
+

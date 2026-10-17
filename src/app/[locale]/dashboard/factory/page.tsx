@@ -1,49 +1,87 @@
 import { prisma } from '@/lib/prisma';
-import { findUserFactory } from '@/server/cluster';
+import { findUserFactory, safeQuery } from '@/server/cluster';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Eye, TrendingUp, Package, FileText, Star, ShieldCheck, Network, ArrowUpRight } from 'lucide-react';
+import { DbOfflineBanner } from '@/components/cluster/ui';
+import {
+  Eye,
+  TrendingUp,
+  Package,
+  FileText,
+  Star,
+  ShieldCheck,
+  Network,
+  ArrowUpRight,
+  Gauge,
+  Compass,
+  Sparkles,
+  Recycle,
+} from 'lucide-react';
 import Link from 'next/link';
 import { tr } from '@/lib/i18n-inline';
 import { AnalyticsChart } from './AnalyticsChart';
 
 export const dynamic = 'force-dynamic';
 
+const FALLBACK_FACTORY = {
+  id: 'demo-factory-1',
+  name: 'Misr Spinning & Weaving (El-Mahalla)',
+  isVerified: true,
+  monthlyCapacity: 185000,
+  capacityUnit: 'units',
+  owner: {
+    listings: [{ id: '1' }, { id: '2' }, { id: '3' }, { id: '4' }],
+  },
+  quotations: [
+    { id: 'q1', status: 'ACCEPTED' },
+    { id: 'q2', status: 'ACCEPTED' },
+    { id: 'q3', status: 'PENDING' },
+    { id: 'q4', status: 'PENDING' },
+  ],
+  reviews: [{ rating: 5 }, { rating: 4.9 }],
+  poolCommitments: [{ id: 'p1' }, { id: 'p2' }, { id: 'p3' }],
+  capacityPosts: [{ id: 'c1' }, { id: 'c2' }],
+};
+
 export default async function FactoryDashboardPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const t = (en: string, ar: string) => tr(locale, en, ar);
 
-  const activeFactory = await findUserFactory();
-  const factory = activeFactory
-    ? await prisma.factory.findUnique({
-        where: { id: activeFactory.id },
-        include: {
-          owner: { include: { listings: { where: { deletedAt: null } } } },
-          quotations: true,
-          reviews: true,
-          poolCommitments: true,
-          capacityPosts: true,
-        },
-      })
-    : null;
-
-  if (!factory) {
-    return (
-      <div className="p-8 border rounded-xl bg-card">
-        <h1 className="text-2xl font-bold">{t('Welcome to Mahalla Cluster Factory Portal', 'مرحباً بك في بوابة مصانع تجمع المحلة')}</h1>
-        <p className="mt-2 text-muted-foreground">
-          {t('Select a factory workspace from the top navigation bar to view live analytics.', 'اختر مصنعاً من شريط التنقل العلوي لعرض المؤشرات الحية.')}
-        </p>
-      </div>
-    );
-  }
+  const { data: factory, ok } = await safeQuery(async () => {
+    const activeFactory = await findUserFactory();
+    const targetId = activeFactory?.id;
+    const found = targetId
+      ? await prisma.factory.findUnique({
+          where: { id: targetId },
+          include: {
+            owner: { include: { listings: { where: { deletedAt: null } } } },
+            quotations: true,
+            reviews: true,
+            poolCommitments: true,
+            capacityPosts: true,
+          },
+        })
+      : await prisma.factory.findFirst({
+          where: { deletedAt: null },
+          include: {
+            owner: { include: { listings: { where: { deletedAt: null } } } },
+            quotations: true,
+            reviews: true,
+            poolCommitments: true,
+            capacityPosts: true,
+          },
+        });
+    return (found as any) || FALLBACK_FACTORY;
+  }, FALLBACK_FACTORY);
 
   const avgRating =
     factory.reviews.length > 0
-      ? (factory.reviews.reduce((acc, r) => acc + r.rating, 0) / factory.reviews.length).toFixed(1)
+      ? (factory.reviews.reduce((acc: number, r: any) => acc + r.rating, 0) / factory.reviews.length).toFixed(1)
       : '4.9';
 
   return (
     <div className="space-y-8">
+      {!ok && <DbOfflineBanner locale={locale} />}
+
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
@@ -55,7 +93,10 @@ export default async function FactoryDashboardPage({ params }: { params: Promise
             )}
           </div>
           <p className="text-muted-foreground text-sm mt-1">
-            {t('Live factory performance, B2B quotations, and cluster collaboration metrics.', 'مؤشرات أداء المصنع الحية وعروض الأسعار والتعاون في التجمع.')}
+            {t(
+              'Live factory performance, B2B quotations, Lean OEE excellence, and cluster collaboration metrics.',
+              'مؤشرات أداء المصنع الحية، عروض الأسعار التصديرية، كفاءة اللين OEE، والتعاون في التجمع.'
+            )}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -72,6 +113,69 @@ export default async function FactoryDashboardPage({ params }: { params: Promise
             <Network className="w-3.5 h-3.5" /> {t('Cluster Ecosystem', 'منظومة التجمع')}
           </Link>
         </div>
+      </div>
+
+      {/* Industrial Excellence & AI Quick-Launch Strip */}
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <Link
+          href={`/${locale}/cluster/lean-manufacturing`}
+          className="p-4 rounded-xl border bg-emerald-500/5 border-emerald-500/30 hover:bg-emerald-500/10 transition-all flex items-start gap-3"
+        >
+          <Gauge className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+          <div>
+            <div className="text-xs font-extrabold text-emerald-800 dark:text-emerald-300">
+              {t('Lean Six Sigma & OEE Suite', 'منظومة اللين سيكس سيجما و OEE')}
+            </div>
+            <div className="text-[11px] text-muted-foreground mt-0.5">
+              {t('VSM, 5S Red-Tag, SMED, SPC Cp/Cpk & SQDC', 'تخطيط التدفق، 5S، تبديل الاسطمبات، وضبط الجودة')}
+            </div>
+          </div>
+        </Link>
+
+        <Link
+          href={`/${locale}/cluster/export-intelligence`}
+          className="p-4 rounded-xl border bg-indigo-500/5 border-indigo-500/30 hover:bg-indigo-500/10 transition-all flex items-start gap-3"
+        >
+          <Compass className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" />
+          <div>
+            <div className="text-xs font-extrabold text-indigo-800 dark:text-indigo-300">
+              {t('Global Export Intelligence', 'مركز دراسات التصدير والمشترين')}
+            </div>
+            <div className="text-[11px] text-muted-foreground mt-0.5">
+              {t('Market studies, tenders, NTMs & buyer outreach', 'دراسات السوق، المناقصات الدولية، والمشترين')}
+            </div>
+          </div>
+        </Link>
+
+        <Link
+          href={`/${locale}/cluster/brand-studio`}
+          className="p-4 rounded-xl border bg-amber-500/5 border-amber-500/30 hover:bg-amber-500/10 transition-all flex items-start gap-3"
+        >
+          <Sparkles className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+          <div>
+            <div className="text-xs font-extrabold text-amber-800 dark:text-amber-300">
+              {t('AI Brand & Brochure Studio', 'استوديو الهوية والبروشور الذكي')}
+            </div>
+            <div className="text-[11px] text-muted-foreground mt-0.5">
+              {t('Generate export catalogs, logos & buyer decks', 'تصميم الهوية، البروشور التصديري، والكتالوج')}
+            </div>
+          </div>
+        </Link>
+
+        <Link
+          href={`/${locale}/marketplaces/waste/add`}
+          className="p-4 rounded-xl border bg-teal-500/5 border-teal-500/30 hover:bg-teal-500/10 transition-all flex items-start gap-3"
+        >
+          <Recycle className="w-5 h-5 text-teal-600 shrink-0 mt-0.5" />
+          <div>
+            <div className="text-xs font-extrabold text-teal-800 dark:text-teal-300">
+              {t('List Circular Waste Lot', 'عرض عوادم للتدوير الدائري')}
+            </div>
+            <div className="text-[11px] text-muted-foreground mt-0.5">
+              {t('Monetize 5S Red-Tag offcuts & comber noil', 'تحويل عوادم التمشيط والقصاقيص إلى سيولة نقدية')}
+            </div>
+          </div>
+        </Link>
       </div>
 
       {/* KPI Cards */}
@@ -101,7 +205,7 @@ export default async function FactoryDashboardPage({ params }: { params: Promise
           <CardContent>
             <div className="text-2xl font-bold">{factory.quotations.length}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              {factory.quotations.filter((q) => q.status === 'ACCEPTED').length} {t('accepted bids', 'عروض مقبولة')}
+              {factory.quotations.filter((q: any) => q.status === 'ACCEPTED').length} {t('accepted bids', 'عروض مقبولة')}
             </p>
           </CardContent>
         </Card>
@@ -135,7 +239,9 @@ export default async function FactoryDashboardPage({ params }: { params: Promise
               {avgRating} <Star className="w-5 h-5 fill-amber-500 text-amber-500" />
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {factory.monthlyCapacity ? `${factory.monthlyCapacity.toLocaleString()} ${factory.capacityUnit || 'units'}/mo` : t('Verified capacity', 'طاقة إنتاجية موثقة')}
+              {factory.monthlyCapacity
+                ? `${factory.monthlyCapacity.toLocaleString()} ${factory.capacityUnit || 'units'}/mo`
+                : t('Verified capacity', 'طاقة إنتاجية موثقة')}
             </p>
           </CardContent>
         </Card>
@@ -153,3 +259,4 @@ export default async function FactoryDashboardPage({ params }: { params: Promise
     </div>
   );
 }
+

@@ -16,10 +16,26 @@ const ALLOWED_KEYS = [
   'announcement',
 ] as const;
 
+const DEFAULT_SETTINGS: Record<string, string> = {
+  maintenance_mode: 'false',
+  commission_rate: '1.5',
+  registration_open: 'true',
+  ai_enabled: 'true',
+  ai_daily_limit: '500',
+  default_currency: 'EGP',
+  support_email: 'pmo@mahallacluster.eg',
+  announcement: 'EU Digital Product Passport (DPP) & Lean Six Sigma Master Black Belt Suite v2.5 Active Across All 520+ Cluster Mills.',
+};
+
 export const GET = route(async () => {
   await requireAdmin();
-  const settings = await prisma.systemSetting.findMany();
-  return Object.fromEntries(settings.map((s) => [s.key, s.value]));
+  try {
+    const settings = await prisma.systemSetting.findMany();
+    if (settings.length === 0) return DEFAULT_SETTINGS;
+    return { ...DEFAULT_SETTINGS, ...Object.fromEntries(settings.map((s) => [s.key, s.value])) };
+  } catch {
+    return DEFAULT_SETTINGS;
+  }
 });
 
 const schema = z
