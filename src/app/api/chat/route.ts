@@ -87,6 +87,11 @@ ${marketplace || '(none yet)'}
 KNOWLEDGE BASE SOURCES:
 ${sources || '(no matching documents)'}`;
 
-  const { text, model } = await generate({ system, messages, temperature: 0.3 });
+  const { text, model } = await generate({
+    system,
+    messages,
+    temperature: 0.3,
+    preferredModel: body?.preferredModel,
+  });
   return { text, reply: text, model, sources: knowledge.map((k) => k.title) };
 });

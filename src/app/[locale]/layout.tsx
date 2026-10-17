@@ -8,6 +8,7 @@ import { Metadata, Viewport } from 'next';
 import { Fira_Sans } from 'next/font/google';
 import Navbar from '@/components/Navbar';
 import { Providers } from '@/components/Providers';
+import { UniversalModuleAiCopilot } from '@/components/cluster/UniversalModuleAiCopilot';
 
 import '../globals.css';
 
@@ -75,6 +76,7 @@ export default async function LocaleLayout({
               <Navbar locale={locale} />
               <main className="flex-1 flex flex-col">
                 {children}
+                <UniversalModuleAiCopilot locale={locale} />
               </main>
             </Providers>
           </NextIntlClientProvider>

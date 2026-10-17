@@ -20,7 +20,13 @@ import {
   Gauge,
   Leaf,
   RotateCcw,
+  Cpu,
+  Globe2,
 } from 'lucide-react';
+import {
+  CLIENT_FREE_LLM_MODELS,
+  type ClientFreeLlmModelId,
+} from '@/server/modernization/module-ai-prompts';
 
 function Mermaid({ chart }: { chart: string }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -86,13 +92,21 @@ const MarkdownComponents = {
 export default function AIBrainPage() {
   const params = useParams();
   const locale = (params?.locale as string) || 'en';
+  const isAr = locale === 'ar';
   const t = (en: string, ar: string) => tr(locale, en, ar);
 
   const [messages, setMessages] = useState<
-    { id: string; role: 'user' | 'assistant'; content: string; topicHint?: string }[]
+    {
+      id: string;
+      role: 'user' | 'assistant';
+      content: string;
+      topicHint?: string;
+      modelUsed?: string;
+    }[]
   >([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [preferredModel, setPreferredModel] = useState<ClientFreeLlmModelId>('auto');
 
   const expertPrompts = [
     {
@@ -159,7 +173,7 @@ export default function AIBrainPage() {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: nextMessages }),
+        body: JSON.stringify({ messages: nextMessages, preferredModel }),
       });
       const data = await res.json();
       const replyText = data?.text || data?.reply;
@@ -171,6 +185,7 @@ export default function AIBrainPage() {
             role: 'assistant',
             content: replyText,
             topicHint: clean.slice(0, 120),
+            modelUsed: data?.model || preferredModel,
           },
         ]);
       }
@@ -194,25 +209,31 @@ export default function AIBrainPage() {
           <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-300 bg-emerald-500/20 border border-emerald-400/30 px-3 py-1 rounded-full">
             <Sparkles className="w-3.5 h-3.5" />
             {t(
-              'UNIDO • ZDHC • ISO 17025 • EU ESPR Knowledge Engine',
-              'محرك المعرفة الهندسي والتجاري المعتمد لتجمع المحلة'
+              'MULTI-LLM FREE AI ENGINE • LLAMA 3.3 70B • DEEPSEEK R1 • MISTRAL • QWEN 2.5 • GEMINI',
+              'محرك الذكاء الاصطناعي المجاني متعدد النماذج (Llama 3.3 • DeepSeek R1 • Mistral • Qwen 2.5)'
             )}
           </div>
           <h1 className="text-2xl md:text-3xl font-extrabold">
             {t(
-              'Mahalla AI Trade, Engineering & Standards Advisor',
-              'المستشار الذكي للهندسة الصناعية والتصدير والمعايير الدولية'
+              'Mahalla AI Trade, Engineering & Standards Command Center',
+              'مركز القيادة الذكي للهندسة الصناعية والتصدير والمعايير الدولية'
             )}
           </h1>
           <p className="text-xs md:text-sm text-slate-300 max-w-3xl">
             {t(
-              'Ask any technical, sourcing, chemical compliance, or export regulation question. Includes live Mermaid process diagrams, ISO/ASTM benchmark tables, and 1-click conversion into an Academy training course.',
-              'اطرح أي سؤال في الغزل والنسيج أو الصباغة أو التصدير الأوروبي أو ترشيح المصانع، مع مخططات هندسية وجداول معيارية وتحويل فوري لأي إجابة إلى دورة تدريبية.'
+              'Select your preferred free LLM model below and ask any technical, sourcing, chemical compliance, or export regulation question. Includes live Mermaid process diagrams, ISO/ASTM benchmark tables, and 18 specialized module AI agents.',
+              'اختر نموذج الذكاء الاصطناعي المجاني المفضل لديك واطرح أي سؤال في الغزل والنسيج أو الصباغة أو التصدير الأوروبي أو ترشيح المصانع، مع ١٨ وكيلاً ذكياً متخصصاً لجميع وحدات المنصة.'
             )}
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <Link href={`/${locale}/cluster/export-intelligence`}>
+            <Button className="bg-teal-500 hover:bg-teal-400 text-slate-950 font-extrabold gap-1.5 text-xs">
+              <Globe2 className="w-4 h-4" />
+              {t('Export & Buyers AI', 'ذكاء التصدير والمشترين')}
+            </Button>
+          </Link>
           <Link href={`/${locale}/cluster/academy/studio`}>
             <Button className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold gap-1.5 text-xs">
               <GraduationCap className="w-4 h-4" />
@@ -234,7 +255,7 @@ export default function AIBrainPage() {
       </div>
 
       <Card className="flex flex-col min-h-[580px] shadow-lg border-primary/20 overflow-hidden">
-        <CardHeader className="bg-muted/40 border-b py-3.5 px-6 flex flex-row items-center justify-between">
+        <CardHeader className="bg-muted/40 border-b py-3.5 px-6 flex flex-wrap flex-row items-center justify-between gap-3">
           <CardTitle className="text-sm font-bold flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-600" />
             {t(
@@ -242,9 +263,23 @@ export default function AIBrainPage() {
               'جلسة الاستشارات الهندسية والتجارية الفورية'
             )}
           </CardTitle>
-          <span className="text-xs text-muted-foreground">
-            {t('Supports Mermaid Flowcharts & ISO Tables', 'يدعم المخططات الهندسية والجداول القياسية')}
-          </span>
+          <div className="flex items-center gap-2">
+            <Cpu className="w-4 h-4 text-emerald-600" />
+            <span className="text-xs font-semibold text-muted-foreground">
+              {t('Free LLM Engine:', 'النموذج المجاني:')}
+            </span>
+            <select
+              value={preferredModel}
+              onChange={(e) => setPreferredModel(e.target.value as ClientFreeLlmModelId)}
+              className="rounded-lg border bg-background px-2.5 py-1 text-xs font-bold outline-none cursor-pointer"
+            >
+              {CLIENT_FREE_LLM_MODELS.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {isAr ? m.labelAr : m.labelEn}
+                </option>
+              ))}
+            </select>
+          </div>
         </CardHeader>
 
         <CardContent className="flex-1 overflow-y-auto p-6 space-y-6">
@@ -316,13 +351,21 @@ export default function AIBrainPage() {
 
                 {m.role === 'assistant' && (
                   <div className="pt-3 border-t flex flex-wrap items-center justify-between gap-3">
-                    <span className="text-xs text-muted-foreground flex items-center gap-1.5">
-                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                      {t(
-                        'Verified against UNIDO, ZDHC, ISO 17025 & EU ESPR references',
-                        'موثق وفق مراجع UNIDO و ZDHC و ISO 17025 و EU ESPR'
+                    <div className="flex flex-wrap items-center gap-2">
+                      {m.modelUsed && (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
+                          <Cpu className="w-3 h-3" />
+                          {m.modelUsed}
+                        </span>
                       )}
-                    </span>
+                      <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                        {t(
+                          'Verified against UNIDO, ZDHC, ISO 17025 & EU ESPR references',
+                          'موثق وفق مراجع UNIDO و ZDHC و ISO 17025 و EU ESPR'
+                        )}
+                      </span>
+                    </div>
                     <Link
                       href={`/${locale}/cluster/academy/studio?topic=${encodeURIComponent(
                         m.topicHint || 'Advanced Textile Engineering & Export Compliance'
