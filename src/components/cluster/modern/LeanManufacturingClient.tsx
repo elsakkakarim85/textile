@@ -8,7 +8,6 @@ import {
   Gauge,
   Sparkles,
   CheckCircle2,
-  AlertTriangle,
   Layers,
   Wrench,
   BarChart3,
@@ -20,8 +19,13 @@ import {
   GraduationCap,
   Cpu,
   Zap,
-  ArrowRight,
   RefreshCw,
+  Activity,
+  ClipboardCheck,
+  Users,
+  Plus,
+  Recycle,
+  TrendingUp,
 } from 'lucide-react';
 import { tr, fmtNumber } from '@/lib/i18n-inline';
 import { Pill } from '@/components/cluster/ui';
@@ -30,6 +34,8 @@ import {
   LEAN_DEPARTMENTS,
   type LeanBlueprintReport,
   type LeanDepartmentId,
+  type IluoLevel,
+  type RedTagItem,
 } from '@/server/modernization/lean-manufacturing';
 import {
   CLIENT_FREE_LLM_MODELS,
@@ -44,6 +50,17 @@ interface Props {
   initialBottleneck?: string;
   initialTab?: string;
 }
+
+type LeanTabId =
+  | 'vsm'
+  | '5s'
+  | 'oee_smed'
+  | 'balancing'
+  | 'kanban'
+  | 'jidoka'
+  | 'six_sigma'
+  | 'daily_mgmt'
+  | 'a3_hoshin';
 
 export function LeanManufacturingClient({
   locale,
@@ -72,18 +89,23 @@ export function LeanManufacturingClient({
     })
   );
 
-  const [activeTab, setActiveTab] = useState<
-    'vsm' | '5s' | 'oee_smed' | 'balancing' | 'kanban' | 'jidoka' | 'a3_hoshin'
-  >((initialTab as any) || 'vsm');
+  const [activeTab, setActiveTab] = useState<LeanTabId>((initialTab as LeanTabId) || 'vsm');
 
-  // --- Interactive Calculator States ---
-  // 1. VSM & Takt Time
+  // --- On-Demand Pillar SOP / OPL AI State ---
+  const [sopLoading, setSopLoading] = useState(false);
+  const [pillarSopMap, setPillarSopMap] = useState<Record<string, { md: string; model: string }>>(
+    {}
+  );
+
+  // --- Pillar 1: VSM, Takt Time, Little's Law & Spaghetti Layout States ---
   const [shiftMinutes, setShiftMinutes] = useState(450);
   const [shiftsPerDay, setShiftsPerDay] = useState(2);
   const [dailyDemandUnits, setDailyDemandUnits] = useState(1200);
   const [futureStateApplied, setFutureStateApplied] = useState(false);
+  const [unitValueEgp, setUnitValueEgp] = useState(420);
+  const [uCellLayoutApplied, setUCellLayoutApplied] = useState(false);
 
-  // 2. 5S Interactive Audit Scores
+  // --- Pillar 2: 5S Audit & Red-Tag Digital Register States ---
   const [fiveSScores, setFiveSScores] = useState<Record<string, number>>(() => {
     const map: Record<string, number> = {};
     blueprint.fiveSAuditItems.forEach((item) => {
@@ -91,8 +113,13 @@ export function LeanManufacturingClient({
     });
     return map;
   });
+  const [customRedTags, setCustomRedTags] = useState<RedTagItem[]>([]);
+  const [newTagItem, setNewTagItem] = useState('');
+  const [newTagLoc, setNewTagLoc] = useState('');
+  const [newTagArea, setNewTagArea] = useState(10);
+  const [newTagValue, setNewTagValue] = useState(15000);
 
-  // 3. OEE & SMED Interactive Calculator
+  // --- Pillar 3: OEE, Six Big Losses, MTBF/MTTR, CLIT & SMED States ---
   const [oeePlannedMin, setOeePlannedMin] = useState(480);
   const [oeeScheduledBreakMin, setOeeScheduledBreakMin] = useState(30);
   const [oeeDownMin, setOeeDownMin] = useState(85);
@@ -100,17 +127,29 @@ export function LeanManufacturingClient({
   const [oeeTotalProduced, setOeeTotalProduced] = useState(520);
   const [oeeDefects, setOeeDefects] = useState(28);
   const [smedOptimized, setSmedOptimized] = useState(false);
+  const [mtbfOperatingHours, setMtbfOperatingHours] = useState(360);
+  const [mtbfFailureCount, setMtbfFailureCount] = useState(6);
+  const [mttrTotalRepairMin, setMttrTotalRepairMin] = useState(270);
+  const [clitChecked, setClitChecked] = useState<Record<string, boolean>>({
+    'clit-1': true,
+    'clit-2': true,
+    'clit-3': false,
+    'clit-4': false,
+  });
 
-  // 4. Line Balancing / Yamazumi State
+  // --- Pillar 4: Line Balancing, Yamazumi, SWCS & ILUO Skill Matrix States ---
   const [lineBalanced, setLineBalanced] = useState(false);
+  const [skillMatrixState, setSkillMatrixState] = useState(blueprint.skillMatrix);
 
-  // 5. Kanban Pull Calculator State
+  // --- Pillar 5: Kanban, Heijunka & Water Spider States ---
   const [kanbanDailyDemand, setKanbanDailyDemand] = useState(1500);
   const [kanbanLeadDays, setKanbanLeadDays] = useState(2.5);
   const [kanbanSafetyPct, setKanbanSafetyPct] = useState(20);
   const [kanbanBinCap, setKanbanBinCap] = useState(250);
+  const [heijunkaPackOutQty, setHeijunkaPackOutQty] = useState(40);
+  const [waterSpiderCycleMin, setWaterSpiderCycleMin] = useState(30);
 
-  // 6. Andon Live Status Simulator
+  // --- Pillar 6: Jidoka, Andon & FMEA RPN States ---
   const [andonStates, setAndonStates] = useState<Record<string, 'GREEN' | 'AMBER' | 'RED'>>({
     'Warping & Sizing': 'GREEN',
     'Air-Jet Weaving Bay A': 'AMBER',
@@ -118,6 +157,25 @@ export function LeanManufacturingClient({
     'Stenter Finishing Line': 'GREEN',
     'Sewing & Packing Cell #1': 'GREEN',
   });
+  const [fmeaMitigated, setFmeaMitigated] = useState(false);
+
+  // --- Pillar 7: Lean Six Sigma SPC, Cp/Cpk & DPMO States ---
+  const [selectedSpcId, setSelectedSpcId] = useState('gsm');
+  const activeSpcPreset = useMemo(
+    () => blueprint.spcPresets.find((p) => p.id === selectedSpcId) || blueprint.spcPresets[0],
+    [blueprint.spcPresets, selectedSpcId]
+  );
+  const [spcLsl, setSpcLsl] = useState(activeSpcPreset.lsl);
+  const [spcUsl, setSpcUsl] = useState(activeSpcPreset.usl);
+  const [spcMean, setSpcMean] = useState(activeSpcPreset.mean);
+  const [spcStdDev, setSpcStdDev] = useState(activeSpcPreset.stdDev);
+  const [dpmoUnitsInspected, setDpmoUnitsInspected] = useState(5000);
+  const [dpmoOpportunitiesPerUnit, setDpmoOpportunitiesPerUnit] = useState(6);
+  const [dpmoTotalDefects, setDpmoTotalDefects] = useState(145);
+  const [copqCostPerDefectEgp, setCopqCostPerDefectEgp] = useState(380);
+
+  // --- Pillar 8: Lean Daily Management (SQDC Board) State ---
+  const [sqdcRows, setSqdcRows] = useState(blueprint.sqdcBoard);
 
   // --- Computed Metrics ---
   const taktTimeSec = useMemo(() => {
@@ -133,9 +191,40 @@ export function LeanManufacturingClient({
     const totalVaMin = blueprint.vsmSteps.reduce((acc, s) => acc + s.valueAddedMin, 0);
     const totalLeadTimeMin = totalWipHours * 60 + totalVaMin;
     const pcePct = ((totalVaMin / Math.max(1, totalLeadTimeMin)) * 100).toFixed(1);
-    const totalLeadDays = (totalLeadTimeMin / (60 * 24)).toFixed(1);
-    return { totalWipHours: Math.round(totalWipHours), totalVaMin, pcePct, totalLeadDays };
-  }, [blueprint.vsmSteps, futureStateApplied]);
+    const totalLeadDays = Number((totalLeadTimeMin / (60 * 24)).toFixed(1));
+    // Little's Law: WIP = Throughput (Units/Day) × Lead Time (Days)
+    const currentLeadDays = Number(
+      (
+        (blueprint.vsmSteps.reduce((a, s) => a + s.wipWaitHours, 0) * 60 + totalVaMin) /
+        (60 * 24)
+      ).toFixed(1)
+    );
+    const futureLeadDays = Number(
+      (
+        (blueprint.vsmSteps.reduce((a, s) => a + s.wipWaitHours * 0.38, 0) * 60 + totalVaMin) /
+        (60 * 24)
+      ).toFixed(1)
+    );
+    const wipUnitsNow = Math.round(dailyDemandUnits * totalLeadDays);
+    const cashFreedEgp = Math.round(
+      Math.max(0, (currentLeadDays - futureLeadDays) * dailyDemandUnits * unitValueEgp)
+    );
+    const inventoryTurnsPerYear = Number((300 / Math.max(0.5, totalLeadDays)).toFixed(1));
+    const totalDistanceM = blueprint.vsmSteps.reduce(
+      (acc, s) => acc + (uCellLayoutApplied ? Math.round(s.distanceMeters * 0.32) : s.distanceMeters),
+      0
+    );
+    return {
+      totalWipHours: Math.round(totalWipHours),
+      totalVaMin,
+      pcePct,
+      totalLeadDays,
+      wipUnitsNow,
+      cashFreedEgp,
+      inventoryTurnsPerYear,
+      totalDistanceM,
+    };
+  }, [blueprint.vsmSteps, futureStateApplied, dailyDemandUnits, unitValueEgp, uCellLayoutApplied]);
 
   const wasteSummary = useMemo(() => {
     const totalMonthlyLossEgp = blueprint.eightWastes.reduce(
@@ -166,8 +255,13 @@ export function LeanManufacturingClient({
         : pct >= 55
         ? t('Bronze Developing (55–69%)', 'المستوى البرونزي التأسيسي (٥٥–٦٩٪)')
         : t('Action Required (<55%)', 'يحتاج تدخل كايزن عاجل (<٥٥٪)');
-    return { earned, maxPoints, pct, tier };
-  }, [blueprint.fiveSAuditItems, fiveSScores, locale]);
+
+    const allRedTags = [...blueprint.redTagItems, ...customRedTags];
+    const totalAreaFreedM2 = allRedTags.reduce((a, r) => a + r.floorAreaSavedM2, 0);
+    const totalSalvageEgp = allRedTags.reduce((a, r) => a + r.estimatedSalvageEgp, 0);
+
+    return { earned, maxPoints, pct, tier, allRedTags, totalAreaFreedM2, totalSalvageEgp };
+  }, [blueprint.fiveSAuditItems, blueprint.redTagItems, customRedTags, fiveSScores, locale]);
 
   const oeeMetrics = useMemo(() => {
     const plannedProdTime = Math.max(1, oeePlannedMin - oeeScheduledBreakMin);
@@ -178,6 +272,13 @@ export function LeanManufacturingClient({
     const goodUnits = Math.max(0, oeeTotalProduced - oeeDefects);
     const quality = oeeTotalProduced > 0 ? Math.min(100, (goodUnits / oeeTotalProduced) * 100) : 0;
     const oee = (availability * performance * quality) / 10000;
+
+    // Six Big Losses estimation
+    const speedLossMin = Math.max(0, Math.round(runTime - idealTotalTimeMin));
+    const qualityLossMin = Math.round((oeeDefects * oeeIdealSecPerUnit) / 60);
+    const mtbfHours = Number((mtbfOperatingHours / Math.max(1, mtbfFailureCount)).toFixed(1));
+    const mttrMin = Math.round(mttrTotalRepairMin / Math.max(1, mtbfFailureCount));
+
     return {
       availability: availability.toFixed(1),
       performance: performance.toFixed(1),
@@ -185,6 +286,10 @@ export function LeanManufacturingClient({
       oee: oee.toFixed(1),
       oeeNum: oee,
       goodUnits,
+      speedLossMin,
+      qualityLossMin,
+      mtbfHours,
+      mttrMin,
     };
   }, [
     oeePlannedMin,
@@ -193,6 +298,9 @@ export function LeanManufacturingClient({
     oeeIdealSecPerUnit,
     oeeTotalProduced,
     oeeDefects,
+    mtbfOperatingHours,
+    mtbfFailureCount,
+    mttrTotalRepairMin,
   ]);
 
   const smedSummary = useMemo(() => {
@@ -212,6 +320,7 @@ export function LeanManufacturingClient({
         vaSec: smoothedVa,
         nvaSec: reducedNva,
         cycleTimeSec: smoothedVa + reducedNva,
+        walkSec: Math.max(2, Math.round(ws.walkSec * 0.4)),
       };
     });
   }, [blueprint.workstations, lineBalanced]);
@@ -222,16 +331,91 @@ export function LeanManufacturingClient({
     const lbePct = Math.round((sumCt / (balancedStations.length * maxCt)) * 100);
     const totalSamMin = (sumCt / 60).toFixed(2);
     const hourlyCap = Math.round(3600 / maxCt);
-    return { sumCt, maxCt, lbePct, totalSamMin, hourlyCap };
-  }, [balancedStations]);
+    const theoreticalMinOperators = Math.max(1, Math.ceil(sumCt / Math.max(1, taktTimeSec)));
+    return { sumCt, maxCt, lbePct, totalSamMin, hourlyCap, theoreticalMinOperators };
+  }, [balancedStations, taktTimeSec]);
 
   const kanbanResult = useMemo(() => {
     const safetyFactor = 1 + kanbanSafetyPct / 100;
     const totalUnitsInLoop = kanbanDailyDemand * kanbanLeadDays * safetyFactor;
     const cards = Math.max(2, Math.ceil(totalUnitsInLoop / Math.max(1, kanbanBinCap)));
     const maxWipUnits = cards * kanbanBinCap;
-    return { cards, maxWipUnits };
-  }, [kanbanDailyDemand, kanbanLeadDays, kanbanSafetyPct, kanbanBinCap]);
+    const pitchMin = Number(((taktTimeSec * heijunkaPackOutQty) / 60).toFixed(1));
+    const waterSpiderTripsPerShift = Math.max(1, Math.floor(shiftMinutes / Math.max(5, waterSpiderCycleMin)));
+    return { cards, maxWipUnits, pitchMin, waterSpiderTripsPerShift };
+  }, [
+    kanbanDailyDemand,
+    kanbanLeadDays,
+    kanbanSafetyPct,
+    kanbanBinCap,
+    taktTimeSec,
+    heijunkaPackOutQty,
+    shiftMinutes,
+    waterSpiderCycleMin,
+  ]);
+
+  const spcMetrics = useMemo(() => {
+    const sigma = Math.max(0.001, spcStdDev);
+    const cp = (spcUsl - spcLsl) / (6 * sigma);
+    const cpu = (spcUsl - spcMean) / (3 * sigma);
+    const cpl = (spcMean - spcLsl) / (3 * sigma);
+    const cpk = Math.min(cpu, cpl);
+    const ucl = Number((spcMean + 3 * sigma).toFixed(2));
+    const lcl = Number((spcMean - 3 * sigma).toFixed(2));
+
+    const totalOpportunities = Math.max(1, dpmoUnitsInspected * dpmoOpportunitiesPerUnit);
+    const dpmo = Math.round((dpmoTotalDefects / totalOpportunities) * 1_000_000);
+    const dhuPct = Number(((dpmoTotalDefects / Math.max(1, dpmoUnitsInspected)) * 100).toFixed(2));
+    const yieldPct = Number(
+      (Math.max(0, 1 - dpmoTotalDefects / Math.max(1, dpmoUnitsInspected)) * 100).toFixed(2)
+    );
+    const sigmaLevel =
+      dpmo <= 3.4
+        ? 6.0
+        : dpmo <= 233
+        ? 5.0
+        : dpmo <= 6210
+        ? 4.0
+        : dpmo <= 22750
+        ? 3.5
+        : dpmo <= 66807
+        ? 3.0
+        : 2.4;
+    const monthlyCopqEgp = dpmoTotalDefects * copqCostPerDefectEgp;
+
+    return {
+      cp: cp.toFixed(2),
+      cpk: cpk.toFixed(2),
+      cpkNum: cpk,
+      ucl,
+      lcl,
+      dpmo,
+      dhuPct,
+      yieldPct,
+      sigmaLevel,
+      monthlyCopqEgp,
+    };
+  }, [
+    spcLsl,
+    spcUsl,
+    spcMean,
+    spcStdDev,
+    dpmoUnitsInspected,
+    dpmoOpportunitiesPerUnit,
+    dpmoTotalDefects,
+    copqCostPerDefectEgp,
+  ]);
+
+  const handleSelectSpcPreset = (presetId: string) => {
+    setSelectedSpcId(presetId);
+    const found = blueprint.spcPresets.find((p) => p.id === presetId);
+    if (found) {
+      setSpcLsl(found.lsl);
+      setSpcUsl(found.usl);
+      setSpcMean(found.mean);
+      setSpcStdDev(found.stdDev);
+    }
+  };
 
   const handleGenerateBlueprint = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -241,6 +425,7 @@ export function LeanManufacturingClient({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          mode: 'blueprint',
           factoryName,
           department,
           productFocus,
@@ -252,11 +437,46 @@ export function LeanManufacturingClient({
       const data = await res.json();
       if (data?.blueprint) {
         setBlueprint(data.blueprint);
+        setSkillMatrixState(data.blueprint.skillMatrix);
+        setSqdcRows(data.blueprint.sqdcBoard);
       }
     } catch {
       // fallback already populated
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGeneratePillarSop = async () => {
+    setSopLoading(true);
+    const liveMetricsContext = `Takt Time: ${taktTimeSec}s, Lead Time: ${vsmMetrics.totalLeadDays} days (PCE ${vsmMetrics.pcePct}%), OEE: ${oeeMetrics.oee}% (Availability ${oeeMetrics.availability}%, Performance ${oeeMetrics.performance}%, Quality ${oeeMetrics.quality}%), SMED Changeover: ${smedSummary.beforeMin}m -> ${smedSummary.afterMin}m, Line Balance Efficiency: ${lineBalanceMetrics.lbePct}%, Kanban Cards: ${kanbanResult.cards} bins, Six Sigma Cpk: ${spcMetrics.cpk} (${spcMetrics.sigmaLevel} Sigma, DPMO ${spcMetrics.dpmo}), 5S Score: ${fiveSSummary.pct}%`;
+    try {
+      const res = await fetch('/api/cluster/lean-manufacturing/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'pillar_sop',
+          pillarId: activeTab,
+          factoryName,
+          department,
+          productFocus,
+          primaryBottleneck,
+          liveMetricsContext,
+          preferredModel,
+          locale,
+        }),
+      });
+      const data = await res.json();
+      if (data?.sopMarkdown) {
+        setPillarSopMap((prev) => ({
+          ...prev,
+          [activeTab]: { md: data.sopMarkdown, model: data.modelUsed || 'Free LLM Sensei' },
+        }));
+      }
+    } catch {
+      // ignore
+    } finally {
+      setSopLoading(false);
     }
   };
 
@@ -267,6 +487,7 @@ export function LeanManufacturingClient({
 - **Department**: ${blueprint.department}
 - **Product Focus**: ${blueprint.productFocus}
 - **Generated**: ${new Date().toISOString().slice(0, 10)}
+- **Live KPIs**: Takt=${taktTimeSec}s | Lead Time=${vsmMetrics.totalLeadDays}d | OEE=${oeeMetrics.oee}% | 5S=${fiveSSummary.pct}% | Cpk=${spcMetrics.cpk}
 
 ## 1. Background
 ${isAr ? a3.backgroundAr : a3.backgroundEn}
@@ -311,48 +532,95 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
     URL.revokeObjectURL(url);
   };
 
-  const tabs = [
+  const handleExportLeanCsv = () => {
+    const rows = [
+      ['Metric Category', 'KPI Name', 'Current / Simulated Value', 'Unit / Benchmark'],
+      ['VSM & Flow', 'Customer Takt Time', String(taktTimeSec), 'Seconds / Unit'],
+      ['VSM & Flow', 'Total Lead Time', String(vsmMetrics.totalLeadDays), 'Days'],
+      ['VSM & Flow', 'Process Cycle Efficiency (PCE)', String(vsmMetrics.pcePct), '%'],
+      ['VSM & Flow', 'Working Capital Freed (Future VSM)', String(vsmMetrics.cashFreedEgp), 'EGP'],
+      ['8 Wastes', 'Annual Recoverable Waste Savings', String(wasteSummary.annualSavingsEgp), 'EGP / Year'],
+      ['5S & Gemba', '5S Audit Score', String(fiveSSummary.pct), `% (${fiveSSummary.tier})`],
+      ['5S & Gemba', 'Red-Tag Floor Space Saved', String(fiveSSummary.totalAreaFreedM2), 'm2'],
+      ['TPM & OEE', 'Overall Equipment Effectiveness (OEE)', String(oeeMetrics.oee), '% (World Class = 85%)'],
+      ['TPM & OEE', 'MTBF / MTTR', `${oeeMetrics.mtbfHours}h / ${oeeMetrics.mttrMin}m`, 'Reliability'],
+      ['SMED', 'Changeover Time Reduction', `${smedSummary.beforeMin} -> ${smedSummary.afterMin}`, `Minutes (-${smedSummary.savedPct}%)`],
+      ['Line Balancing', 'Line Balance Efficiency (LBE)', String(lineBalanceMetrics.lbePct), '%'],
+      ['Kanban Pull', 'Supermarket Kanban Cards', String(kanbanResult.cards), `Bins (Max WIP ${kanbanResult.maxWipUnits})`],
+      ['Six Sigma SPC', 'Process Capability (Cp / Cpk)', `${spcMetrics.cp} / ${spcMetrics.cpk}`, `${spcMetrics.sigmaLevel} Sigma`],
+      ['Six Sigma SPC', 'DPMO & Monthly COPQ', `${spcMetrics.dpmo} DPMO`, `${spcMetrics.monthlyCopqEgp} EGP/mo`],
+    ];
+    const csv = rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `lean-six-sigma-kpis-${blueprint.factoryName.toLowerCase().replace(/\s+/g, '-')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const cycleIluo = (current: IluoLevel): IluoLevel => {
+    if (current === 'I') return 'L';
+    if (current === 'L') return 'U';
+    if (current === 'U') return 'O';
+    return 'I';
+  };
+
+  const tabs: { id: LeanTabId; icon: any; labelEn: string; labelAr: string }[] = [
     {
-      id: 'vsm' as const,
+      id: 'vsm',
       icon: Layers,
-      labelEn: '1. VSM, Takt Time & 8 Wastes',
+      labelEn: "1. VSM, Little's Law & 8 Wastes",
       labelAr: '١. تدفق القيمة (VSM) والفواقد الـ ٨',
     },
     {
-      id: '5s' as const,
+      id: '5s',
       icon: CheckCircle2,
-      labelEn: '2. 5S Audit & Gemba Walk',
-      labelAr: '٢. تدقيق 5S وجولات الجيمبا',
+      labelEn: '2. 5S Audit & Red-Tag Register',
+      labelAr: '٢. تدقيق 5S وسجل البطاقات الحمراء',
     },
     {
-      id: 'oee_smed' as const,
+      id: 'oee_smed',
       icon: Wrench,
-      labelEn: '3. TPM, OEE & SMED Changeover',
+      labelEn: '3. TPM, OEE, MTBF & SMED',
       labelAr: '٣. الصيانة الشاملة و OEE و SMED',
     },
     {
-      id: 'balancing' as const,
+      id: 'balancing',
       icon: BarChart3,
-      labelEn: '4. Line Balancing & Yamazumi',
-      labelAr: '٤. توازن الخطوط ومخطط يامازومي',
+      labelEn: '4. Yamazumi, SWCS & Skill Matrix',
+      labelAr: '٤. توازن الخطوط ومصفوفة المهارات',
     },
     {
-      id: 'kanban' as const,
+      id: 'kanban',
       icon: Repeat,
-      labelEn: '5. Kanban Pull & Heijunka',
-      labelAr: '٥. نظام السحب كانبان و Heijunka',
+      labelEn: '5. Kanban, Heijunka & Water Spider',
+      labelAr: '٥. كانبان وجدولة Heijunka والمزود',
     },
     {
-      id: 'jidoka' as const,
+      id: 'jidoka',
       icon: ShieldAlert,
-      labelEn: '6. Jidoka, Andon & Poka-Yoke',
-      labelAr: '٦. الإيقاف الذاتي و Poka-Yoke',
+      labelEn: '6. Jidoka, Poka-Yoke & FMEA RPN',
+      labelAr: '٦. أندون و Poka-Yoke وتحليل FMEA',
     },
     {
-      id: 'a3_hoshin' as const,
+      id: 'six_sigma',
+      icon: Activity,
+      labelEn: '7. Six Sigma SPC, Cp/Cpk & DPMO',
+      labelAr: '٧. لين 6 سيجما و SPC والقدرة Cpk',
+    },
+    {
+      id: 'daily_mgmt',
+      icon: ClipboardCheck,
+      labelEn: '8. SQDC Gemba Board & Leader Work',
+      labelAr: '٨. لوحة الإدارة اليومية SQDC والجيمبا',
+    },
+    {
+      id: 'a3_hoshin',
       icon: FileText,
-      labelEn: '7. A3 Report, Kaizen & Hoshin Kanri',
-      labelAr: '٧. تقرير A3 وكايزن وهوشين كانري',
+      labelEn: '9. A3 Charter & Hoshin Kanri',
+      labelAr: '٩. تقرير A3 ومصفوفة هوشين كانري',
     },
   ];
 
@@ -365,8 +633,8 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
             <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/40 bg-emerald-500/20 px-3 py-1 text-xs font-extrabold text-emerald-300">
               <Gauge className="h-3.5 w-3.5" />
               {t(
-                'TOYOTA PRODUCTION SYSTEM (TPS) • LEAN SIX SIGMA • UNIDO BENCHMARKS',
-                'نظام إنتاج تويوتا (TPS) • التصنيع الرشيق لين 6 سيجما • معايير اليونيدو'
+                '9-PILLAR TOYOTA PRODUCTION SYSTEM (TPS) • LEAN SIX SIGMA MASTER BLACK BELT SUITE',
+                'منظومة إنتاج تويوتا (TPS) الشاملة • ٩ ركائز للإدارة الرشيقة ولين 6 سيجما'
               )}
             </span>
             {blueprint.aiModelUsed && (
@@ -414,7 +682,17 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
             </label>
             <select
               value={department}
-              onChange={(e) => setDepartment(e.target.value as LeanDepartmentId)}
+              onChange={(e) => {
+                const nextDept = e.target.value as LeanDepartmentId;
+                setDepartment(nextDept);
+                const updated = synthesizeLeanBlueprint({
+                  factoryName,
+                  department: nextDept,
+                  productFocus,
+                  primaryBottleneck,
+                });
+                setBlueprint(updated);
+              }}
               className="w-full rounded-xl border border-white/20 bg-slate-900/90 px-3 py-2.5 text-xs sm:text-sm text-white focus:border-emerald-400 focus:outline-none"
             >
               {LEAN_DEPARTMENTS.map((d) => (
@@ -451,7 +729,7 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
 
           <div className="md:col-span-12 flex flex-wrap items-center justify-between gap-3 pt-2">
             <div className="flex flex-wrap gap-2 text-xs">
-              <span className="text-slate-300">{t('Quick Presets:', 'نماذج سريعة:')}</span>
+              <span className="text-slate-300">{t('Quick Mill Presets:', 'نماذج مصانع سريعة:')}</span>
               {[
                 {
                   f: 'Misr Spinning & Weaving — Compact Mill #2',
@@ -460,7 +738,7 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
                   b: 'High doffing downtime, flyer lint stops & cone lot mixing',
                 },
                 {
-                  f: 'Al-Rowad Dyehouse & Finishing',
+                  f: 'Al-Rowad Dyehouse & Stenter Finishing',
                   d: 'dyeing_finishing' as LeanDepartmentId,
                   p: 'Reactive Dyed Sateen & Terry Towels',
                   b: 'Long dye-bath turnaround (85 min) & 6.5% off-shade re-dyeing',
@@ -480,6 +758,14 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
                     setDepartment(preset.d);
                     setProductFocus(preset.p);
                     setPrimaryBottleneck(preset.b);
+                    setBlueprint(
+                      synthesizeLeanBlueprint({
+                        factoryName: preset.f,
+                        department: preset.d,
+                        productFocus: preset.p,
+                        primaryBottleneck: preset.b,
+                      })
+                    );
                   }}
                   className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold hover:bg-emerald-500/25 hover:border-emerald-400 transition cursor-pointer"
                 >
@@ -488,19 +774,29 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
               ))}
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 px-6 py-3 text-xs sm:text-sm font-extrabold text-slate-950 hover:from-emerald-400 hover:to-teal-300 transition shadow-lg cursor-pointer"
-            >
-              <Sparkles className="h-4 w-4" />
-              {loading
-                ? t('AI Synthesizing Lean Master Plan...', 'جارٍ توليد خطة اللين المتكاملة...')
-                : t(
-                    '✨ Generate AI Lean Manufacturing Master Plan',
-                    '✨ توليد خطة الإدارة والتصنيع الرشيق بالذكاء الاصطناعي'
-                  )}
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={handleExportLeanCsv}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-white/25 bg-white/10 px-4 py-2.5 text-xs font-bold text-white hover:bg-white/20 transition cursor-pointer"
+              >
+                <Download className="h-3.5 w-3.5 text-emerald-300" />
+                {t('Export KPIs (.CSV)', 'تصدير المؤشرات (.CSV)')}
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 px-6 py-3 text-xs sm:text-sm font-extrabold text-slate-950 hover:from-emerald-400 hover:to-teal-300 transition shadow-lg cursor-pointer"
+              >
+                <Sparkles className="h-4 w-4" />
+                {loading
+                  ? t('AI Synthesizing 9-Pillar Master Plan...', 'جارٍ توليد خطة اللين و6 سيجما...')
+                  : t(
+                      '✨ Generate AI Lean Six Sigma Master Plan',
+                      '✨ توليد خطة التصنيع الرشيق ولين 6 سيجما بالذكاء الاصطناعي'
+                    )}
+              </button>
+            </div>
           </div>
         </form>
 
@@ -516,48 +812,57 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
         )}
       </div>
 
-      {/* Top Executive KPI Summary Bar */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      {/* Top Executive 6-KPI Summary Bar */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
         <div className="rounded-2xl border bg-card p-4 shadow-xs">
-          <div className="text-xs text-muted-foreground">{t('Takt Time', 'زمن التاكت (Takt Time)')}</div>
+          <div className="text-xs text-muted-foreground">{t('Takt Time', 'زمن التاكت (Takt)')}</div>
           <div className="text-2xl font-extrabold text-primary mt-1">{taktTimeSec}s</div>
           <div className="text-[11px] text-muted-foreground mt-0.5">
-            {t('per unit customer beat', 'لكل وحدة حسب طلب العميل')}
+            {t('Customer demand beat', 'إيقاع طلب العميل')}
           </div>
         </div>
         <div className="rounded-2xl border bg-card p-4 shadow-xs">
-          <div className="text-xs text-muted-foreground">{t('Lead Time & PCE', 'زمن التوريد وكفاءة الدورة')}</div>
+          <div className="text-xs text-muted-foreground">{t('Lead Time & PCE', 'زمن التوريد و PCE')}</div>
           <div className="text-2xl font-extrabold text-emerald-600 mt-1">
             {vsmMetrics.totalLeadDays} {t('days', 'يوم')}
           </div>
           <div className="text-[11px] text-muted-foreground mt-0.5">
-            PCE: <strong>{vsmMetrics.pcePct}%</strong> ({vsmMetrics.totalVaMin}m VA)
+            PCE: <strong>{vsmMetrics.pcePct}%</strong> ({vsmMetrics.inventoryTurnsPerYear}x {t('turns', 'دوران')})
           </div>
         </div>
         <div className="rounded-2xl border bg-card p-4 shadow-xs">
-          <div className="text-xs text-muted-foreground">{t('Live OEE Score', 'كفاءة الماكينات الكلية OEE')}</div>
+          <div className="text-xs text-muted-foreground">{t('Live OEE Score', 'كفاءة الماكينات OEE')}</div>
           <div className="text-2xl font-extrabold text-sky-600 mt-1">{oeeMetrics.oee}%</div>
           <div className="text-[11px] text-muted-foreground mt-0.5">
-            {t('World-Class Target: 85%', 'المعيار العالمي: ٨٥٪')}
+            MTBF: <strong>{oeeMetrics.mtbfHours}h</strong> | MTTR: <strong>{oeeMetrics.mttrMin}m</strong>
           </div>
         </div>
         <div className="rounded-2xl border bg-card p-4 shadow-xs">
-          <div className="text-xs text-muted-foreground">{t('5S Workplace Score', 'تقييم بيئة العمل 5S')}</div>
-          <div className="text-2xl font-extrabold text-amber-600 mt-1">{fiveSSummary.pct}%</div>
-          <div className="text-[11px] text-muted-foreground mt-0.5 truncate">{fiveSSummary.tier}</div>
+          <div className="text-xs text-muted-foreground">{t('Six Sigma Capability', 'قدرة العملية Six Sigma')}</div>
+          <div className="text-2xl font-extrabold text-purple-600 mt-1">Cpk {spcMetrics.cpk}</div>
+          <div className="text-[11px] text-muted-foreground mt-0.5">
+            <strong>{spcMetrics.sigmaLevel}σ</strong> ({fmtNumber(locale, spcMetrics.dpmo)} DPMO)
+          </div>
         </div>
-        <div className="rounded-2xl border bg-card p-4 shadow-xs col-span-2 md:col-span-1">
+        <div className="rounded-2xl border bg-card p-4 shadow-xs">
+          <div className="text-xs text-muted-foreground">{t('5S & Red-Tag Space', 'تقييم 5S والمساحة المحررة')}</div>
+          <div className="text-2xl font-extrabold text-amber-600 mt-1">{fiveSSummary.pct}%</div>
+          <div className="text-[11px] text-muted-foreground mt-0.5 truncate">
+            +{fiveSSummary.totalAreaFreedM2} m² {t('floor freed', 'مساحة محررة')}
+          </div>
+        </div>
+        <div className="rounded-2xl border bg-card p-4 shadow-xs">
           <div className="text-xs text-muted-foreground">{t('Annual Waste Savings', 'الوفر السنوي من الفواقد')}</div>
           <div className="text-2xl font-extrabold text-emerald-600 mt-1">
             {fmtNumber(locale, wasteSummary.annualSavingsEgp)} EGP
           </div>
           <div className="text-[11px] text-muted-foreground mt-0.5">
-            {t('From 8 Wastes (DOWNTIME)', 'من القضاء على الفواقد الـ ٨')}
+            +{fmtNumber(locale, vsmMetrics.cashFreedEgp)} EGP {t('WIP cash', 'سيولة محررة')}
           </div>
         </div>
       </div>
 
-      {/* 7-Pillar Navigation Tabs */}
+      {/* 9-Pillar Navigation Tabs */}
       <div className="flex flex-wrap gap-2 border-b pb-3">
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -567,59 +872,74 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-extrabold transition cursor-pointer ${
+              className={`inline-flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-xs font-extrabold transition cursor-pointer ${
                 active
                   ? 'bg-emerald-600 text-white shadow'
                   : 'bg-muted/60 text-foreground hover:bg-muted'
               }`}
             >
-              <Icon className="h-4 w-4" />
+              <Icon className="h-3.5 w-3.5" />
               {isAr ? tab.labelAr : tab.labelEn}
             </button>
           );
         })}
       </div>
 
-      {/* TAB 1: Value Stream Mapping (VSM), Takt Time & 8 Wastes (DOWNTIME) */}
+      {/* TAB 1: Value Stream Mapping (VSM), Takt Time, Little's Law & 8 Wastes */}
       {activeTab === 'vsm' && (
         <div className="space-y-8">
-          {/* Takt Time & Future-State VSM Simulator Bar */}
           <div className="rounded-2xl border bg-card p-6 space-y-5">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <h2 className="text-lg font-extrabold">
                   {t(
-                    'Interactive Value Stream Map (VSM) & Takt Time Calculator',
-                    'خريطة تدفق القيمة التفاعلية (VSM) وحاسبة زمن التاكت'
+                    "Interactive Value Stream Map (VSM), Takt Time & Little's Law Simulator",
+                    'خريطة تدفق القيمة التفاعلية (VSM) وحاسبة زمن التاكت وقانون ليتل (Little’s Law)'
                   )}
                 </h2>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {t(
-                    'Compare Current-State push production vs. Future-State Lean pull flow across the mill.',
-                    'قارن بين الوضع الحالي (الإنتاج بالدفع) والوضع المستقبلي الرشيق (التدفق والسحب) عبر مراحل المصنع.'
+                    'Compare Current-State push batches vs. Future-State Lean pull flow and U-Cell layout.',
+                    'قارن بين الوضع الحالي (الإنتاج بالدفعات) والوضع المستقبلي الرشيق (التدفق والسحب والخلايا على شكل حرف U).'
                   )}
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={() => setFutureStateApplied((prev) => !prev)}
-                className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-extrabold transition cursor-pointer ${
-                  futureStateApplied
-                    ? 'bg-emerald-600 text-white'
-                    : 'border border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
-                }`}
-              >
-                <Zap className="h-4 w-4" />
-                {futureStateApplied
-                  ? t('✓ Future-State Lean Pull Active (-62% WIP)', '✓ تم تفعيل خريطة الحالة المستقبلية (-٦٢٪ مخزون)')
-                  : t('Simulate Future-State VSM Transformation', 'محاكاة خريطة التدفق المستقبلية (Future-State VSM)')}
-              </button>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setFutureStateApplied((prev) => !prev)}
+                  className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-extrabold transition cursor-pointer ${
+                    futureStateApplied
+                      ? 'bg-emerald-600 text-white'
+                      : 'border border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+                  }`}
+                >
+                  <Zap className="h-3.5 w-3.5" />
+                  {futureStateApplied
+                    ? t('✓ Future-State VSM Active (-62% WIP)', '✓ خريطة الحالة المستقبلية مفعلة (-٦٢٪ مخزون)')
+                    : t('Simulate Future-State VSM Pull', 'محاكاة خريطة التدفق المستقبلية (Future VSM)')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setUCellLayoutApplied((prev) => !prev)}
+                  className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-extrabold transition cursor-pointer ${
+                    uCellLayoutApplied
+                      ? 'bg-sky-600 text-white'
+                      : 'border border-sky-500/40 bg-sky-500/10 text-sky-700 dark:text-sky-300'
+                  }`}
+                >
+                  <TrendingUp className="h-3.5 w-3.5" />
+                  {uCellLayoutApplied
+                    ? t('✓ Spaghetti Layout -> U-Cell (-68% Travel)', '✓ تم تحويل المسار إلى خلية U (-٦٨٪ مسافة)')
+                    : t('Optimize Spaghetti Travel Distance', 'تحسين مخطط السباغيتي ومسافة النقل')}
+                </button>
+              </div>
             </div>
 
-            <div className="grid sm:grid-cols-3 gap-4 pt-2">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
               <div className="rounded-xl border bg-muted/30 p-3.5">
                 <label className="block text-xs font-semibold mb-1">
-                  {t('Net Available Time per Shift (min)', 'صافي وقت العمل للوردية (دقيقة)')}
+                  {t('Net Available Time / Shift (min)', 'صافي وقت العمل للوردية (دقيقة)')}
                 </label>
                 <input
                   type="number"
@@ -645,7 +965,7 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
               </div>
               <div className="rounded-xl border bg-muted/30 p-3.5">
                 <label className="block text-xs font-semibold mb-1">
-                  {t('Daily Customer Demand (Units / Rolls)', 'الطلب اليومي للعملاء (وحدة / رول)')}
+                  {t('Daily Customer Demand (Units)', 'الطلب اليومي للعملاء (وحدة/رول)')}
                 </label>
                 <input
                   type="number"
@@ -655,10 +975,52 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
                   className="w-full rounded-lg border bg-background px-3 py-1.5 text-sm font-bold"
                 />
               </div>
+              <div className="rounded-xl border bg-muted/30 p-3.5">
+                <label className="block text-xs font-semibold mb-1">
+                  {t('Avg Unit WIP Cost (EGP)', 'متوسط تكلفة الوحدة تحت التشغيل (ج.م)')}
+                </label>
+                <input
+                  type="number"
+                  min={10}
+                  value={unitValueEgp}
+                  onChange={(e) => setUnitValueEgp(Number(e.target.value))}
+                  className="w-full rounded-lg border bg-background px-3 py-1.5 text-sm font-bold"
+                />
+              </div>
+            </div>
+
+            {/* Little's Law & Spaghetti Layout Summary Strip */}
+            <div className="grid sm:grid-cols-4 gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-4 text-xs">
+              <div>
+                <span className="text-muted-foreground block">
+                  {t("Little's Law Active WIP:", 'المخزون البيني حسب قانون ليتل:')}
+                </span>
+                <strong className="text-base">{fmtNumber(locale, vsmMetrics.wipUnitsNow)} units</strong>
+              </div>
+              <div>
+                <span className="text-muted-foreground block">
+                  {t('Working Capital Liberated:', 'السيولة النقدية المحررة من المخزون:')}
+                </span>
+                <strong className="text-base text-emerald-600">
+                  {fmtNumber(locale, vsmMetrics.cashFreedEgp)} EGP
+                </strong>
+              </div>
+              <div>
+                <span className="text-muted-foreground block">
+                  {t('Inventory Turns / Year:', 'معدل دوران المخزون سنوياً:')}
+                </span>
+                <strong className="text-base">{vsmMetrics.inventoryTurnsPerYear}x / yr</strong>
+              </div>
+              <div>
+                <span className="text-muted-foreground block">
+                  {t('Spaghetti Travel Distance:', 'إجمالي مسافة انتقال اللوط (Spaghetti):')}
+                </span>
+                <strong className="text-base text-sky-600">{vsmMetrics.totalDistanceM} meters</strong>
+              </div>
             </div>
 
             {/* VSM Process Boxes */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 pt-1">
               {blueprint.vsmSteps.map((step) => {
                 const wipHrs = futureStateApplied
                   ? Math.round(step.wipWaitHours * 0.38)
@@ -666,6 +1028,9 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
                 const coMin = futureStateApplied
                   ? Math.round(step.changeoverMin * 0.42)
                   : step.changeoverMin;
+                const distM = uCellLayoutApplied
+                  ? Math.round(step.distanceMeters * 0.32)
+                  : step.distanceMeters;
                 const overTakt = step.cycleTimeSec > taktTimeSec;
                 return (
                   <div
@@ -678,9 +1043,7 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
                       <h3 className="font-extrabold text-sm">
                         {isAr ? step.stepNameAr : step.stepNameEn}
                       </h3>
-                      <Pill tone={overTakt ? 'amber' : 'emerald'}>
-                        C/T: {step.cycleTimeSec}s
-                      </Pill>
+                      <Pill tone={overTakt ? 'amber' : 'emerald'}>C/T: {step.cycleTimeSec}s</Pill>
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       <div className="rounded-lg bg-background p-2 border">
@@ -691,9 +1054,11 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
                       </div>
                       <div className="rounded-lg bg-background p-2 border">
                         <span className="text-muted-foreground block text-[10px]">
-                          {t('Machine Uptime', 'الإتاحة التشغيلية')}
+                          {t('Uptime / RFT', 'الإتاحة / العيوب')}
                         </span>
-                        <strong>{step.uptimePct}%</strong>
+                        <strong>
+                          {step.uptimePct}% ({step.defectPct}% def)
+                        </strong>
                       </div>
                       <div className="rounded-lg bg-background p-2 border">
                         <span className="text-muted-foreground block text-[10px]">
@@ -703,9 +1068,11 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
                       </div>
                       <div className="rounded-lg bg-background p-2 border">
                         <span className="text-muted-foreground block text-[10px]">
-                          {t('Value-Added (VA)', 'الوقت المضيف للقيمة')}
+                          {t('VA Time / Travel', 'الوقت المضيف / المسافة')}
                         </span>
-                        <strong className="text-emerald-600">{step.valueAddedMin} min</strong>
+                        <strong className="text-emerald-600">
+                          {step.valueAddedMin}m • {distM}m
+                        </strong>
                       </div>
                     </div>
                   </div>
@@ -725,10 +1092,7 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
                   )}
                 </h2>
                 <p className="text-xs text-muted-foreground">
-                  {t(
-                    'Total Monthly Loss Identified: ',
-                    'إجمالي الفاقد الشهري المرصود: '
-                  )}
+                  {t('Total Monthly Loss Identified: ', 'إجمالي الفاقد الشهري المرصود: ')}
                   <strong className="text-rose-600">
                     {fmtNumber(locale, wasteSummary.totalMonthlyLossEgp)} EGP/mo
                   </strong>{' '}
@@ -770,9 +1134,9 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
         </div>
       )}
 
-      {/* TAB 2: 5S Workplace Audit & Gemba Walk Scorer */}
+      {/* TAB 2: 5S Workplace Audit & Red-Tag Digital Register */}
       {activeTab === '5s' && (
-        <div className="space-y-6">
+        <div className="space-y-8">
           <div className="rounded-2xl border bg-card p-6 space-y-5">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
@@ -789,21 +1153,19 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
                   )}
                 </p>
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const upgraded: Record<string, number> = {};
-                    blueprint.fiveSAuditItems.forEach((item) => {
-                      upgraded[item.id] = 5;
-                    });
-                    setFiveSScores(upgraded);
-                  }}
-                  className="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-extrabold text-white hover:bg-emerald-500 transition cursor-pointer"
-                >
-                  {t('Simulate 5/5 World-Class 5S', 'محاكاة المستوى الذهبي الكامل (5/5)')}
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  const upgraded: Record<string, number> = {};
+                  blueprint.fiveSAuditItems.forEach((item) => {
+                    upgraded[item.id] = 5;
+                  });
+                  setFiveSScores(upgraded);
+                }}
+                className="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-extrabold text-white hover:bg-emerald-500 transition cursor-pointer"
+              >
+                {t('Simulate 5/5 World-Class 5S', 'محاكاة المستوى الذهبي الكامل (5/5)')}
+              </button>
             </div>
 
             <div className="space-y-3">
@@ -816,9 +1178,7 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
                   >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <Pill tone="emerald">
-                          {isAr ? item.pillarTitleAr : item.pillarTitleEn}
-                        </Pill>
+                        <Pill tone="emerald">{isAr ? item.pillarTitleAr : item.pillarTitleEn}</Pill>
                         <span className="text-[11px] font-mono text-muted-foreground">
                           {item.standardRef}
                         </span>
@@ -851,25 +1211,124 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
               })}
             </div>
           </div>
+
+          {/* 1S Seiri Red-Tag Digital Register */}
+          <div className="rounded-2xl border bg-card p-6 space-y-5">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-extrabold">
+                  {t(
+                    '1S Seiri: Red-Tag Holding Area Register & Waste Exchange Monetization',
+                    'سجل البطاقات الحمراء (1S Red-Tag Register) واستغلال الرواكد والعوادم'
+                  )}
+                </h2>
+                <p className="text-xs text-muted-foreground">
+                  {t('Floor Space Recovered:', 'المساحة الأرضية المحررة:')}{' '}
+                  <strong className="text-emerald-600">{fiveSSummary.totalAreaFreedM2} m²</strong> |{' '}
+                  {t('Estimated Cash / Salvage Value:', 'القيمة الاستردادية المقدرة:')}{' '}
+                  <strong className="text-emerald-600">
+                    {fmtNumber(locale, fiveSSummary.totalSalvageEgp)} EGP
+                  </strong>
+                </p>
+              </div>
+              <Link
+                href={`/${locale}/marketplaces/waste/add`}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-extrabold text-white hover:bg-emerald-500 transition"
+              >
+                <Recycle className="h-3.5 w-3.5" />
+                {t('List Surplus on Waste Marketplace', 'عرض الرواكد والعوادم في بورصة المخلفات')}
+              </Link>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              {fiveSSummary.allRedTags.map((rt) => (
+                <div key={rt.id} className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="rounded-md bg-rose-600 px-2 py-0.5 text-[11px] font-mono font-bold text-white">
+                      {rt.tagCode}
+                    </span>
+                    <Pill tone="emerald">
+                      +{rt.floorAreaSavedM2} m² • {fmtNumber(locale, rt.estimatedSalvageEgp)} EGP
+                    </Pill>
+                  </div>
+                  <div className="font-bold text-sm">{isAr ? rt.itemAr : rt.itemEn}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {t('Location:', 'الموقع:')} {isAr ? rt.locationAr : rt.locationEn} •{' '}
+                    <strong>{rt.disposition}</strong>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Quick Add Red-Tag Item */}
+            <div className="grid sm:grid-cols-5 gap-3 pt-2 border-t">
+              <input
+                type="text"
+                placeholder={t('Red-Tagged Item Description...', 'وصف الصنف الراكد أو المعدة...')}
+                value={newTagItem}
+                onChange={(e) => setNewTagItem(e.target.value)}
+                className="sm:col-span-2 rounded-lg border bg-background px-3 py-2 text-xs"
+              />
+              <input
+                type="text"
+                placeholder={t('Floor Location...', 'موقع العنبر...')}
+                value={newTagLoc}
+                onChange={(e) => setNewTagLoc(e.target.value)}
+                className="rounded-lg border bg-background px-3 py-2 text-xs"
+              />
+              <input
+                type="number"
+                placeholder="m²"
+                value={newTagArea}
+                onChange={(e) => setNewTagArea(Number(e.target.value))}
+                className="rounded-lg border bg-background px-3 py-2 text-xs"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (!newTagItem.trim()) return;
+                  setCustomRedTags((prev) => [
+                    ...prev,
+                    {
+                      id: `rt-custom-${Date.now()}`,
+                      tagCode: `RT-2026-0${30 + prev.length}`,
+                      itemEn: newTagItem,
+                      itemAr: newTagItem,
+                      locationEn: newTagLoc || 'Production Bay',
+                      locationAr: newTagLoc || 'صالة الإنتاج',
+                      disposition: 'SCRAP_WASTE_EXCHANGE',
+                      floorAreaSavedM2: newTagArea || 8,
+                      estimatedSalvageEgp: newTagValue || 12000,
+                    },
+                  ]);
+                  setNewTagItem('');
+                  setNewTagLoc('');
+                }}
+                className="inline-flex items-center justify-center gap-1 rounded-lg bg-rose-600 px-3 py-2 text-xs font-extrabold text-white hover:bg-rose-500 cursor-pointer"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                {t('Log Red Tag', 'إضافة بطاقة حمراء')}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* TAB 3: TPM, OEE & SMED Quick Changeover */}
+      {/* TAB 3: TPM, OEE, MTBF/MTTR, CLIT & SMED Quick Changeover */}
       {activeTab === 'oee_smed' && (
         <div className="space-y-8">
-          {/* Interactive OEE Calculator */}
           <div className="rounded-2xl border bg-card p-6 space-y-5">
             <div>
               <h2 className="text-lg font-extrabold">
                 {t(
-                  'TPM Overall Equipment Effectiveness (OEE) & Six Big Losses Calculator',
-                  'حاسبة الفعالية الكلية للمعدات (OEE) والصيانة الإنتاجية الشاملة (TPM)'
+                  'TPM Overall Equipment Effectiveness (OEE), Six Big Losses & MTBF/MTTR Calculator',
+                  'حاسبة الفعالية الكلية للمعدات (OEE) والفواقد الستة الكبرى واعتمادية الصيانة (MTBF/MTTR)'
                 )}
               </h2>
               <p className="text-xs text-muted-foreground">
                 {t(
-                  'Formula: OEE = Availability × Performance × Quality (Right-First-Time)',
-                  'المعادلة القياسية: OEE = الإتاحة × الأداء × الجودة من المرة الأولى'
+                  'Formula: OEE = Availability × Performance × Quality | MTBF = Operating Time / Failures',
+                  'المعادلة القياسية: OEE = الإتاحة × الأداء × الجودة | MTBF = ساعات التشغيل ÷ عدد الأعطال'
                 )}
               </p>
             </div>
@@ -945,23 +1404,131 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
 
             <div className="grid sm:grid-cols-4 gap-4">
               <div className="rounded-2xl border p-4 bg-muted/20">
-                <div className="text-xs text-muted-foreground">{t('Availability', 'الإتاحة التشغيلية')}</div>
-                <div className="text-2xl font-extrabold text-primary mt-1">{oeeMetrics.availability}%</div>
+                <div className="text-xs text-muted-foreground">
+                  {t('Availability (Loss: Stops)', 'الإتاحة (فاقد التوقفات)')}
+                </div>
+                <div className="text-2xl font-extrabold text-primary mt-1">
+                  {oeeMetrics.availability}%
+                </div>
+                <div className="text-[11px] text-rose-600 mt-0.5">
+                  -{oeeDownMin} min {t('downtime loss', 'توقف وأعطال')}
+                </div>
               </div>
               <div className="rounded-2xl border p-4 bg-muted/20">
-                <div className="text-xs text-muted-foreground">{t('Performance', 'كفاءة الأداء والسرعة')}</div>
-                <div className="text-2xl font-extrabold text-sky-600 mt-1">{oeeMetrics.performance}%</div>
+                <div className="text-xs text-muted-foreground">
+                  {t('Performance (Loss: Speed)', 'الأداء (فاقد السرعة)')}
+                </div>
+                <div className="text-2xl font-extrabold text-sky-600 mt-1">
+                  {oeeMetrics.performance}%
+                </div>
+                <div className="text-[11px] text-amber-600 mt-0.5">
+                  -{oeeMetrics.speedLossMin} min {t('micro-stops/speed', 'توقفات صغرى وبطء')}
+                </div>
               </div>
               <div className="rounded-2xl border p-4 bg-muted/20">
-                <div className="text-xs text-muted-foreground">{t('Quality (RFT)', 'نسبة الجودة RFT')}</div>
-                <div className="text-2xl font-extrabold text-emerald-600 mt-1">{oeeMetrics.quality}%</div>
+                <div className="text-xs text-muted-foreground">
+                  {t('Quality (Loss: Rework)', 'الجودة من المرة الأولى')}
+                </div>
+                <div className="text-2xl font-extrabold text-emerald-600 mt-1">
+                  {oeeMetrics.quality}%
+                </div>
+                <div className="text-[11px] text-rose-600 mt-0.5">
+                  -{oeeMetrics.qualityLossMin} min ({oeeDefects} {t('defects', 'وحدة معيبة')})
+                </div>
               </div>
               <div className="rounded-2xl border-2 border-emerald-500/40 p-4 bg-emerald-500/10">
                 <div className="text-xs font-bold text-emerald-700 dark:text-emerald-300">
                   {t('Overall OEE Score', 'المؤشر الكلي OEE')}
                 </div>
                 <div className="text-3xl font-extrabold text-emerald-600 mt-1">{oeeMetrics.oee}%</div>
+                <div className="text-[11px] text-muted-foreground mt-0.5">
+                  {t('World-Class Benchmark: 85%', 'المعيار العالمي: ٨٥٪')}
+                </div>
               </div>
+            </div>
+
+            {/* MTBF & MTTR Reliability Row */}
+            <div className="grid sm:grid-cols-3 gap-3 pt-2 border-t">
+              <div className="rounded-xl border bg-muted/20 p-3">
+                <label className="block text-[11px] font-semibold mb-1">
+                  {t('Monthly Operating Hours', 'ساعات التشغيل الشهرية')}
+                </label>
+                <input
+                  type="number"
+                  value={mtbfOperatingHours}
+                  onChange={(e) => setMtbfOperatingHours(Number(e.target.value))}
+                  className="w-full rounded-lg border bg-background px-2.5 py-1 text-xs font-bold"
+                />
+              </div>
+              <div className="rounded-xl border bg-muted/20 p-3">
+                <label className="block text-[11px] font-semibold mb-1">
+                  {t('Breakdown Events Count', 'عدد مرات العطل الفجائي')}
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  value={mtbfFailureCount}
+                  onChange={(e) => setMtbfFailureCount(Number(e.target.value))}
+                  className="w-full rounded-lg border bg-background px-2.5 py-1 text-xs font-bold"
+                />
+              </div>
+              <div className="rounded-xl border bg-muted/20 p-3 flex flex-col justify-center">
+                <div className="text-xs text-muted-foreground">
+                  {t('Reliability Metrics:', 'مؤشرات الاعتمادية الهندسية:')}
+                </div>
+                <div className="text-sm font-extrabold mt-0.5">
+                  MTBF: <span className="text-emerald-600">{oeeMetrics.mtbfHours} hrs</span> | MTTR:{' '}
+                  <span className="text-amber-600">{oeeMetrics.mttrMin} min</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CLIT Autonomous Maintenance (Jishu Hozen) Checklist */}
+          <div className="rounded-2xl border bg-card p-6 space-y-4">
+            <h2 className="text-lg font-extrabold">
+              {t(
+                'TPM Pillar 1: Jishu Hozen (Autonomous Maintenance — CLIT Operator Checklist)',
+                'الركيزة الأولى للصيانة الشاملة (TPM): الصيانة الذاتية للمشغل (CLIT Checklist)'
+              )}
+            </h2>
+            <div className="grid md:grid-cols-2 gap-3">
+              {blueprint.clitChecklist.map((item) => {
+                const checked = !!clitChecked[item.id];
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() =>
+                      setClitChecked((prev) => ({ ...prev, [item.id]: !prev[item.id] }))
+                    }
+                    className={`rounded-xl border p-4 text-start transition cursor-pointer flex items-start gap-3 ${
+                      checked ? 'border-emerald-500/40 bg-emerald-500/5' : 'bg-muted/15'
+                    }`}
+                  >
+                    <span
+                      className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-extrabold text-sm ${
+                        checked ? 'bg-emerald-600 text-white' : 'bg-muted text-foreground'
+                      }`}
+                    >
+                      {item.code}
+                    </span>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-xs sm:text-sm">
+                          {isAr ? item.categoryAr : item.categoryEn}
+                        </span>
+                        <Pill tone={checked ? 'emerald' : 'amber'}>
+                          {item.standardMinutes} min • {isAr ? item.frequencyAr : item.frequencyEn}
+                        </Pill>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {isAr ? item.taskAr : item.taskEn}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -986,7 +1553,7 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
                 type="button"
                 onClick={() => {
                   setSmedOptimized((prev) => !prev);
-                  setOeeDownMin((prev) => (smedOptimized ? 85 : 32));
+                  setOeeDownMin(smedOptimized ? 85 : 32);
                 }}
                 className="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-extrabold text-white hover:bg-emerald-500 transition cursor-pointer"
               >
@@ -1032,206 +1599,373 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
         </div>
       )}
 
-      {/* TAB 4: Line Balancing, Yamazumi Chart & SAM Costing */}
+      {/* TAB 4: Line Balancing, Yamazumi Chart, SWCS & ILUO Skill Matrix */}
       {activeTab === 'balancing' && (
-        <div className="rounded-2xl border bg-card p-6 space-y-6">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
+        <div className="space-y-8">
+          <div className="rounded-2xl border bg-card p-6 space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-extrabold">
+                  {t(
+                    'Workstation Line Balancing, Yamazumi Chart & Standard Work Combination Sheet (SWCS)',
+                    'موازنة خطوط الإنتاج ومخطط يامازومي (Yamazumi) وبطاقة العمل القياسي (SWCS)'
+                  )}
+                </h2>
+                <p className="text-xs text-muted-foreground">
+                  {t('Line Balance Efficiency (LBE):', 'كفاءة توازن الخط (LBE):')}{' '}
+                  <strong className="text-emerald-600">{lineBalanceMetrics.lbePct}%</strong> |{' '}
+                  {t('Total SAM:', 'إجمالي الزمن القياسي SAM:')}{' '}
+                  <strong>{lineBalanceMetrics.totalSamMin} min</strong> |{' '}
+                  {t('Theoretical Min Operators:', 'العدد المثالي للعمال:')}{' '}
+                  <strong>{lineBalanceMetrics.theoreticalMinOperators}</strong> |{' '}
+                  {t('Line Hourly Output:', 'القدرة بالساعة:')}{' '}
+                  <strong>{lineBalanceMetrics.hourlyCap} units/hr</strong>
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setLineBalanced((prev) => !prev)}
+                className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-extrabold text-white hover:bg-emerald-500 transition cursor-pointer"
+              >
+                <RefreshCw className="h-3.5 w-3.5" />
+                {lineBalanced
+                  ? t('Reset to Unbalanced Baseline', 'إعادة للوضع قبل الموازنة')
+                  : t(
+                      '✨ AI Auto-Balance Workstations & Strip NVA',
+                      '✨ موازنة الخط آلياً وحذف الحركات غير المضيفة للقيمة'
+                    )}
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {balancedStations.map((ws) => {
+                const overTakt = ws.cycleTimeSec > taktTimeSec;
+                const widthPct = Math.min(100, Math.round((ws.cycleTimeSec / 75) * 100));
+                const vaWidthPct = Math.round((ws.vaSec / Math.max(1, ws.cycleTimeSec)) * 100);
+                return (
+                  <div key={ws.id} className="rounded-xl border p-4 space-y-2 bg-muted/15">
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm">
+                      <span className="font-bold">{isAr ? ws.stationAr : ws.stationEn}</span>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-xs text-muted-foreground">
+                          VA: <strong className="text-emerald-600">{ws.vaSec}s</strong> + NVA:{' '}
+                          <strong className="text-amber-600">{ws.nvaSec}s</strong> | SWCS (Manual:{' '}
+                          {ws.manualSec}s / Auto: {ws.machineAutoSec}s / Walk: {ws.walkSec}s) ={' '}
+                          <strong>{ws.cycleTimeSec}s</strong> ({t('Takt:', 'التاكت:')} {taktTimeSec}s)
+                        </span>
+                        <Pill tone={overTakt ? 'red' : 'emerald'}>
+                          {overTakt
+                            ? t('Bottleneck > Takt', 'اختناق > التاكت')
+                            : t('Balanced ≤ Takt', 'متوازن ≤ التاكت')}
+                        </Pill>
+                      </div>
+                    </div>
+                    <div className="h-4 w-full rounded-full bg-muted overflow-hidden flex">
+                      <div
+                        className="h-full bg-emerald-500 transition-all"
+                        style={{ width: `${(widthPct * vaWidthPct) / 100}%` }}
+                        title="Value-Added Time"
+                      />
+                      <div
+                        className="h-full bg-amber-500 transition-all"
+                        style={{ width: `${(widthPct * (100 - vaWidthPct)) / 100}%` }}
+                        title="Non-Value-Added Motion"
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 4×4 ILUO Operator Multi-Skill Matrix */}
+          <div className="rounded-2xl border bg-card p-6 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-extrabold flex items-center gap-2">
+                  <Users className="h-5 w-5 text-emerald-600" />
+                  {t(
+                    'Interactive ILUO Operator Multi-Skill Matrix (Cross-Training & Bottleneck Coverage)',
+                    'مصفوفة المهارات المتعددة للعمال (ILUO Skill Matrix) للتدريب المتقاطع'
+                  )}
+                </h2>
+                <p className="text-xs text-muted-foreground">
+                  {t(
+                    'Click any cell to upgrade operator skill level: I (In Training 25%) → L (Learnt 50%) → U (Independent Standard 75%) → O (Master Trainer 100%).',
+                    'اضغط على أي خلية لترقية مستوى مهارة العامل: I (تحت التدريب ٢٥٪) ← L (ممارس بإشراف ٥٠٪) ← U (مستقل بالزمن القياسي ٧٥٪) ← O (مدرب خبير ١٠٠٪).'
+                  )}
+                </p>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs border-collapse">
+                <thead>
+                  <tr className="border-b bg-muted/40">
+                    <th className="p-3 text-start">{t('Operator / Role', 'العامل / الوظيفة')}</th>
+                    {blueprint.workstations.map((ws, idx) => (
+                      <th key={ws.id} className="p-3 text-center">
+                        S{idx + 1}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {skillMatrixState.map((op) => (
+                    <tr key={op.id} className="border-b hover:bg-muted/20">
+                      <td className="p-3">
+                        <div className="font-bold">{isAr ? op.operatorNameAr : op.operatorNameEn}</div>
+                        <div className="text-[11px] text-muted-foreground">
+                          {isAr ? op.roleAr : op.roleEn}
+                        </div>
+                      </td>
+                      {blueprint.workstations.map((ws) => {
+                        const lvl = op.skills[ws.id] || 'I';
+                        const badgeClass =
+                          lvl === 'O'
+                            ? 'bg-emerald-600 text-white'
+                            : lvl === 'U'
+                            ? 'bg-sky-600 text-white'
+                            : lvl === 'L'
+                            ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/40'
+                            : 'bg-muted text-muted-foreground';
+                        return (
+                          <td key={ws.id} className="p-2 text-center">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSkillMatrixState((prev) =>
+                                  prev.map((row) =>
+                                    row.id === op.id
+                                      ? {
+                                          ...row,
+                                          skills: {
+                                            ...row.skills,
+                                            [ws.id]: cycleIluo(row.skills[ws.id] || 'I'),
+                                          },
+                                        }
+                                      : row
+                                  )
+                                );
+                              }}
+                              className={`h-8 w-8 rounded-lg font-extrabold text-xs transition cursor-pointer ${badgeClass}`}
+                            >
+                              {lvl}
+                            </button>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 5: Kanban Pull System, Supermarket Sizing, Heijunka Box & Water Spider */}
+      {activeTab === 'kanban' && (
+        <div className="space-y-8">
+          <div className="grid lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-6 rounded-2xl border bg-card p-6 space-y-4">
               <h2 className="text-lg font-extrabold">
                 {t(
-                  'Workstation Line Balancing, Yamazumi Chart & SAM Costing',
-                  'موازنة خطوط الإنتاج ومخطط يامازومي (Yamazumi) وحساب الزمن القياسي SAM'
+                  'Kanban Card, Supermarket Sizing & Water Spider Route Calculator',
+                  'حاسبة بطاقات كانبان وحجم السوبرماركت ومسار المزود (Water Spider)'
                 )}
               </h2>
               <p className="text-xs text-muted-foreground">
-                {t('Line Balance Efficiency (LBE):', 'كفاءة توازن الخط (LBE):')}{' '}
-                <strong className="text-emerald-600">{lineBalanceMetrics.lbePct}%</strong> |{' '}
-                {t('Total SAM:', 'إجمالي الزمن القياسي SAM:')}{' '}
-                <strong>{lineBalanceMetrics.totalSamMin} min</strong> |{' '}
-                {t('Line Hourly Output:', 'القدرة بالساعة:')}{' '}
-                <strong>{lineBalanceMetrics.hourlyCap} units/hr</strong>
+                {t(
+                  'Formula: N = ceil( (Daily Demand × Lead Time × (1 + Safety %)) / Container Capacity )',
+                  'المعادلة: عدد بطاقات كانبان = السقف الأعلى لـ (الطلب اليومي × زمن التوريد × معامل الأمان ÷ سعة العربة)'
+                )}
+              </p>
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold mb-1">
+                    {t('Daily Demand (kg / units)', 'الاستهلاك اليومي (كجم / قطعة)')}
+                  </label>
+                  <input
+                    type="number"
+                    value={kanbanDailyDemand}
+                    onChange={(e) => setKanbanDailyDemand(Number(e.target.value))}
+                    className="w-full rounded-lg border bg-background px-3 py-2 text-sm font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold mb-1">
+                    {t('Replenishment Lead Time (Days)', 'زمن الاستعاضة والتوريد (أيام)')}
+                  </label>
+                  <input
+                    type="number"
+                    step="0.5"
+                    value={kanbanLeadDays}
+                    onChange={(e) => setKanbanLeadDays(Number(e.target.value))}
+                    className="w-full rounded-lg border bg-background px-3 py-2 text-sm font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold mb-1">
+                    {t('Safety Buffer Factor (%)', 'نسبة مخزون الأمان (%)')}
+                  </label>
+                  <input
+                    type="number"
+                    value={kanbanSafetyPct}
+                    onChange={(e) => setKanbanSafetyPct(Number(e.target.value))}
+                    className="w-full rounded-lg border bg-background px-3 py-2 text-sm font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold mb-1">
+                    {t('Standard Trolley / Bin Capacity', 'سعة العربة أو الحاوية القياسية')}
+                  </label>
+                  <input
+                    type="number"
+                    value={kanbanBinCap}
+                    onChange={(e) => setKanbanBinCap(Number(e.target.value))}
+                    className="w-full rounded-lg border bg-background px-3 py-2 text-sm font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold mb-1">
+                    {t('Heijunka Pack-Out Lot Size', 'سعة صندوق الجدولة (Pitch Pack Qty)')}
+                  </label>
+                  <input
+                    type="number"
+                    value={heijunkaPackOutQty}
+                    onChange={(e) => setHeijunkaPackOutQty(Number(e.target.value))}
+                    className="w-full rounded-lg border bg-background px-3 py-2 text-sm font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold mb-1">
+                    {t('Water Spider Cycle (min)', 'دورة قطار التغذية (دقيقة)')}
+                  </label>
+                  <input
+                    type="number"
+                    value={waterSpiderCycleMin}
+                    onChange={(e) => setWaterSpiderCycleMin(Number(e.target.value))}
+                    className="w-full rounded-lg border bg-background px-3 py-2 text-sm font-bold"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3 pt-2">
+                <div className="rounded-xl border-2 border-emerald-500/40 bg-emerald-500/10 p-3.5">
+                  <div className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
+                    {t('Kanban Cards', 'بطاقات كانبان')}
+                  </div>
+                  <div className="text-2xl font-extrabold text-emerald-600 mt-1">
+                    {kanbanResult.cards} {t('Bins', 'عربة')}
+                  </div>
+                </div>
+                <div className="rounded-xl border bg-muted/30 p-3.5">
+                  <div className="text-[11px] text-muted-foreground">
+                    {t('Heijunka Pitch', 'إيقاع Pitch')}
+                  </div>
+                  <div className="text-2xl font-extrabold text-sky-600 mt-1">
+                    {kanbanResult.pitchMin}m
+                  </div>
+                </div>
+                <div className="rounded-xl border bg-muted/30 p-3.5">
+                  <div className="text-[11px] text-muted-foreground">
+                    {t('Spider Trips/Shift', 'جولات التغذية/وردية')}
+                  </div>
+                  <div className="text-2xl font-extrabold mt-1">
+                    {kanbanResult.waterSpiderTripsPerShift}x
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Printable Visual Kanban Card Preview */}
+            <div className="lg:col-span-6 rounded-2xl border-2 border-dashed border-emerald-500/50 bg-card p-6 space-y-4">
+              <div className="flex items-center justify-between border-b pb-3">
+                <div>
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-emerald-600 font-bold">
+                    PRODUCTION & WITHDRAWAL KANBAN CARD • KB-MHL-01
+                  </span>
+                  <h3 className="font-extrabold text-base">{blueprint.factoryName}</h3>
+                </div>
+                <Pill tone="emerald">{t('PULL TRIGGER', 'إشارة سحب كانبان')}</Pill>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="rounded-lg border p-2.5 bg-muted/20">
+                  <span className="text-muted-foreground block">
+                    {t('Item / Material Spec:', 'الصنف والمواصفة:')}
+                  </span>
+                  <strong>{blueprint.productFocus}</strong>
+                </div>
+                <div className="rounded-lg border p-2.5 bg-muted/20">
+                  <span className="text-muted-foreground block">
+                    {t('Standard Container Qty:', 'سعة الحاوية القياسية:')}
+                  </span>
+                  <strong>
+                    {kanbanBinCap} units / trolley (Max WIP: {kanbanResult.maxWipUnits})
+                  </strong>
+                </div>
+                <div className="rounded-lg border p-2.5 bg-muted/20">
+                  <span className="text-muted-foreground block">
+                    {t('Upstream Supplier Process:', 'القسم المورّد (المنبع):')}
+                  </span>
+                  <strong>Weaving / Dyeing Supermarket Bay #2</strong>
+                </div>
+                <div className="rounded-lg border p-2.5 bg-muted/20">
+                  <span className="text-muted-foreground block">
+                    {t('Downstream Customer Process:', 'القسم المستهلك (المصب):')}
+                  </span>
+                  <strong>Finishing / Cutting & Sewing Cell #1</strong>
+                </div>
+              </div>
+              <p className="text-[11px] text-muted-foreground bg-muted/40 p-2.5 rounded-lg">
+                {t(
+                  'Kanban Rule: Never produce or move a trolley without an attached Kanban card. Defective items must never be passed downstream (Jidoka).',
+                  'قاعدة كانبان الذهبية: يمنع إنتاج أو تحريك أي عربة بدون بطاقة كانبان مرفقة، ويمنع تمرير أي قطعة معيبة للمرحلة التالية.'
+                )}
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() => setLineBalanced((prev) => !prev)}
-              className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-extrabold text-white hover:bg-emerald-500 transition cursor-pointer"
-            >
-              <RefreshCw className="h-3.5 w-3.5" />
-              {lineBalanced
-                ? t('Reset to Unbalanced Baseline', 'إعادة للوضع قبل الموازنة')
-                : t('✨ AI Auto-Balance Workstations & Strip NVA', '✨ موازنة الخط آلياً وحذف الحركات غير المضيفة للقيمة')}
-            </button>
           </div>
 
-          <div className="space-y-4">
-            {balancedStations.map((ws) => {
-              const overTakt = ws.cycleTimeSec > taktTimeSec;
-              const widthPct = Math.min(100, Math.round((ws.cycleTimeSec / 75) * 100));
-              const vaWidthPct = Math.round((ws.vaSec / Math.max(1, ws.cycleTimeSec)) * 100);
-              return (
-                <div key={ws.id} className="rounded-xl border p-4 space-y-2 bg-muted/15">
-                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm">
-                    <span className="font-bold">{isAr ? ws.stationAr : ws.stationEn}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">
-                        VA: <strong className="text-emerald-600">{ws.vaSec}s</strong> + NVA:{' '}
-                        <strong className="text-amber-600">{ws.nvaSec}s</strong> ={' '}
-                        <strong>{ws.cycleTimeSec}s</strong> ({t('Takt:', 'التاكت:')} {taktTimeSec}s)
-                      </span>
-                      <Pill tone={overTakt ? 'red' : 'emerald'}>
-                        {overTakt
-                          ? t('Bottleneck > Takt', 'اختناق > التاكت')
-                          : t('Balanced ≤ Takt', 'متوازن ≤ التاكت')}
-                      </Pill>
-                    </div>
+          {/* Visual Heijunka Box (Mixed-Model Production Leveling) */}
+          <div className="rounded-2xl border bg-card p-6 space-y-4">
+            <div>
+              <h2 className="text-lg font-extrabold">
+                {t(
+                  'Heijunka Box: Visual Mixed-Model Production Leveling (A-B-A-C-A-B-D Sequence)',
+                  'صندوق هيجونكا (Heijunka Box): تسوية وموازنة الإنتاج متعدد الموديلات (A-B-A-C)'
+                )}
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                {t(
+                  'Eliminates batching surges (Mura) and machine overburden (Muri) by sequencing SKUs in 30-minute Pitch slots (EPEI = 0.5 Shift).',
+                  'يقضي على التذبذب (Mura) والإجهاد الزائد للماكينات (Muri) عبر توزيع الأصناف في فترات Pitch منتظمة كل ٣٠ دقيقة.'
+                )}
+              </p>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {blueprint.heijunkaSchedule.map((slot, idx) => (
+                <div key={idx} className="rounded-xl border p-3.5 bg-muted/15 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs font-bold text-muted-foreground">
+                      {slot.pitchTime}
+                    </span>
+                    <Pill tone={slot.colorTone}>{slot.qtyUnits} pcs</Pill>
                   </div>
-                  <div className="h-4 w-full rounded-full bg-muted overflow-hidden flex">
-                    <div
-                      className="h-full bg-emerald-500 transition-all"
-                      style={{ width: `${(widthPct * vaWidthPct) / 100}%` }}
-                      title="Value-Added Time"
-                    />
-                    <div
-                      className="h-full bg-amber-500 transition-all"
-                      style={{ width: `${(widthPct * (100 - vaWidthPct)) / 100}%` }}
-                      title="Non-Value-Added Motion"
-                    />
+                  <div className="text-xs font-extrabold">{slot.skuCode}</div>
+                  <div className="text-[11px] text-muted-foreground">
+                    {isAr ? slot.skuNameAr : slot.skuNameEn}
                   </div>
                 </div>
-              );
-            })}
+              ))}
+            </div>
           </div>
         </div>
       )}
 
-      {/* TAB 5: Kanban Pull System, Supermarket Sizing & Heijunka */}
-      {activeTab === 'kanban' && (
-        <div className="grid lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-6 rounded-2xl border bg-card p-6 space-y-4">
-            <h2 className="text-lg font-extrabold">
-              {t(
-                'Kanban Card & Supermarket Bin Sizing Calculator',
-                'حاسبة عدد بطاقات كانبان وحجم مخزون السوبرماركت (Pull System)'
-              )}
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              {t(
-                'Formula: N = ceil( (Daily Demand × Lead Time × (1 + Safety %)) / Container Capacity )',
-                'المعادلة: عدد بطاقات كانبان = السقف الأعلى لـ (الطلب اليومي × زمن التوريد × معامل الأمان ÷ سعة العربة)'
-              )}
-            </p>
-            <div className="grid sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-semibold mb-1">
-                  {t('Daily Demand (kg / units)', 'الاستهلاك اليومي (كجم / قطعة)')}
-                </label>
-                <input
-                  type="number"
-                  value={kanbanDailyDemand}
-                  onChange={(e) => setKanbanDailyDemand(Number(e.target.value))}
-                  className="w-full rounded-lg border bg-background px-3 py-2 text-sm font-bold"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold mb-1">
-                  {t('Replenishment Lead Time (Days)', 'زمن الاستعاضة والتوريد (أيام)')}
-                </label>
-                <input
-                  type="number"
-                  step="0.5"
-                  value={kanbanLeadDays}
-                  onChange={(e) => setKanbanLeadDays(Number(e.target.value))}
-                  className="w-full rounded-lg border bg-background px-3 py-2 text-sm font-bold"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold mb-1">
-                  {t('Safety Buffer Factor (%)', 'نسبة مخزون الأمان (%)')}
-                </label>
-                <input
-                  type="number"
-                  value={kanbanSafetyPct}
-                  onChange={(e) => setKanbanSafetyPct(Number(e.target.value))}
-                  className="w-full rounded-lg border bg-background px-3 py-2 text-sm font-bold"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold mb-1">
-                  {t('Standard Trolley / Bin Capacity', 'سعة العربة أو الحاوية القياسية')}
-                </label>
-                <input
-                  type="number"
-                  value={kanbanBinCap}
-                  onChange={(e) => setKanbanBinCap(Number(e.target.value))}
-                  className="w-full rounded-lg border bg-background px-3 py-2 text-sm font-bold"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 pt-2">
-              <div className="rounded-xl border-2 border-emerald-500/40 bg-emerald-500/10 p-4">
-                <div className="text-xs font-bold text-emerald-700 dark:text-emerald-300">
-                  {t('Required Kanban Cards / Bins', 'عدد بطاقات وعربات كانبان المطلوبة')}
-                </div>
-                <div className="text-3xl font-extrabold text-emerald-600 mt-1">
-                  {kanbanResult.cards} {t('Cards', 'بطاقة')}
-                </div>
-              </div>
-              <div className="rounded-xl border bg-muted/30 p-4">
-                <div className="text-xs text-muted-foreground">
-                  {t('Strict WIP Inventory Cap', 'الحد الأقصى المسموح للمخزون البيني')}
-                </div>
-                <div className="text-2xl font-extrabold mt-1">
-                  {fmtNumber(locale, kanbanResult.maxWipUnits)} {t('units', 'وحدة')}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Printable Visual Kanban Card Preview */}
-          <div className="lg:col-span-6 rounded-2xl border-2 border-dashed border-emerald-500/50 bg-card p-6 space-y-4">
-            <div className="flex items-center justify-between border-b pb-3">
-              <div>
-                <span className="text-[10px] font-mono uppercase tracking-widest text-emerald-600 font-bold">
-                  PRODUCTION & WITHDRAWAL KANBAN CARD • KB-MHL-01
-                </span>
-                <h3 className="font-extrabold text-base">{blueprint.factoryName}</h3>
-              </div>
-              <Pill tone="emerald">{t('PULL TRIGGER', 'إشارة سحب كانبان')}</Pill>
-            </div>
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="rounded-lg border p-2.5 bg-muted/20">
-                <span className="text-muted-foreground block">{t('Item / Material Spec:', 'الصنف والمواصفة:')}</span>
-                <strong>{blueprint.productFocus}</strong>
-              </div>
-              <div className="rounded-lg border p-2.5 bg-muted/20">
-                <span className="text-muted-foreground block">{t('Standard Container Qty:', 'سعة الحاوية القياسية:')}</span>
-                <strong>{kanbanBinCap} units / trolley</strong>
-              </div>
-              <div className="rounded-lg border p-2.5 bg-muted/20">
-                <span className="text-muted-foreground block">{t('Upstream Supplier Process:', 'القسم المورّد (المنبع):')}</span>
-                <strong>Weaving / Dyeing Supermarket Bay #2</strong>
-              </div>
-              <div className="rounded-lg border p-2.5 bg-muted/20">
-                <span className="text-muted-foreground block">{t('Downstream Customer Process:', 'القسم المستهلك (المصب):')}</span>
-                <strong>Finishing / Cutting & Sewing Cell #1</strong>
-              </div>
-            </div>
-            <p className="text-[11px] text-muted-foreground bg-muted/40 p-2.5 rounded-lg">
-              {t(
-                'Kanban Rule: Never produce or move a trolley without an attached Kanban card. Defective items must never be passed downstream (Jidoka).',
-                'قاعدة كانبان الذهبية: يمنع إنتاج أو تحريك أي عربة بدون بطاقة كانبان مرفقة، ويمنع تمرير أي قطعة معيبة للمرحلة التالية.'
-              )}
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* TAB 6: Jidoka, Andon Board, Poka-Yoke & Root Cause (5 Whys + Ishikawa) */}
+      {/* TAB 6: Jidoka, Andon Board, Poka-Yoke & Process FMEA (RPN Calculator) */}
       {activeTab === 'jidoka' && (
         <div className="space-y-8">
-          {/* Interactive Andon Shop-Floor Control Board */}
           <div className="rounded-2xl border bg-card p-6 space-y-4">
             <div>
               <h2 className="text-lg font-extrabold">
@@ -1261,9 +1995,7 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
                   <button
                     key={bay}
                     type="button"
-                    onClick={() =>
-                      setAndonStates((prev) => ({ ...prev, [bay]: nextState }))
-                    }
+                    onClick={() => setAndonStates((prev) => ({ ...prev, [bay]: nextState }))}
                     className={`rounded-2xl border-2 p-4 text-start transition cursor-pointer ${styles}`}
                   >
                     <div className="text-xs font-extrabold uppercase">{state} ANDON</div>
@@ -1278,6 +2010,82 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
                   </button>
                 );
               })}
+            </div>
+          </div>
+
+          {/* Interactive Process FMEA (RPN = S × O × D) Matrix */}
+          <div className="rounded-2xl border bg-card p-6 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-extrabold">
+                  {t(
+                    'Process FMEA (Failure Mode & Effects Analysis) — Risk Priority Number (RPN = S × O × D)',
+                    'تحليل أنماط وآثار الفشل (PFMEA) وحساب رقم أولوية المخاطر (RPN = S × O × D)'
+                  )}
+                </h2>
+                <p className="text-xs text-muted-foreground">
+                  {t(
+                    'Any failure mode with RPN ≥ 100 requires mandatory Poka-Yoke mistake-proofing interlocks.',
+                    'أي خطوة يتجاوز فيها معامل الخطورة RPN ≥ ١٠٠ تتطلب تطبيق أنظمة منع الخطأ (Poka-Yoke) فوراً.'
+                  )}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setFmeaMitigated((prev) => !prev)}
+                className="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-extrabold text-white hover:bg-emerald-500 transition cursor-pointer"
+              >
+                {fmeaMitigated
+                  ? t('✓ Poka-Yoke Controls Active (All RPN < 35)', '✓ تم تفعيل Poka-Yoke (جميع RPN أقل من ٣٥)')
+                  : t('Simulate Post-Poka-Yoke RPN Reduction', 'محاكاة خفض المخاطر RPN بعد تطبيق Poka-Yoke')}
+              </button>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs sm:text-sm border-collapse">
+                <thead>
+                  <tr className="border-b bg-muted/40 text-start">
+                    <th className="p-3 text-start">{t('Process & Failure Mode', 'العملية ونمط الفشل')}</th>
+                    <th className="p-3 text-center">S</th>
+                    <th className="p-3 text-center">O</th>
+                    <th className="p-3 text-center">D</th>
+                    <th className="p-3 text-center">RPN</th>
+                    <th className="p-3 text-start">{t('Poka-Yoke Countermeasure', 'إجراء Poka-Yoke الوقائي')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {blueprint.fmeaItems.map((f) => {
+                    const s = fmeaMitigated ? f.afterSeverity : f.severity;
+                    const o = fmeaMitigated ? f.afterOccurrence : f.occurrence;
+                    const d = fmeaMitigated ? f.afterDetection : f.detection;
+                    const rpn = s * o * d;
+                    return (
+                      <tr key={f.id} className="border-b hover:bg-muted/20">
+                        <td className="p-3">
+                          <div className="font-bold">
+                            {isAr ? f.processStepAr : f.processStepEn}:{' '}
+                            {isAr ? f.failureModeAr : f.failureModeEn}
+                          </div>
+                          <div className="text-[11px] text-muted-foreground">
+                            {isAr ? f.effectAr : f.effectEn}
+                          </div>
+                        </td>
+                        <td className="p-3 text-center font-mono font-bold">{s}</td>
+                        <td className="p-3 text-center font-mono font-bold">{o}</td>
+                        <td className="p-3 text-center font-mono font-bold">{d}</td>
+                        <td className="p-3 text-center">
+                          <Pill tone={rpn >= 100 ? 'red' : rpn >= 50 ? 'amber' : 'emerald'}>
+                            {rpn}
+                          </Pill>
+                        </td>
+                        <td className="p-3 text-xs text-emerald-700 dark:text-emerald-300 font-medium">
+                          {isAr ? f.recommendedActionAr : f.recommendedActionEn}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
 
@@ -1341,7 +2149,358 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
         </div>
       )}
 
-      {/* TAB 7: Toyota-Style A3 Report, Kaizen PDCA & Hoshin Kanri X-Matrix */}
+      {/* TAB 7: Lean Six Sigma DMAIC, SPC Control Chart, Cp/Cpk & DPMO Calculator */}
+      {activeTab === 'six_sigma' && (
+        <div className="space-y-8">
+          <div className="rounded-2xl border bg-card p-6 space-y-5">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-extrabold">
+                  {t(
+                    'Statistical Process Control (SPC) & Process Capability (Cp / Cpk) Calculator',
+                    'حاسبة الضبط الإحصائي للعمليات (SPC) ومؤشرات قدرة العملية (Cp / Cpk)'
+                  )}
+                </h2>
+                <p className="text-xs text-muted-foreground">
+                  {t(
+                    'Cp = (USL - LSL) / 6σ | Cpk = min( (USL - μ)/3σ, (μ - LSL)/3σ ) — Target Cpk ≥ 1.33 (4σ) to 2.00 (6σ).',
+                    'المعيار الصناعي لقدرة العملية: Cpk ≥ 1.33 (مستوى ٤ سيجما) إلى 2.00 (مستوى ٦ سيجما العالمي).'
+                  )}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {blueprint.spcPresets.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => handleSelectSpcPreset(p.id)}
+                    className={`rounded-xl px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+                      selectedSpcId === p.id
+                        ? 'bg-emerald-600 text-white'
+                        : 'border bg-muted/40 hover:bg-muted'
+                    }`}
+                  >
+                    {isAr ? p.parameterAr : p.parameterEn}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid sm:grid-cols-4 gap-3">
+              <div className="rounded-xl border bg-muted/30 p-3">
+                <label className="block text-[11px] font-semibold mb-1">
+                  {t('Lower Spec Limit (LSL)', 'الحد الأدنى للمواصفة (LSL)')}
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={spcLsl}
+                  onChange={(e) => setSpcLsl(Number(e.target.value))}
+                  className="w-full rounded-lg border bg-background px-2.5 py-1.5 text-sm font-bold"
+                />
+              </div>
+              <div className="rounded-xl border bg-muted/30 p-3">
+                <label className="block text-[11px] font-semibold mb-1">
+                  {t('Upper Spec Limit (USL)', 'الحد الأعلى للمواصفة (USL)')}
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={spcUsl}
+                  onChange={(e) => setSpcUsl(Number(e.target.value))}
+                  className="w-full rounded-lg border bg-background px-2.5 py-1.5 text-sm font-bold"
+                />
+              </div>
+              <div className="rounded-xl border bg-muted/30 p-3">
+                <label className="block text-[11px] font-semibold mb-1">
+                  {t('Process Mean (μ)', 'متوسط العملية الفعلي (μ)')}
+                </label>
+                <input
+                  type="number"
+                  step="0.05"
+                  value={spcMean}
+                  onChange={(e) => setSpcMean(Number(e.target.value))}
+                  className="w-full rounded-lg border bg-background px-2.5 py-1.5 text-sm font-bold"
+                />
+              </div>
+              <div className="rounded-xl border bg-muted/30 p-3">
+                <label className="block text-[11px] font-semibold mb-1">
+                  {t('Std Deviation (σ)', 'الانحراف المعياري (σ)')}
+                </label>
+                <input
+                  type="number"
+                  step="0.02"
+                  value={spcStdDev}
+                  onChange={(e) => setSpcStdDev(Number(e.target.value))}
+                  className="w-full rounded-lg border bg-background px-2.5 py-1.5 text-sm font-bold"
+                />
+              </div>
+            </div>
+
+            <div className="grid sm:grid-cols-4 gap-4">
+              <div className="rounded-2xl border p-4 bg-muted/20">
+                <div className="text-xs text-muted-foreground">{t('Potential Capability (Cp)', 'القدرة الكامنة Cp')}</div>
+                <div className="text-2xl font-extrabold text-primary mt-1">{spcMetrics.cp}</div>
+              </div>
+              <div className="rounded-2xl border-2 border-emerald-500/40 p-4 bg-emerald-500/10">
+                <div className="text-xs font-bold text-emerald-700 dark:text-emerald-300">
+                  {t('Centered Capability (Cpk)', 'مؤشر القدرة الفعلي Cpk')}
+                </div>
+                <div className="text-3xl font-extrabold text-emerald-600 mt-1">{spcMetrics.cpk}</div>
+                <div className="text-[11px] mt-0.5">
+                  {spcMetrics.cpkNum >= 1.33
+                    ? t('✓ Capable Process (≥ 1.33)', '✓ عملية قادرة ومضبوطة إحصائياً')
+                    : t('⚠ Drift / High Variation (< 1.33)', '⚠ انحراف يتطلب ضبط المعايرة')}
+                </div>
+              </div>
+              <div className="rounded-2xl border p-4 bg-muted/20">
+                <div className="text-xs text-muted-foreground">
+                  {t('SPC 3σ Control Limits', 'حدود الرقابة الإحصائية ±3σ')}
+                </div>
+                <div className="text-sm font-extrabold mt-2">
+                  LCL: <span className="text-sky-600">{spcMetrics.lcl}</span> | UCL:{' '}
+                  <span className="text-sky-600">{spcMetrics.ucl}</span> {activeSpcPreset.unit}
+                </div>
+              </div>
+              <div className="rounded-2xl border p-4 bg-muted/20">
+                <div className="text-xs text-muted-foreground">
+                  {t('Sample Batch Readings (12 Lots)', 'قراءات العينات المتتالية (١٢ لوط)')}
+                </div>
+                <div className="flex items-end gap-1 h-10 mt-2">
+                  {activeSpcPreset.samples.map((val, i) => {
+                    const norm = Math.max(
+                      15,
+                      Math.min(
+                        100,
+                        Math.round(((val - spcLsl) / Math.max(0.01, spcUsl - spcLsl)) * 100)
+                      )
+                    );
+                    const outOfSpec = val > spcUsl || val < spcLsl;
+                    return (
+                      <div
+                        key={i}
+                        className={`flex-1 rounded-t ${
+                          outOfSpec ? 'bg-rose-500' : 'bg-emerald-500'
+                        }`}
+                        style={{ height: `${norm}%` }}
+                        title={`Lot #${i + 1}: ${val} ${activeSpcPreset.unit}`}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* DPMO, Sigma Level, DHU & COPQ Calculator */}
+          <div className="rounded-2xl border bg-card p-6 space-y-5">
+            <h2 className="text-lg font-extrabold">
+              {t(
+                'Six Sigma DPMO, Sigma Level, DHU % & Cost of Poor Quality (COPQ) Calculator',
+                'حاسبة عيوب المليون فرصة (DPMO) ومستوى سيجما وتكلفة الجودة الرديئة (COPQ)'
+              )}
+            </h2>
+            <div className="grid sm:grid-cols-4 gap-3">
+              <div className="rounded-xl border bg-muted/30 p-3">
+                <label className="block text-[11px] font-semibold mb-1">
+                  {t('Units / Rolls Inspected', 'عدد الوحدات / الرولات المفحوصة')}
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  value={dpmoUnitsInspected}
+                  onChange={(e) => setDpmoUnitsInspected(Number(e.target.value))}
+                  className="w-full rounded-lg border bg-background px-2.5 py-1.5 text-sm font-bold"
+                />
+              </div>
+              <div className="rounded-xl border bg-muted/30 p-3">
+                <label className="block text-[11px] font-semibold mb-1">
+                  {t('Defect Opportunities / Unit', 'فرص العيب في الوحدة الواحدة')}
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  value={dpmoOpportunitiesPerUnit}
+                  onChange={(e) => setDpmoOpportunitiesPerUnit(Number(e.target.value))}
+                  className="w-full rounded-lg border bg-background px-2.5 py-1.5 text-sm font-bold"
+                />
+              </div>
+              <div className="rounded-xl border bg-muted/30 p-3">
+                <label className="block text-[11px] font-semibold mb-1">
+                  {t('Total Defects Found', 'إجمالي العيوب المرصودة')}
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  value={dpmoTotalDefects}
+                  onChange={(e) => setDpmoTotalDefects(Number(e.target.value))}
+                  className="w-full rounded-lg border bg-background px-2.5 py-1.5 text-sm font-bold"
+                />
+              </div>
+              <div className="rounded-xl border bg-muted/30 p-3">
+                <label className="block text-[11px] font-semibold mb-1">
+                  {t('Rework/Scrap Cost per Defect (EGP)', 'متوسط تكلفة العيب الواحد (ج.م)')}
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  value={copqCostPerDefectEgp}
+                  onChange={(e) => setCopqCostPerDefectEgp(Number(e.target.value))}
+                  className="w-full rounded-lg border bg-background px-2.5 py-1.5 text-sm font-bold"
+                />
+              </div>
+            </div>
+
+            <div className="grid sm:grid-cols-4 gap-4">
+              <div className="rounded-2xl border p-4 bg-muted/20">
+                <div className="text-xs text-muted-foreground">DPMO</div>
+                <div className="text-2xl font-extrabold text-primary mt-1">
+                  {fmtNumber(locale, spcMetrics.dpmo)}
+                </div>
+                <div className="text-[11px] text-muted-foreground">
+                  {t('Defects Per Million Opp.', 'عيب لكل مليون فرصة')}
+                </div>
+              </div>
+              <div className="rounded-2xl border p-4 bg-muted/20">
+                <div className="text-xs text-muted-foreground">{t('Sigma Level', 'مستوى سيجما')}</div>
+                <div className="text-2xl font-extrabold text-emerald-600 mt-1">
+                  {spcMetrics.sigmaLevel} Sigma (σ)
+                </div>
+                <div className="text-[11px] text-muted-foreground">
+                  Yield: <strong>{spcMetrics.yieldPct}%</strong>
+                </div>
+              </div>
+              <div className="rounded-2xl border p-4 bg-muted/20">
+                <div className="text-xs text-muted-foreground">DHU %</div>
+                <div className="text-2xl font-extrabold text-amber-600 mt-1">
+                  {spcMetrics.dhuPct}%
+                </div>
+                <div className="text-[11px] text-muted-foreground">
+                  {t('Defects Per 100 Units', 'عيوب لكل ١٠٠ قطعة')}
+                </div>
+              </div>
+              <div className="rounded-2xl border p-4 bg-rose-500/10 border-rose-500/30">
+                <div className="text-xs font-bold text-rose-600">
+                  {t('Monthly COPQ Loss', 'تكلفة الجودة الرديئة شهرياً')}
+                </div>
+                <div className="text-2xl font-extrabold text-rose-600 mt-1">
+                  {fmtNumber(locale, spcMetrics.monthlyCopqEgp)} EGP
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 8: Lean Daily Management System (LDMS) — SQDC Gemba Board & Leader Standard Work */}
+      {activeTab === 'daily_mgmt' && (
+        <div className="space-y-8">
+          <div className="rounded-2xl border bg-card p-6 space-y-5">
+            <div>
+              <h2 className="text-lg font-extrabold">
+                {t(
+                  'Interactive SQDC Shop-Floor Gemba Board (Safety • Quality • Delivery • Cost • People)',
+                  'لوحة الإدارة البصرية اليومية في صالة الإنتاج (SQDC Gemba Board)'
+                )}
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                {t(
+                  'Click any day cell (D1–D14) to toggle Green (Target Met) vs. Red (Target Missed — Triggers 24h Countermeasure).',
+                  'اضغط على أي يوم (D1–D14) لتغيير حالته بين الأخضر (تحقق الهدف) والأحمر (انحراف يستوجب إجراء كايزن خلال ٢٤ ساعة).'
+                )}
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              {sqdcRows.map((row, rIdx) => (
+                <div key={row.code} className="rounded-xl border p-4 bg-muted/15 space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-white font-extrabold text-sm">
+                        {row.code}
+                      </span>
+                      <div>
+                        <div className="font-extrabold text-sm">
+                          {isAr ? row.dimensionAr : row.dimensionEn}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {t('Target:', 'الهدف:')} {isAr ? row.kpiTargetAr : row.kpiTargetEn}
+                        </div>
+                      </div>
+                    </div>
+                    <Pill tone="blue">{isAr ? row.currentActualAr : row.currentActualEn}</Pill>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {row.daysStatus.map((st, dIdx) => (
+                      <button
+                        key={dIdx}
+                        type="button"
+                        onClick={() => {
+                          setSqdcRows((prev) =>
+                            prev.map((r, i) =>
+                              i === rIdx
+                                ? {
+                                    ...r,
+                                    daysStatus: r.daysStatus.map((val, j) =>
+                                      j === dIdx ? (val === 'GREEN' ? 'RED' : 'GREEN') : val
+                                    ),
+                                  }
+                                : r
+                            )
+                          );
+                        }}
+                        className={`h-7 w-9 rounded-md text-[10px] font-extrabold transition cursor-pointer ${
+                          st === 'GREEN'
+                            ? 'bg-emerald-600 text-white'
+                            : 'bg-rose-600 text-white animate-pulse'
+                        }`}
+                      >
+                        D{dIdx + 1}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="text-xs text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 rounded-lg p-2">
+                    <strong>{t('Active Gemba Countermeasure:', 'إجراء الجيمبا التصحيحي:')}</strong>{' '}
+                    {isAr ? row.countermeasureAr : row.countermeasureEn}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Tier 1 / Tier 2 / Tier 3 Leader Standard Work (LSW) Cadence */}
+          <div className="rounded-2xl border bg-card p-6 space-y-4">
+            <h2 className="text-lg font-extrabold">
+              {t(
+                'Tiered Leader Standard Work (LSW) & Daily Gemba Walk Cadence',
+                'العمل القياسي للقادة (Leader Standard Work) والروتين اليومي لجولات الجيمبا'
+              )}
+            </h2>
+            <div className="grid md:grid-cols-3 gap-4">
+              {blueprint.leaderStandardWork.map((lsw) => (
+                <div key={lsw.tier} className="rounded-xl border p-4 bg-muted/15 space-y-2">
+                  <Pill tone="emerald">{lsw.timeSlot}</Pill>
+                  <h3 className="font-extrabold text-sm">
+                    {isAr ? lsw.tierLabelAr : lsw.tierLabelEn}
+                  </h3>
+                  <div className="text-xs text-muted-foreground">
+                    <strong>{t('Participants:', 'المشاركون:')}</strong>{' '}
+                    {isAr ? lsw.ownerAr : lsw.ownerEn}
+                  </div>
+                  <p className="text-xs">{isAr ? lsw.gembaFocusAr : lsw.gembaFocusEn}</p>
+                  <div className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 rounded-lg p-2">
+                    {isAr ? lsw.standardOutputAr : lsw.standardOutputEn}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 9: Toyota-Style A3 Report, Kaizen PDCA & Hoshin Kanri X-Matrix */}
       {activeTab === 'a3_hoshin' && (
         <div className="space-y-8">
           <div className="rounded-2xl border-2 border-emerald-500/35 bg-card p-6 space-y-6">
@@ -1365,6 +2524,14 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
                 </button>
                 <button
                   type="button"
+                  onClick={handleExportLeanCsv}
+                  className="inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-xs font-bold hover:bg-muted transition cursor-pointer"
+                >
+                  <Download className="h-3.5 w-3.5 text-amber-600" />
+                  {t('Export KPIs (.CSV)', 'تصدير المؤشرات (.CSV)')}
+                </button>
+                <button
+                  type="button"
                   onClick={() => window.print()}
                   className="inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-xs font-bold hover:bg-muted transition cursor-pointer"
                 >
@@ -1373,7 +2540,7 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
                 </button>
                 <Link
                   href={`/${locale}/cluster/academy/studio?topic=${encodeURIComponent(
-                    `Lean Manufacturing, SMED, 5S & OEE Turnaround for ${blueprint.factoryName}`
+                    `Lean Six Sigma, SMED, 5S & OEE Turnaround for ${blueprint.factoryName}`
                   )}`}
                   className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-extrabold text-white hover:bg-emerald-500 transition"
                 >
@@ -1489,9 +2656,13 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
               <table className="w-full text-xs sm:text-sm border-collapse">
                 <thead>
                   <tr className="border-b bg-muted/40 text-start">
-                    <th className="p-3 text-start">{t('3-Year Breakthrough', 'الهدف الاستراتيجي (٣ سنوات)')}</th>
+                    <th className="p-3 text-start">
+                      {t('3-Year Breakthrough', 'الهدف الاستراتيجي (٣ سنوات)')}
+                    </th>
                     <th className="p-3 text-start">{t('Annual Target', 'الهدف السنوي')}</th>
-                    <th className="p-3 text-start">{t('Shop-Floor Kaizen Focus', 'مبادرة كايزن في العنبر')}</th>
+                    <th className="p-3 text-start">
+                      {t('Shop-Floor Kaizen Focus', 'مبادرة كايزن في العنبر')}
+                    </th>
                     <th className="p-3 text-start">{t('KPI Metrics', 'مؤشرات الأداء KPIs')}</th>
                     <th className="p-3 text-start">{t('Owner', 'المسؤول')}</th>
                   </tr>
@@ -1499,13 +2670,19 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
                 <tbody>
                   {blueprint.hoshinMatrix.map((h, i) => (
                     <tr key={i} className="border-b hover:bg-muted/20">
-                      <td className="p-3 font-bold">{isAr ? h.breakthrough3YrAr : h.breakthrough3YrEn}</td>
+                      <td className="p-3 font-bold">
+                        {isAr ? h.breakthrough3YrAr : h.breakthrough3YrEn}
+                      </td>
                       <td className="p-3">{isAr ? h.annualTargetAr : h.annualTargetEn}</td>
                       <td className="p-3 text-emerald-700 dark:text-emerald-300 font-medium">
                         {isAr ? h.shopFloorKaizenAr : h.shopFloorKaizenEn}
                       </td>
-                      <td className="p-3 font-mono text-xs">{isAr ? h.kpiMetricAr : h.kpiMetricEn}</td>
-                      <td className="p-3 text-xs text-muted-foreground">{isAr ? h.ownerAr : h.ownerEn}</td>
+                      <td className="p-3 font-mono text-xs">
+                        {isAr ? h.kpiMetricAr : h.kpiMetricEn}
+                      </td>
+                      <td className="p-3 text-xs text-muted-foreground">
+                        {isAr ? h.ownerAr : h.ownerEn}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -1514,6 +2691,63 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
           </div>
         </div>
       )}
+
+      {/* Universal On-Demand Pillar One-Point Lesson (OPL) & Standard Work SOP Generator */}
+      <div className="rounded-2xl border-2 border-emerald-500/35 bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-sky-500/10 p-6 space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <span className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-emerald-600">
+              <Sparkles className="h-3.5 w-3.5" />
+              {t(
+                'LIVE SHOP-FLOOR ONE-POINT LESSON (OPL) & STANDARD WORK SOP GENERATOR',
+                'مولد دروس النقطة الواحدة (OPL) وتعليمات العمل القياسية (SOP) بالذكاء الاصطناعي'
+              )}
+            </span>
+            <h3 className="text-base font-extrabold mt-0.5">
+              {t(
+                `Synthesize a Custom Shop-Floor OPL & Standard Work Sheet for Pillar: ${activeTab.toUpperCase()}`,
+                `توليد وثيقة عمل قياسية (SOP) ودرس نقطة واحدة (OPL) للمحور الحالي (${activeTab.toUpperCase()})`
+              )}
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              {t(
+                'Uses your live calculator numbers (Takt, OEE, Cpk, Kanban, 5S) and your selected Free LLM.',
+                'يعتمد مباشرة على الأرقام المحسوبة أمامك في الحاسبات التفاعلية مع نموذج الذكاء الاصطناعي المجاني المختار.'
+              )}
+            </p>
+          </div>
+          <button
+            type="button"
+            disabled={sopLoading}
+            onClick={handleGeneratePillarSop}
+            className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-xs sm:text-sm font-extrabold text-white hover:bg-emerald-500 transition shadow cursor-pointer"
+          >
+            <Sparkles className="h-4 w-4" />
+            {sopLoading
+              ? t('AI Writing OPL & SOP...', 'جارٍ كتابة تعليمة العمل القياسية...')
+              : t(
+                  '✨ Generate AI One-Point Lesson (OPL) for This Tab',
+                  '✨ توليد درس النقطة الواحدة (OPL) لهذا المحور'
+                )}
+          </button>
+        </div>
+
+        {pillarSopMap[activeTab] && (
+          <div className="rounded-xl border bg-card p-5 space-y-2">
+            <div className="flex items-center justify-between text-xs text-muted-foreground border-b pb-2">
+              <span>
+                {t('Generated Shop-Floor Standard Work Sheet', 'بطاقة العمل القياسي الجاهزة للطباعة')}
+              </span>
+              <Pill tone="emerald">{pillarSopMap[activeTab].model}</Pill>
+            </div>
+            <div className="prose prose-sm dark:prose-invert max-w-none">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {pillarSopMap[activeTab].md}
+              </ReactMarkdown>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

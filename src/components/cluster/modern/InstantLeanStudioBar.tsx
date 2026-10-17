@@ -128,11 +128,14 @@ export function InstantLeanStudioBar({ locale }: { locale: string }) {
           {t('Jump directly to tool:', 'انتقل مباشرة إلى الأداة:')}
         </span>
         {[
-          { tab: 'vsm', icon: Layers, en: 'VSM & 8 Wastes', ar: 'تدفق القيمة والفواقد الـ ٨' },
-          { tab: '5s', icon: CheckCircle2, en: '5S Gemba Scorer', ar: 'تدقيق 5S الميداني' },
-          { tab: 'oee_smed', icon: Wrench, en: 'OEE & SMED Changeover', ar: 'حاسبة OEE و SMED' },
-          { tab: 'balancing', icon: Gauge, en: 'Line Balancing & SAM', ar: 'موازنة الخطوط و SAM' },
-          { tab: 'kanban', icon: Repeat, en: 'Kanban Pull & Heijunka', ar: 'بطاقات كانبان و Heijunka' },
+          { tab: 'vsm', icon: Layers, en: "VSM, Little's Law & 8 Wastes", ar: 'تدفق القيمة والفواقد الـ ٨' },
+          { tab: '5s', icon: CheckCircle2, en: '5S & Red-Tag Register', ar: 'تدقيق 5S والبطاقات الحمراء' },
+          { tab: 'oee_smed', icon: Wrench, en: 'OEE, MTBF & SMED', ar: 'حاسبة OEE و SMED' },
+          { tab: 'balancing', icon: Gauge, en: 'Yamazumi, SWCS & ILUO', ar: 'توازن الخطوط ومصفوفة المهارات' },
+          { tab: 'kanban', icon: Repeat, en: 'Kanban, Heijunka & Spider', ar: 'كانبان وجدولة Heijunka' },
+          { tab: 'jidoka', icon: Sparkles, en: 'Jidoka, Poka-Yoke & FMEA', ar: 'أندون و Poka-Yoke و FMEA' },
+          { tab: 'six_sigma', icon: Gauge, en: 'Six Sigma SPC & Cp/Cpk', ar: 'لين 6 سيجما و Cp/Cpk' },
+          { tab: 'daily_mgmt', icon: CheckCircle2, en: 'SQDC Gemba Board', ar: 'لوحة الإدارة اليومية SQDC' },
           { tab: 'a3_hoshin', icon: FileText, en: 'Toyota A3 & Hoshin Kanri', ar: 'تقرير A3 وهوشين كانري' },
         ].map((item) => {
           const Icon = item.icon;
