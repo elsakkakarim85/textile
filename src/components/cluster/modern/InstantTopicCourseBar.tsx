@@ -15,6 +15,7 @@ import {
   SlidersHorizontal,
   ShieldCheck,
 } from 'lucide-react';
+import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 
 export function InstantTopicCourseBar({ locale }: { locale: string }) {
   const router = useRouter();
@@ -107,6 +108,15 @@ export function InstantTopicCourseBar({ locale }: { locale: string }) {
 
   return (
     <div className="pt-2 space-y-3">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-xs font-bold text-emerald-300">
+          {t(
+            '✨ AI Multimedia Course & Exam Generator (Beginner → Advanced)',
+            '✨ مولد الدورات الهندسية والاختبارات بالذكاء الاصطناعي (مبتدئ ← متقدم)'
+          )}
+        </span>
+        <ExpertManualButton manualId="academy-studio" locale={locale} variant="mini" />
+      </div>
       <form onSubmit={handleInstantGenerate} className="flex flex-col sm:flex-row gap-2.5">
         <div className="relative flex-1">
           <Wand2 className="w-4 h-4 text-emerald-400 absolute start-3.5 top-1/2 -translate-y-1/2" />

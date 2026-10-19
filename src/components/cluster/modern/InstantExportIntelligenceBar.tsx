@@ -13,6 +13,7 @@ import {
   Scale,
   ArrowRight,
 } from 'lucide-react';
+import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 
 export function InstantExportIntelligenceBar({ locale }: { locale: string }) {
   const isAr = locale === 'ar';
@@ -75,12 +76,15 @@ export function InstantExportIntelligenceBar({ locale }: { locale: string }) {
     <Card className="p-6 border-teal-500/30 bg-gradient-to-br from-teal-500/10 via-background to-sky-500/10 shadow-md space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-teal-500/15 border border-teal-500/30 px-3 py-1 text-xs font-extrabold text-teal-700 dark:text-teal-300">
-            <Globe2 className="w-3.5 h-3.5" />
-            {t(
-              'AI GLOBAL EXPORT INTELLIGENCE • MARKET ENTRY • TRUSTED BUYERS • NTM STANDARDS',
-              'ذكاء التصدير العالمي • استراتيجيات دخول الأسواق • المشترون الموثوقون • المواصفات والعوائق غير الجمركية'
-            )}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-teal-500/15 border border-teal-500/30 px-3 py-1 text-xs font-extrabold text-teal-700 dark:text-teal-300">
+              <Globe2 className="w-3.5 h-3.5" />
+              {t(
+                'AI GLOBAL EXPORT INTELLIGENCE • MARKET ENTRY • TRUSTED BUYERS • NTM STANDARDS',
+                'ذكاء التصدير العالمي • استراتيجيات دخول الأسواق • المشترون الموثوقون • المواصفات والعوائق غير الجمركية'
+              )}
+            </div>
+            <ExpertManualButton manualId="export-intelligence" locale={locale} variant="mini" />
           </div>
           <h3 className="text-xl md:text-2xl font-extrabold">
             {t(

@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { tr } from '@/lib/i18n-inline';
 import { LEAN_DEPARTMENTS, type LeanDepartmentId } from '@/server/modernization/lean-manufacturing';
+import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 
 export function InstantLeanStudioBar({ locale }: { locale: string }) {
   const router = useRouter();
@@ -43,12 +44,15 @@ export function InstantLeanStudioBar({ locale }: { locale: string }) {
     <div className="rounded-3xl border-2 border-emerald-500/35 bg-gradient-to-r from-slate-950 via-emerald-950/90 to-teal-950 p-6 text-white shadow-xl">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/40 bg-emerald-500/20 px-3 py-1 text-[11px] font-extrabold text-emerald-300">
-            <Gauge className="h-3.5 w-3.5" />
-            {t(
-              'NEW • LEAN MANAGEMENT & LEAN MANUFACTURING STUDIO (TPS • VSM • 5S • OEE • SMED • KANBAN • A3)',
-              'جديد • استوديو الإدارة الرشيقة والتصنيع الرشيق (VSM • 5S • OEE • SMED • Kanban • A3)'
-            )}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/40 bg-emerald-500/20 px-3 py-1 text-[11px] font-extrabold text-emerald-300">
+              <Gauge className="h-3.5 w-3.5" />
+              {t(
+                'NEW • LEAN MANAGEMENT & LEAN MANUFACTURING STUDIO (TPS • VSM • 5S • OEE • SMED • KANBAN • A3)',
+                'جديد • استوديو الإدارة الرشيقة والتصنيع الرشيق (VSM • 5S • OEE • SMED • Kanban • A3)'
+              )}
+            </div>
+            <ExpertManualButton manualId="lean-manufacturing" locale={locale} variant="mini" />
           </div>
           <h2 className="text-xl sm:text-2xl font-extrabold">
             {t(

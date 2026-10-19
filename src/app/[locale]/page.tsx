@@ -8,6 +8,7 @@ import { InstantTopicCourseBar } from '@/components/cluster/modern/InstantTopicC
 import { InstantBrandStudioBar } from '@/components/cluster/modern/InstantBrandStudioBar';
 import { InstantExportIntelligenceBar } from '@/components/cluster/modern/InstantExportIntelligenceBar';
 import { InstantLeanStudioBar } from '@/components/cluster/modern/InstantLeanStudioBar';
+import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 import {
   Factory,
   Package,
@@ -172,12 +173,15 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       {/* Hero Section */}
       <section className="w-full bg-gradient-to-br from-primary/15 via-background to-emerald-500/10 py-6 md:py-8 px-4 border-b">
         <div className="container mx-auto max-w-6xl text-center space-y-3">
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1 text-[11px] font-bold text-primary shadow-2xs">
-            <Sparkles className="w-3 h-3" />
-            {t(
-              'EU • UNIDO • Egyptian Ministry of Industry — TIGARA Digital Ecosystem',
-              'الاتحاد الأوروبي • اليونيدو • وزارة الصناعة — المنصة الرقمية لتجمع المحلة الكبرى (مشروع تجارة)'
-            )}
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1 text-[11px] font-bold text-primary shadow-2xs">
+              <Sparkles className="w-3 h-3" />
+              {t(
+                'EU • UNIDO • Egyptian Ministry of Industry — TIGARA Digital Ecosystem',
+                'الاتحاد الأوروبي • اليونيدو • وزارة الصناعة — المنصة الرقمية لتجمع المحلة الكبرى (مشروع تجارة)'
+              )}
+            </div>
+            <ExpertManualButton manualId="platform-home" locale={locale} variant="mini" />
           </div>
 
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-foreground leading-tight">
@@ -323,6 +327,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           {[
             {
               href: `/${locale}/cluster/lean-manufacturing`,
+              manualId: 'lean-manufacturing',
               icon: Gauge,
               title: t('Lean Management & Manufacturing Hub', 'مركز الإدارة الرشيقة والتصنيع الرشيق (Lean)'),
               desc: t('Apply Toyota Production System (TPS), Value Stream Mapping (VSM), 8 Wastes (DOWNTIME), 5S Gemba Audits, OEE/TPM, SMED Changeover, Line Balancing, Kanban Pull & A3 Reports.', 'تطبيق شامل لتدفق القيمة VSM، الفواقد الـ ٨، تدقيق 5S، مؤشر OEE و SMED، موازنة الخطوط، نظام كانبان، منع الأخطاء Poka-Yoke، وتقارير A3.'),
@@ -330,6 +335,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             },
             {
               href: `/${locale}/cluster/export-intelligence`,
+              manualId: 'export-intelligence',
               icon: Globe2,
               title: t('AI Global Export Intelligence, Buyers & NTMs', 'ذكاء التصدير العالمي، المشترون والمواصفات القياسية'),
               desc: t('Generate market studies, landed-cost entry strategies, live international tenders, promotional plans, verified buyers with 5-stage outreach, and country NTM standards.', 'دراسات سوق، استراتيجيات دخول الأسواق، مناقصات دولية موثقة، خطط ترويج، كشاف المشترين الموثوقين والتواصل معهم، وتحليل المواصفات والعوائق غير الجمركية.'),
@@ -337,6 +343,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             },
             {
               href: `/${locale}/cluster/brand-studio`,
+              manualId: 'brand-studio',
               icon: Megaphone,
               title: t('AI Brand, Marketing & Collateral Studio', 'استوديو الهوية والتسويق والمطبوعات الذكي'),
               desc: t('Create textile brands, 90-day export marketing plans, automated campaigns, promo videos, studio photos, 6-panel brochures, flyers & trade-show posters.', 'إنشاء علامات تجارية، خطط تسويق تصديرية، أتمتة حملات، وتوليد فيديوهات وصور وبروشورات وفلايرز وبوسترات للمعارض.'),
@@ -344,6 +351,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             },
             {
               href: `/${locale}/cluster/procurement`,
+              manualId: 'procurement',
               icon: ShoppingCart,
               title: t('Joint Procurement', 'الشراء المشترك للخامات'),
               desc: t('Pool Giza cotton yarn, reactive dyes, spare parts & solar PPA orders for bulk discounts.', 'تجميع طلبات الغزول والصبغات وقطع الغيار والطاقة للحصول على أسعار الجملة.'),
@@ -351,6 +359,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             },
             {
               href: `/${locale}/cluster/capacity`,
+              manualId: 'capacity',
               icon: ArrowRightLeft,
               title: t('Capacity Exchange', 'تبادل الطاقات الإنتاجية'),
               desc: t('Subcontract idle looms, circular knitting machines, and dyeing jets across trusted peers.', 'استغلال الماكينات المتاحة أو التعاقد من الباطن مع مصانع موثوقة بالتجمع.'),
@@ -358,6 +367,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             },
             {
               href: `/${locale}/cluster/consortia`,
+              manualId: 'consortia',
               icon: Handshake,
               title: t('Export Consortia', 'التحالفات التصديرية'),
               desc: t('Form multi-factory alliances covering spinning to sewing to win large EU retail RFQs.', 'تشكيل تحالفات متكاملة عبر سلسلة القيمة للفوز بطلبيات التصدير الكبرى.'),
@@ -365,6 +375,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             },
             {
               href: `/${locale}/cluster/facilities`,
+              manualId: 'facilities',
               icon: FlaskConical,
               title: t('Shared Labs & Studios', 'المعامل والمرافق المشتركة'),
               desc: t('Book ISO testing labs, 3D CAD/CAM studios, effluent treatment, and training halls.', 'حجز معمل اختبارات الجودة واستوديو التصميم CAD ومحطة المعالجة.'),
@@ -372,6 +383,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             },
             {
               href: `/${locale}/cluster/maturity`,
+              manualId: 'maturity',
               icon: Gauge,
               title: t('Industry 4.0 Maturity', 'تقييم النضج الرقمي 4.0'),
               desc: t('24-point diagnostic across 6 dimensions with a prioritized 90-day roadmap.', 'تقييم شامل عبر ٦ محاور مع خارطة طريق تنفيذية لمدة ٩٠ يوماً.'),
@@ -379,6 +391,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             },
             {
               href: `/${locale}/cluster/sustainability`,
+              manualId: 'sustainability',
               icon: Leaf,
               title: t('ESG & EU CBAM Hub', 'الاستدامة وآلية CBAM'),
               desc: t('Calculate Scope 1 & 2 CO2e intensity, ZLD water recycling, and export CBAM CSV reports.', 'حساب البصمة الكربونية وتدوير المياه وتصدير تقارير CBAM الأوروبية.'),
@@ -386,6 +399,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             },
             {
               href: `/${locale}/cluster/academy`,
+              manualId: 'academy',
               icon: GraduationCap,
               title: t('Cluster Academy & AI Course Studio', 'أكاديمية التجمع واستوديو الدورات الذكي'),
               desc: t('Generate Beginner-to-Advanced multimedia courses on any topic with QR-verifiable certificates.', 'توليد دورات تدريبية متعددة الوسائط لأي موضوع مع إصدار شهادات رقمية قابلة للتحقق.'),
@@ -393,6 +407,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             },
             {
               href: `/${locale}/cluster/funding`,
+              manualId: 'funding',
               icon: Landmark,
               title: t('Grants & Green Finance', 'التمويل والمنح الخضراء'),
               desc: t('Apply to EU/UNIDO TIGARA, EBRD, MSMEDA & IMC grants matched to your maturity gaps.', 'التقديم المباشر على منح وبرامج التمويل الأخضر المطابقة لاحتياجات مصنعك.'),
@@ -407,7 +422,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                     <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
                       <Icon className="w-6 h-6" />
                     </div>
-                    <Pill tone="blue">{m.badge}</Pill>
+                    <div className="flex items-center gap-1.5">
+                      <Pill tone="blue">{m.badge}</Pill>
+                      <ExpertManualButton manualId={m.manualId} locale={locale} variant="icon" />
+                    </div>
                   </div>
                   <h3 className="text-lg font-bold mb-2 group-hover:text-primary transition-colors">{m.title}</h3>
                   <p className="text-sm text-muted-foreground flex-1 leading-relaxed">{m.desc}</p>

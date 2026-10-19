@@ -13,6 +13,7 @@ import {
   Workflow,
   ArrowRight,
 } from 'lucide-react';
+import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 
 export function InstantBrandStudioBar({ locale }: { locale: string }) {
   const isAr = locale === 'ar';
@@ -58,12 +59,15 @@ export function InstantBrandStudioBar({ locale }: { locale: string }) {
     <Card className="p-6 border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-background to-rose-500/10 shadow-md space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 px-3 py-1 text-xs font-extrabold text-amber-700 dark:text-amber-300">
-            <Megaphone className="w-3.5 h-3.5" />
-            {t(
-              'AI BRAND ARCHITECT • CAMPAIGN AUTOMATION • VIDEO, PHOTO & PRINT STUDIO',
-              'مهندس العلامات التجارية • أتمتة التسويق • استوديو الفيديو والصور والمطبوعات'
-            )}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 px-3 py-1 text-xs font-extrabold text-amber-700 dark:text-amber-300">
+              <Megaphone className="w-3.5 h-3.5" />
+              {t(
+                'AI BRAND ARCHITECT • CAMPAIGN AUTOMATION • VIDEO, PHOTO & PRINT STUDIO',
+                'مهندس العلامات التجارية • أتمتة التسويق • استوديو الفيديو والصور والمطبوعات'
+              )}
+            </div>
+            <ExpertManualButton manualId="brand-studio" locale={locale} variant="mini" />
           </div>
           <h3 className="text-xl md:text-2xl font-extrabold">
             {t(

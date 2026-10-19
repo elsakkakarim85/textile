@@ -26,9 +26,11 @@ import {
   Plus,
   Recycle,
   TrendingUp,
+  HelpCircle,
 } from 'lucide-react';
 import { tr, fmtNumber } from '@/lib/i18n-inline';
 import { Pill } from '@/components/cluster/ui';
+import { ExpertManualButton, openExpertManual } from '@/components/cluster/ExpertManualModal';
 import {
   synthesizeLeanBlueprint,
   LEAN_DEPARTMENTS,
@@ -567,60 +569,69 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
     return 'I';
   };
 
-  const tabs: { id: LeanTabId; icon: any; labelEn: string; labelAr: string }[] = [
+  const tabs: { id: LeanTabId; icon: any; labelEn: string; labelAr: string; manualId: string }[] = [
     {
       id: 'vsm',
       icon: Layers,
       labelEn: "1. VSM, Little's Law & 8 Wastes",
       labelAr: '١. تدفق القيمة (VSM) والفواقد الـ ٨',
+      manualId: 'lean-vsm',
     },
     {
       id: '5s',
       icon: CheckCircle2,
       labelEn: '2. 5S Audit & Red-Tag Register',
       labelAr: '٢. تدقيق 5S وسجل البطاقات الحمراء',
+      manualId: 'lean-5s',
     },
     {
       id: 'oee_smed',
       icon: Wrench,
       labelEn: '3. TPM, OEE, MTBF & SMED',
       labelAr: '٣. الصيانة الشاملة و OEE و SMED',
+      manualId: 'lean-oee',
     },
     {
       id: 'balancing',
       icon: BarChart3,
       labelEn: '4. Yamazumi, SWCS & Skill Matrix',
       labelAr: '٤. توازن الخطوط ومصفوفة المهارات',
+      manualId: 'lean-balancing',
     },
     {
       id: 'kanban',
       icon: Repeat,
       labelEn: '5. Kanban, Heijunka & Water Spider',
       labelAr: '٥. كانبان وجدولة Heijunka والمزود',
+      manualId: 'lean-kanban',
     },
     {
       id: 'jidoka',
       icon: ShieldAlert,
       labelEn: '6. Jidoka, Poka-Yoke & FMEA RPN',
       labelAr: '٦. أندون و Poka-Yoke وتحليل FMEA',
+      manualId: 'lean-wastes',
     },
     {
       id: 'six_sigma',
       icon: Activity,
       labelEn: '7. Six Sigma SPC, Cp/Cpk & DPMO',
       labelAr: '٧. لين 6 سيجما و SPC والقدرة Cpk',
+      manualId: 'lean-six-sigma',
     },
     {
       id: 'daily_mgmt',
       icon: ClipboardCheck,
       labelEn: '8. SQDC Gemba Board & Leader Work',
       labelAr: '٨. لوحة الإدارة اليومية SQDC والجيمبا',
+      manualId: 'lean-5s',
     },
     {
       id: 'a3_hoshin',
       icon: FileText,
       labelEn: '9. A3 Charter & Hoshin Kanri',
       labelAr: '٩. تقرير A3 ومصفوفة هوشين كانري',
+      manualId: 'lean-a3-ai',
     },
   ];
 
@@ -879,7 +890,27 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
               }`}
             >
               <Icon className="h-3.5 w-3.5" />
-              {isAr ? tab.labelAr : tab.labelEn}
+              <span>{isAr ? tab.labelAr : tab.labelEn}</span>
+              <span
+                role="button"
+                tabIndex={0}
+                title={t(
+                  'Open Expert Manual for this Lean Pillar',
+                  'افتح الدليل الهندسي الشامل لهذه الأداة'
+                )}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  openExpertManual(tab.manualId);
+                }}
+                className={`inline-flex items-center justify-center w-4 h-4 rounded-full transition-colors ${
+                  active
+                    ? 'bg-white/25 text-white hover:bg-amber-400 hover:text-slate-950'
+                    : 'bg-amber-500/20 text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-slate-950'
+                }`}
+              >
+                <HelpCircle className="w-3 h-3" />
+              </span>
             </button>
           );
         })}

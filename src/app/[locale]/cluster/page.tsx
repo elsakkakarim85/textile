@@ -11,6 +11,7 @@ import { PageHeader, StatCard, DbOfflineBanner } from '@/components/cluster/ui';
 import { InstantBrandStudioBar } from '@/components/cluster/modern/InstantBrandStudioBar';
 import { InstantExportIntelligenceBar } from '@/components/cluster/modern/InstantExportIntelligenceBar';
 import { InstantLeanStudioBar } from '@/components/cluster/modern/InstantLeanStudioBar';
+import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 
 export const dynamic = 'force-dynamic';
 
@@ -111,6 +112,7 @@ export default async function ClusterHubPage({ params }: { params: Promise<{ loc
       {!ok && <DbOfflineBanner locale={locale} />}
       <PageHeader
         icon={Network}
+        manualId="cluster-hub"
         title={t('Mahalla Cluster Hub', 'مركز تجمع المحلة')}
         subtitle={t(
           'One place for cluster members to collaborate, share resources, modernize operations and grow exports together.',
@@ -163,13 +165,17 @@ export default async function ClusterHubPage({ params }: { params: Promise<{ loc
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {g.mods.map((m) => {
                 const Icon = m.icon;
+                const manualId = m.href === 'academy/studio' ? 'academy-studio' : m.href;
                 return (
                   <Link key={m.href} href={`${base}/${m.href}`} className={`group relative rounded-xl border bg-gradient-to-br ${g.tone} to-transparent p-5 transition-all hover:shadow-md hover:-translate-y-0.5`}>
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-start justify-between gap-2">
                       <span className="rounded-lg bg-background/80 border p-2.5"><Icon className="w-5 h-5 text-primary" /></span>
-                      {m.stat !== undefined && (
-                        <span className="rounded-full bg-background/80 border px-2.5 py-0.5 text-xs font-semibold tabular-nums">{fmtNumber(locale, m.stat)}</span>
-                      )}
+                      <div className="flex items-center gap-1.5">
+                        {m.stat !== undefined && (
+                          <span className="rounded-full bg-background/80 border px-2.5 py-0.5 text-xs font-semibold tabular-nums">{fmtNumber(locale, m.stat)}</span>
+                        )}
+                        <ExpertManualButton manualId={manualId} locale={locale} variant="icon" />
+                      </div>
                     </div>
                     <h3 className="mt-4 font-semibold flex items-center gap-1">
                       {t(m.en, m.ar)}

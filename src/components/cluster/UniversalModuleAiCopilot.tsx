@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { tr } from '@/lib/i18n-inline';
 import { Pill } from '@/components/cluster/ui';
+import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 import {
   MODULE_AI_CONFIGS,
   CLIENT_FREE_LLM_MODELS,
@@ -206,7 +207,8 @@ export function UniversalModuleAiCopilot({
   return (
     <>
       {/* Floating Quick-Launch AI Specialist Pill */}
-      <div className="fixed bottom-5 end-5 z-40 print:hidden">
+      <div className="fixed bottom-5 end-5 z-40 flex items-center gap-1.5 print:hidden">
+        <ExpertManualButton manualId="gadget-ai-copilot" locale={locale} variant="icon" />
         <button
           type="button"
           onClick={scrollToCopilot}
@@ -237,6 +239,7 @@ export function UniversalModuleAiCopilot({
                 'محرك ذكاء اصطناعي مجاني متعدد النماذج (Llama 3.3 • DeepSeek R1 • Mistral • Qwen 2.5)'
               )}
             </span>
+            <ExpertManualButton manualId="gadget-ai-copilot" locale={locale} variant="mini" />
           </div>
 
           <div className="flex items-center gap-2">

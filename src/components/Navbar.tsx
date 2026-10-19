@@ -9,10 +9,13 @@ import { useCurrency } from '@/contexts/CurrencyContext';
 import { ThemeToggle } from './ThemeToggle';
 import { NotificationsDropdown } from './NotificationsDropdown';
 import { PersonaSwitcher } from './PersonaSwitcher';
+import { ExpertManualButton, openExpertManual } from './cluster/ExpertManualModal';
+import { resolveManualByPathname } from '@/lib/expert-manuals';
 import { tr } from '@/lib/i18n-inline';
 import {
   Menu,
   X,
+  HelpCircle,
   Network,
   BarChart3,
   Building2,
@@ -698,11 +701,30 @@ export default function Navbar({ locale }: { locale: string }) {
                                     <span className="text-xs font-bold text-foreground group-hover:text-primary transition-colors truncate">
                                       {sub.label}
                                     </span>
-                                    {sub.badge && (
-                                      <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 shrink-0">
-                                        {sub.badge}
+                                    <div className="flex items-center gap-1 shrink-0">
+                                      {sub.badge && (
+                                        <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 shrink-0">
+                                          {sub.badge}
+                                        </span>
+                                      )}
+                                      <span
+                                        role="button"
+                                        tabIndex={0}
+                                        title={t(
+                                          'Open Expert Manual: What • How It Works • Why • How To Use',
+                                          'افتح الدليل الهندسي الشامل لهذه الوحدة'
+                                        )}
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          setOpenMenu(null);
+                                          openExpertManual(resolveManualByPathname(sub.href).id);
+                                        }}
+                                        className="inline-flex items-center justify-center w-5 h-5 rounded-md border border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-slate-950 transition-colors cursor-pointer"
+                                      >
+                                        <HelpCircle className="w-3 h-3" />
                                       </span>
-                                    )}
+                                    </div>
                                   </div>
                                   <p className="text-[11px] text-muted-foreground line-clamp-2 leading-snug mt-0.5">
                                     {sub.desc}
@@ -735,8 +757,9 @@ export default function Navbar({ locale }: { locale: string }) {
             })}
           </div>
 
-          {/* Zone 3 (Right): Workspace Icon, Currency, Language, Theme, Dashboard, Auth */}
+          {/* Zone 3 (Right): Manual Icon, Workspace Icon, Currency, Language, Theme, Dashboard, Auth */}
           <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+            <ExpertManualButton locale={locale} variant="icon" />
             <div className="hidden lg:block shrink-0">
               <PersonaSwitcher locale={locale} />
             </div>

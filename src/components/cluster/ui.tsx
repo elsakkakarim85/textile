@@ -2,13 +2,14 @@ import type { ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 
 /** Shared presentational building blocks for cluster modules (server-safe, no hooks). */
 
 export type Tone = 'default' | 'green' | 'emerald' | 'amber' | 'blue' | 'purple' | 'red' | 'gray';
 
-export function PageHeader({ icon: Icon, title, subtitle, actions, accent = 'from-primary/15' }: {
-  icon?: LucideIcon; title: string; subtitle?: string; actions?: ReactNode; accent?: string;
+export function PageHeader({ icon: Icon, title, subtitle, actions, accent = 'from-primary/15', manualId }: {
+  icon?: LucideIcon; title: string; subtitle?: string; actions?: ReactNode; accent?: string; manualId?: string;
 }) {
   return (
     <div className={cn('rounded-2xl border bg-gradient-to-br to-transparent p-6 md:p-8 mb-8', accent)}>
@@ -20,9 +21,13 @@ export function PageHeader({ icon: Icon, title, subtitle, actions, accent = 'fro
             </div>
           )}
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{title}</h1>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{title}</h1>
+              <ExpertManualButton manualId={manualId} variant="icon" />
+            </div>
             {subtitle && <p className="mt-1.5 text-muted-foreground max-w-3xl">{subtitle}</p>}
             <div className="mt-2.5 flex flex-wrap items-center gap-2">
+              <ExpertManualButton manualId={manualId} variant="pill" />
               <a
                 href="#mahalla-universal-ai-copilot"
                 className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/35 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 transition"

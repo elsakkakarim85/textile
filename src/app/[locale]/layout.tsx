@@ -11,6 +11,7 @@ import { Footer } from '@/components/Footer';
 import { Providers } from '@/components/Providers';
 import { UniversalModuleAiCopilot } from '@/components/cluster/UniversalModuleAiCopilot';
 import { GlobalQuickToolsDock } from '@/components/cluster/GlobalQuickToolsDock';
+import { GlobalExpertManualHost } from '@/components/cluster/ExpertManualModal';
 
 import '../globals.css';
 
@@ -76,6 +77,7 @@ export default async function LocaleLayout({
           <NextIntlClientProvider messages={messages}>
             <Providers>
               <Navbar locale={locale} />
+              <GlobalExpertManualHost locale={locale} />
               <main className="flex-1 flex flex-col">
                 {children}
                 <UniversalModuleAiCopilot locale={locale} />

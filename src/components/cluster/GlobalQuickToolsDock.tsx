@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { tr } from '@/lib/i18n-inline';
 import { Pill } from '@/components/cluster/ui';
+import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 
 export function GlobalQuickToolsDock({ locale }: { locale: string }) {
   const isAr = locale === 'ar';
@@ -203,7 +204,7 @@ export function GlobalQuickToolsDock({ locale }: { locale: string }) {
   return (
     <>
       {/* Floating Quick-Tools & Command Palette Trigger */}
-      <div className="fixed bottom-4 start-4 z-40 flex items-center gap-2 print:hidden">
+      <div className="fixed bottom-4 start-4 z-40 flex items-center gap-1.5 print:hidden">
         <button
           type="button"
           onClick={() => setOpen(true)}
@@ -216,6 +217,7 @@ export function GlobalQuickToolsDock({ locale }: { locale: string }) {
             Ctrl+K
           </kbd>
         </button>
+        <ExpertManualButton manualId="gadget-quick-tools" locale={locale} variant="icon" />
       </div>
 
       {/* Modal Overlay */}
@@ -241,13 +243,16 @@ export function GlobalQuickToolsDock({ locale }: { locale: string }) {
                   </p>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="rounded-xl border border-white/20 p-1.5 text-slate-300 hover:bg-white/10 cursor-pointer"
-              >
-                <X className="h-4 w-4" />
-              </button>
+              <div className="flex items-center gap-2">
+                <ExpertManualButton manualId="gadget-quick-tools" locale={locale} variant="mini" />
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="rounded-xl border border-white/20 p-1.5 text-slate-300 hover:bg-white/10 cursor-pointer"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
             </div>
 
             {/* Sub-Tabs */}
