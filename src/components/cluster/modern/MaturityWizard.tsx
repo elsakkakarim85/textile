@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { api } from '@/lib/api-client';
 import { ProgressBar } from '@/components/cluster/ui';
+import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 import { CheckCircle2, ChevronRight, ChevronLeft } from 'lucide-react';
 import { tr, isRTL } from '@/lib/i18n-inline';
 
@@ -45,8 +46,11 @@ export default function MaturityWizard({ locale }: { locale: string }) {
   return (
     <div className="max-w-3xl mx-auto">
       <div className="mb-8">
-        <div className="flex justify-between text-sm font-medium mb-2 text-muted-foreground">
-          <span>{t(currentDim.en, currentDim.ar)}</span>
+        <div className="flex justify-between items-center text-sm font-medium mb-2 text-muted-foreground">
+          <span className="flex items-center gap-2">
+            {t(currentDim.en, currentDim.ar)}
+            <ExpertManualButton manualId="maturity-6d-wizard" locale={locale} variant="mini" />
+          </span>
           <span>{currentDimIdx + 1} / {DIMENSIONS.length}</span>
         </div>
         <ProgressBar value={progress} />

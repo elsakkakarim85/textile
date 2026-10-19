@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { tr } from '@/lib/i18n-inline';
+import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 
 export default function ProductsMarketplacePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = use(params);
@@ -67,9 +68,12 @@ export default function ProductsMarketplacePage({ params }: { params: Promise<{ 
     <div className="container mx-auto py-10 px-4 space-y-8">
       <div className="rounded-2xl bg-gradient-to-r from-emerald-950 via-slate-900 to-indigo-950 text-white p-6 md:p-8 border border-emerald-500/30 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-2 max-w-2xl">
-          <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-300 bg-emerald-500/20 border border-emerald-400/30 px-3 py-1 rounded-full">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            {t('EU ESPR Digital Product Passports • OEKO-TEX® & GOTS', 'جواز المنتج الرقمي الأوروبي • أيكوتكس و GOTS')}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-300 bg-emerald-500/20 border border-emerald-400/30 px-3 py-1 rounded-full">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              {t('EU ESPR Digital Product Passports • OEKO-TEX® & GOTS', 'جواز المنتج الرقمي الأوروبي • أيكوتكس و GOTS')}
+            </div>
+            <ExpertManualButton manualId="marketplace-products" locale={locale} variant="pill" />
           </div>
           <h1 className="text-2xl md:text-4xl font-extrabold">
             {t('B2B Finished Textile Products Marketplace', 'سوق المنتجات النسيجية النهائية للتصدير (B2B)')}

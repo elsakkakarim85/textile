@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Award, ShieldCheck, Search, ExternalLink, CheckCircle2 } from 'lucide-react';
+import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 
 export interface IssuedCertItem {
   code: string;
@@ -40,9 +41,12 @@ export function CertificateVerifierBar({
     <Card className="p-6 border-emerald-500/30 bg-gradient-to-r from-emerald-500/5 via-background to-indigo-500/5">
       <div className="grid lg:grid-cols-12 gap-6 items-center">
         <div className="lg:col-span-5 space-y-2">
-          <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-            <ShieldCheck className="w-4 h-4" />
-            {t('Official Credential Registry & Verification', 'سجل التحقق من الشهادات الرقمية المعتمدة')}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+              <ShieldCheck className="w-4 h-4" />
+              {t('Official Credential Registry & Verification', 'سجل التحقق من الشهادات الرقمية المعتمدة')}
+            </div>
+            <ExpertManualButton manualId="academy-cert-verifier" locale={locale} variant="mini" />
           </div>
           <h3 className="text-lg font-extrabold">
             {t(

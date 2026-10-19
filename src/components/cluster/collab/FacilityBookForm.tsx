@@ -7,6 +7,7 @@ import { tr, fmtMoney, fmtDate } from '@/lib/i18n-inline';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Calendar, Clock, CheckCircle2, Sparkles } from 'lucide-react';
+import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 
 export function FacilityBookForm({
   facility,
@@ -106,15 +107,18 @@ export function FacilityBookForm({
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="block font-medium">{t('Testing / Usage Purpose', 'الغرض من الحجز أو الاختبار')}</label>
-              <button
-                type="button"
-                onClick={handleAiSuggestProtocol}
-                disabled={aiLoading}
-                className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 hover:underline cursor-pointer"
-              >
-                <Sparkles className="w-3 h-3" />
-                {aiLoading ? t('AI Drafting...', 'جاري التوليد...') : t('✨ AI Suggest ISO Protocol', '✨ اقتراح اختبارات ISO بالذكاء الاصطناعي')}
-              </button>
+              <div className="inline-flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={handleAiSuggestProtocol}
+                  disabled={aiLoading}
+                  className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 hover:underline cursor-pointer"
+                >
+                  <Sparkles className="w-3 h-3" />
+                  {aiLoading ? t('AI Drafting...', 'جاري التوليد...') : t('✨ AI Suggest ISO Protocol', '✨ اقتراح اختبارات ISO بالذكاء الاصطناعي')}
+                </button>
+                <ExpertManualButton manualId="collab-ai-smart-fill" locale={locale} variant="mini" />
+              </div>
             </div>
             <Input
               required

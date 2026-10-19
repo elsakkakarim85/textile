@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Briefcase, Building2, MapPin, Clock, Sparkles, Search, GraduationCap, Gauge } from 'lucide-react';
 import Link from 'next/link';
 import { tr } from '@/lib/i18n-inline';
+import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 
 export default function RecruitmentBoardPage({
   params,
@@ -39,9 +40,12 @@ export default function RecruitmentBoardPage({
     <div className="container mx-auto py-10 px-4 space-y-8">
       <div className="rounded-2xl bg-gradient-to-r from-indigo-950 via-slate-900 to-emerald-950 text-white p-6 md:p-8 border border-indigo-500/30 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-2 max-w-2xl">
-          <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-300 bg-emerald-500/20 border border-emerald-400/30 px-3 py-1 rounded-full">
-            <Briefcase className="w-3.5 h-3.5" />
-            {t('Industrial Talent Hub • AI Role Certification • ILUO Skill Matrix', 'منصة الكفاءات الصناعية • شهادات الذكاء الاصطناعي • مصفوفة المهارات ILUO')}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-300 bg-emerald-500/20 border border-emerald-400/30 px-3 py-1 rounded-full">
+              <Briefcase className="w-3.5 h-3.5" />
+              {t('Industrial Talent Hub • AI Role Certification • ILUO Skill Matrix', 'منصة الكفاءات الصناعية • شهادات الذكاء الاصطناعي • مصفوفة المهارات ILUO')}
+            </div>
+            <ExpertManualButton manualId="recruitment" locale={locale} variant="pill" />
           </div>
           <h1 className="text-2xl md:text-4xl font-extrabold">
             {t('Mahalla Textile Engineering & Technical Recruitment Hub', 'بورصة التوظيف والكفاءات الهندسية والفنية لتجمع المحلة')}

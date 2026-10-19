@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { tr } from '@/lib/i18n-inline';
 import { Plus, Sparkles, Cpu } from 'lucide-react';
+import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 
 const PROCESSES = [
   'spinning', 'weaving', 'knitting', 'dyeing', 'printing', 
@@ -91,10 +92,13 @@ export function CapacityForm({ locale }: { locale: string }) {
 
   if (!isOpen) {
     return (
-      <Button onClick={() => setIsOpen(true)}>
-        <Plus className="w-4 h-4 me-2" />
-        {t('Post Capacity', 'إضافة طلب/عرض طاقة')}
-      </Button>
+      <div className="inline-flex items-center gap-2">
+        <Button onClick={() => setIsOpen(true)}>
+          <Plus className="w-4 h-4 me-2" />
+          {t('Post Capacity', 'إضافة طلب/عرض طاقة')}
+        </Button>
+        <ExpertManualButton manualId="collab-ai-smart-fill" locale={locale} variant="mini" />
+      </div>
     );
   }
 
@@ -103,6 +107,7 @@ export function CapacityForm({ locale }: { locale: string }) {
       <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
         <div className="flex flex-wrap items-center gap-2">
           <h3 className="font-semibold">{t('New Capacity Post', 'إضافة عرض/طلب طاقة إنتاجية جديد')}</h3>
+          <ExpertManualButton manualId="collab-ai-smart-fill" locale={locale} variant="mini" />
           {aiModelBadge && (
             <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
               <Cpu className="w-3 h-3" /> {aiModelBadge}

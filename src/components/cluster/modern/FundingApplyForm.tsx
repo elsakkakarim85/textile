@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { tr } from '@/lib/i18n-inline';
 import { Sparkles } from 'lucide-react';
+import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 
 export function FundingApplyForm({ programId, hasApplied, locale }: { programId: string, hasApplied: boolean, locale: string }) {
   const router = useRouter();
@@ -86,17 +87,20 @@ export function FundingApplyForm({ programId, hasApplied, locale }: { programId:
       <div>
         <div className="flex items-center justify-between mb-1">
           <label className="block text-xs font-medium">{t('Purpose / Justification', 'الغرض / المبرر')}</label>
-          <button
-            type="button"
-            onClick={handleAiDraftJustification}
-            disabled={aiLoading}
-            className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 hover:underline cursor-pointer"
-          >
-            <Sparkles className="w-3 h-3" />
-            {aiLoading
-              ? t('AI Writing...', 'جاري الصياغة...')
-              : t('✨ AI Write Bankable Justification', '✨ صياغة دراسة جدوى بالذكاء الاصطناعي')}
-          </button>
+          <div className="inline-flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={handleAiDraftJustification}
+              disabled={aiLoading}
+              className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 hover:underline cursor-pointer"
+            >
+              <Sparkles className="w-3 h-3" />
+              {aiLoading
+                ? t('AI Writing...', 'جاري الصياغة...')
+                : t('✨ AI Write Bankable Justification', '✨ صياغة دراسة جدوى بالذكاء الاصطناعي')}
+            </button>
+            <ExpertManualButton manualId="collab-ai-smart-fill" locale={locale} variant="mini" />
+          </div>
         </div>
         <textarea 
           required 

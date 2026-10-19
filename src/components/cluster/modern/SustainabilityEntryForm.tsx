@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { tr } from '@/lib/i18n-inline';
 import { Plus, Download, Sparkles, Cpu } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -134,7 +135,7 @@ export default function SustainabilityEntryForm({
     }
   };
 
-  if (!isOpen) {
+    if (!isOpen) {
     return (
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <Button onClick={() => setIsOpen(true)}>
@@ -147,6 +148,7 @@ export default function SustainabilityEntryForm({
             {t('Export EU CBAM CSV Report', 'تصدير تقرير CBAM الأوروبي (CSV)')}
           </Button>
         )}
+        <ExpertManualButton manualId="esg-cbam-auditor" locale={locale} variant="pill" />
       </div>
     );
   }
@@ -156,6 +158,7 @@ export default function SustainabilityEntryForm({
       <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
         <div className="flex flex-wrap items-center gap-2">
           <h3 className="font-semibold text-lg">{t('Log Monthly ESG & Resource Record', 'تسجيل بيانات الموارد والانبعاثات الشهرية')}</h3>
+          <ExpertManualButton manualId="esg-cbam-auditor" locale={locale} variant="mini" />
           {aiModelBadge && (
             <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
               <Cpu className="w-3 h-3" /> {aiModelBadge}

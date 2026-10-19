@@ -3335,6 +3335,399 @@ export const EXPERT_MANUALS: Record<string, ExpertManualEntry> = {
     proTipEn: 'Design your sewing or inspection line cycle time at 90–93% of Takt Time (called Pitch/Target Cycle Time) to buffer against minor thread breaks!',
     proTipAr: 'صمّم زمن دورة خط الحياكة أو الفحص ليكون عند 90% إلى 93% من زمن التاكت لتوفير هامش أمان ضد التوقفات الصغرى وانقطاع الخيط!',
   },
+
+  // ============================================================================
+  // 13. ACADEMY MULTIMEDIA LESSON PLAYER, CERTIFICATE VERIFIER & SUB-WIDGETS
+  // ============================================================================
+  'academy-video-slides': {
+    id: 'academy-video-slides',
+    category: 'ai_academy',
+    badgeEn: 'Academy Tab 1 Manual',
+    badgeAr: 'دليل المحاضرة المرئية والشرائح',
+    titleEn: 'Interactive HD Video Lecture & Visual KPI Slide Deck',
+    titleAr: 'مشغل المحاضرات المرئية التفاعلي وشرائح المؤشرات الهندسية',
+    subtitleEn: 'Synchronized multi-speed slide deck with live engineering metrics, formulas & key takeaways',
+    subtitleAr: 'عرض شرائح تفاعلي متزامن مع سرعات تشغيل متعددة ومؤشرات هندسية ومعادلات تطبيقية',
+    whatIsThisEn:
+      'An interactive visual lecture player inside every Cluster Academy module that synchronizes slide progression, key industrial metrics, and shop-floor diagrams with multi-speed playback (`1x`, `1.25x`, `1.5x`).',
+    whatIsThisAr:
+      'مشغل محاضرات مرئية تفاعلي داخل كل وحدة تدريبية بأكاديمية التجمع؛ يزامن انتقال الشرائح والمؤشرات الرقمية والمخططات الهندسية مع التحكم في سرعة العرض (1x, 1.25x, 1.5x).',
+    howItWorksEn:
+      'Extracts structured slide decks from the course blueprint, displays target KPIs and shop-floor highlights per slide, and automatically marks video mastery once 50%+ of the lecture is reviewed.',
+    howItWorksAr:
+      'يستخرج الشرائح التعليمية والمؤشرات المستهدفة لكل مستوى (مبتدئ / متوسط / متقدم) ويسجل إتمام الوسائط المرئية تلقائياً في شريط الإتقان.',
+    formulaOrArchitecture:
+      'Slide Synchronization Engine + Playback Rate Controller (1x / 1.25x / 1.5x) + Modality Mastery Tracker',
+    whyToUseEn: [
+      'Allows engineers and technicians to visually grasp complex spinning, weaving, dyeing, and Lean concepts in minutes.',
+      'Step through slides manually or let auto-play advance through the visual deck.',
+    ],
+    whyToUseAr: [
+      'تمكين المهندسين والفنيين من استيعاب مفاهيم الغزل والنسيج والصباغة واللين بصرياً في دقائق.',
+      'إمكانية التنقل اليدوي بين الشرائح أو التشغيل التلقائي المتزامن.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Click Play or Navigate Slides Manually',
+        titleAr: '١. اضغط تشغيل (Play) أو تنقل بين الشرائح يدوياً',
+        detailEn: 'Use the Play/Pause button and speed selector (1x, 1.25x, 1.5x) or click slide thumbnails.',
+        detailAr: 'استخدم زر التشغيل والتحكم في السرعة أو اضغط على أرقام الشرائح للتنقل المباشر.',
+      },
+    ],
+    proTipEn: 'Project the Visual Slide Deck on the training room screen during 15-minute shift handovers!',
+    proTipAr: 'اعرض الشرائح المرئية على شاشة قاعة التدريب أثناء اجتماعات تسليم الوردية الصباحية (15 دقيقة)!',
+  },
+
+  'academy-audio-podcast': {
+    id: 'academy-audio-podcast',
+    category: 'ai_academy',
+    badgeEn: 'Academy Tab 2 Manual',
+    badgeAr: 'دليل الملخص الصوتي الميداني',
+    titleEn: 'Hands-Free Bilingual Shop-Floor Audio Briefing (AR / EN)',
+    titleAr: 'الملخص الصوتي الميداني ثنائي اللغة (عربي / إنجليزي) لصالة الإنتاج',
+    subtitleEn: 'Listen to technical course summaries hands-free via Web Speech synthesis while walking the mill floor',
+    subtitleAr: 'استمع إلى الشرح الهندسي للوحدة التدريبية باللغة العربية أو الإنجليزية أثناء جولتك الميدانية بالمصنع',
+    whatIsThisEn:
+      'A bilingual (Arabic & English) audio podcast narrator built into every Academy lesson so shift engineers and supervisors can listen hands-free while inspecting machines on the Gemba floor.',
+    whatIsThisAr:
+      'مشغل بودكاست صوتي ثنائي اللغة (عربي وإنجليزي) مدمج في كل درس بالأكاديمية، يتيح للمهندسين والمشرفين الاستماع للشرح الفني عبر السماعات أثناء المرور الميداني في العنابر.',
+    howItWorksEn:
+      'Uses the browser Web Speech API (`window.speechSynthesis`) with language-matched voice selection (`ar-EG` / `en-US`) and real-time progress tracking.',
+    howItWorksAr:
+      'يستخدم تقنية النطق الصوتي بالمتصفح (Web Speech API) مع اختيار صوت عربي أو إنجليزي واضح وتتبع نسبة الاستماع لحظياً.',
+    formulaOrArchitecture:
+      'Bilingual Audio Script Generator + Web Speech Synthesis (ar-EG / en-US) + Hands-Free Progress Tracker',
+    whyToUseEn: [
+      'Enables learning on the noisy shop floor using earphones without needing to stare at a screen.',
+      'Switch effortlessly between Arabic and English narration to build bilingual technical vocabulary.',
+    ],
+    whyToUseAr: [
+      'يتيح التعلم الميداني أثناء الحركة داخل المصنع باستخدام سماعات الأذن دون الحاجة للنظر للشاشة.',
+      'التبديل الفوري بين الشرح العربي والإنجليزي لإتقان المصطلحات الهندسية الدولية.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Choose Arabic or English & Click "Start Audio Briefing"',
+        titleAr: '١. اختر اللغة (العربية أو الإنجليزية) واضغط "تشغيل الشرح الصوتي"',
+        detailEn: 'The narrator will read the executive technical summary aloud and update your multimedia mastery bar.',
+        detailAr: 'سيقوم القارئ الصوتي بقراءة الملخص التنفيذي وتحديث شريط إتقان الوحدة تلقائياً.',
+      },
+    ],
+    proTipEn: 'Listening in Arabic first and then re-listening in English is the fastest way to prepare for international ISO/OEKO-TEX buyer audits!',
+    proTipAr: 'الاستماع للشرح بالعربية أولاً ثم بالإنجليزية هو أسرع طريقة للاستعداد لاستقبال مدققي المشترين الدوليين!',
+  },
+
+  'academy-blueprint-guide': {
+    id: 'academy-blueprint-guide',
+    category: 'ai_academy',
+    badgeEn: 'Academy Tab 3 Manual',
+    badgeAr: 'دليل المخطط الفني والدراسة',
+    titleEn: 'Engineering Study Guide & Process Parameter Blueprint',
+    titleAr: 'الدليل الهندسي التفصيلي ومخطط معايير التشغيل القياسية',
+    subtitleEn: 'Full Markdown textbook, process flow parameters, target tolerances & downloadable manual',
+    subtitleAr: 'المرجع العلمي الكامل للوحدة التدريبية مع خطوات العملية الصناعية والحدود القياسية المسموحة',
+    whatIsThisEn:
+      'The complete written engineering textbook and process parameter table for each Academy module, detailing exact machine settings, tolerances, formulas, and troubleshooting matrices.',
+    whatIsThisAr:
+      'الكتاب الهندسي النصي الكامل وجدول معايير التشغيل لكل وحدة تدريبية، ويشمل إعدادات الماكينات الدقيقة، حدود التفاوت المسموحة، المعادلات، وجداول تشخيص الأعطال.',
+    howItWorksEn:
+      'Renders structured GitHub-Flavored Markdown alongside a 4-stage Process Parameter Flow (`Stage → Action → Target Metric`) and lets you mark the study guide reviewed or download it.',
+    howItWorksAr:
+      'يعرض المحتوى العلمي المنسق مع مخطط خطوات العملية الصناعية والمؤشرات المستهدفة لكل مرحلة مع إمكانية تأكيد القراءة.',
+    formulaOrArchitecture:
+      '4-Stage Process Parameter Blueprint + GFM Technical Textbook + 1-Click Review Confirmation',
+    whyToUseEn: [
+      'Serves as a permanent desk reference for quality managers, lab chemists, and shift engineers.',
+      'Provides exact numerical targets (e.g., $\\Delta E \\le 0.8$, liquor ratio $1:6$, $C_{pk} \\ge 1.33$).',
+    ],
+    whyToUseAr: [
+      'مرجع هندسي دائم لمديري الجودة وكيميائيي المعامل ومهندسي الورديات.',
+      'يوفر أرقاماً ومعايير قياسية دقيقة قابلة للتطبيق المباشر في المصنع.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Review the Process Parameter Cards & Technical Guide',
+        titleAr: '١. راجع بطاقات معايير العملية الصناعية والدليل النصي التفصيلي',
+        detailEn: 'Click "Mark Study Guide Reviewed" at the bottom to credit your module mastery score.',
+        detailAr: 'اضغط على زر "تأكيد قراءة الدليل الفني" في أسفل التبويب لتسجيل إتمام القراءة.',
+      },
+    ],
+    proTipEn: 'Use the process parameter cards to calibrate your shift handover logbooks!',
+    proTipAr: 'استخدم بطاقات معايير التشغيل لمعايرة دفاتر استلام وتسليم الورديات في مصنعك!',
+  },
+
+  'academy-sop-checklist': {
+    id: 'academy-sop-checklist',
+    category: 'ai_academy',
+    badgeEn: 'Academy Tab 4 Manual',
+    badgeAr: 'دليل قائمة فحص SOP والمراجع',
+    titleEn: 'Shop-Floor SOP Verification Checklist & Authorized Global Standards',
+    titleAr: 'قائمة فحص إجراءات التشغيل القياسية (SOP) والمراجع الدولية المعتمدة',
+    subtitleEn: 'Interactive Gemba checklist + direct links to UNIDO, ZDHC, ISO 17025, OEKO-TEX & EU ESPR standards',
+    subtitleAr: 'قائمة تحقق ميدانية تفاعلية مع روابط مباشرة لمعايير UNIDO و ZDHC و ISO 17025 و OEKO-TEX و EU ESPR',
+    whatIsThisEn:
+      'An interactive Standard Operating Procedure (SOP) verification checklist paired with verified external links to the authoritative international bodies governing the module.',
+    whatIsThisAr:
+      'قائمة تحقق تفاعلية لإجراءات التشغيل القياسية (SOP) مقترنة بروابط رسمية مباشرة للمنظمات والمعايير الدولية المعتمدة الخاصة بالوحدة.',
+    howItWorksEn:
+      'Lets learners check off each mandatory shop-floor action item (`checkedSops`) and download a printable `.md` SOP sheet to post directly on weaving looms, dyeing jets, or inspection tables.',
+    howItWorksAr:
+      'تتيح للمتدرب التأشير على كل خطوة تشغيلية قياسية وتحميل ملف (SOP.md) جاهز للطباعة والتعليق بجوار أنوال النسيج أو ماكينات الصباغة أو طاولات الفحص.',
+    formulaOrArchitecture:
+      'Interactive SOP Check-Off State + Printable Markdown SOP Exporter + Authorized Standard Citation Cards',
+    whyToUseEn: [
+      'Bridges the gap between classroom training and actual shop-floor discipline.',
+      'Provides instant downloadable SOP sheets ready for ISO 9001 and buyer compliance audits.',
+    ],
+    whyToUseAr: [
+      'تحويل التدريب النظري إلى انضباط تشغيلي فعلي داخل صالة الإنتاج.',
+      'توفير قوائم SOP جاهزة للطباعة والتقديم أثناء تفتيشات الأيزو والمشترين الدوليين.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Tick Every SOP Verification Item & Click "Download Printable SOP"',
+        titleAr: '١. أشّر على كافة بنود قائمة الفحص واضغط "تحميل قائمة SOP للطباعة"',
+        detailEn: 'Checking all items automatically completes the SOP modality in your mastery tracker.',
+        detailAr: 'التأشير على كافة البنود يكمل تلقائياً متطلب قائمة SOP في شريط الإتقان.',
+      },
+    ],
+    proTipEn: 'Laminate the downloaded SOP checklist and attach it to the machine control panel for operators!',
+    proTipAr: 'قم بتغليف قائمة SOP المحملة حرارياً وتعليقها بجوار لوحة تحكم الماكينة للفنيين!',
+  },
+
+  'academy-quiz-engine': {
+    id: 'academy-quiz-engine',
+    category: 'ai_academy',
+    badgeEn: 'Academy Tab 5 Manual',
+    badgeAr: 'دليل اختبار الكفاءة والشهادة',
+    titleEn: 'Competency Assessment Quiz & SHA-256 Certificate Unlock Engine',
+    titleAr: 'محرك اختبار الكفاءة الهندسية وإصدار الشهادة الرقمية الموثقة',
+    subtitleEn: 'Scenario-based technical quiz with instant grading, explanations & credential issuance',
+    subtitleAr: 'اختبار فني تطبيقي مع تصحيح فوري وشرح للإجابات الصحيحة وإصدار كود الشهادة الرقمية',
+    whatIsThisEn:
+      'The interactive competency assessment engine at the end of every Academy module that tests applied engineering comprehension before certifying the module.',
+    whatIsThisAr:
+      'محرك التقييم والاختبار التفاعلي في نهاية كل وحدة تدريبية، يقيس الاستيعاب الهندسي التطبيقي قبل اعتماد إتمام الوحدة وإصدار الشهادة.',
+    howItWorksEn:
+      'Presents multiple-choice industrial scenarios, grades answers immediately upon submission, displays detailed engineering explanations for each question, and unlocks 1-click module completion.',
+    howItWorksAr:
+      'يعرض أسئلة مواقف صناعية متعددة الاختيارات، ويصحح الإجابات فوراً مع عرض التفسير الهندسي الصحيح، ويفتح زر اعتماد الوحدة وإصدار الشهادة النهائية عند إكمال المنهج.',
+    formulaOrArchitecture:
+      'Applied Scenario Quiz + Instant Explanation Grader + SHA-256 Credential Code Generator (MC-XXXX)',
+    whyToUseEn: [
+      'Verifies real comprehension rather than passive reading—essential for ILUO skill matrix upgrades.',
+      'Completing all modules issues a permanent verifiable certificate (`MC-...`) on the cluster registry.',
+    ],
+    whyToUseAr: [
+      'التأكد من الفهم العملي الحقيقي للمتدرب قبل ترقيته في مصفوفة المهارات (ILUO).',
+      'إتمام كافة وحدات الدورة يصدر شهادة رقمية رسمية موثقة بكود تحقق فريد.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Select Your Answers & Click "Grade Assessment"',
+        titleAr: '١. اختر الإجابات الصحيحة واضغط "تصحيح الاختبار"',
+        detailEn: 'Review the green/amber feedback explanations, then click "Complete Module & Save Progress".',
+        detailAr: 'راجع التفسير العلمي للإجابات ثم اضغط على زر "إتمام الوحدة وحفظ التقدم".',
+      },
+    ],
+    proTipEn: 'Attach your issued Certificate Code (`MC-...`) when applying to jobs on the Recruitment Portal!',
+    proTipAr: 'أرفق كود شهادتك الصادر (MC-...) عند التقديم على الوظائف في بورصة التوظيف لرفع أولوية قبولك!',
+  },
+
+  'academy-ai-tutor': {
+    id: 'academy-ai-tutor',
+    category: 'ai_academy',
+    badgeEn: 'Academy Tab 6 Manual',
+    badgeAr: 'دليل المعلم الذكي للمعايير',
+    titleEn: 'AI Standards Tutor (UNIDO, ZDHC, ISO 17025 & EU ESPR Mentor)',
+    titleAr: 'المعلم الذكي التفاعلي للمعايير الدولية (UNIDO • ZDHC • ISO • EU ESPR)',
+    subtitleEn: 'Ask any technical question about the active lesson and get answers grounded in international standards',
+    subtitleAr: 'اسأل أي سؤال هندسي حول الدرس الحالي واحصل على إجابة موثقة بالمعايير الدولية وتطبيقاتها في المحلة',
+    whatIsThisEn:
+      'A personal 1-on-1 AI professor inside every lesson player that answers your specific factory questions grounded in the active module topic and its authorized global standards.',
+    whatIsThisAr:
+      'أستاذ ذكاء اصطناعي شخصي داخل كل درس يجيب على استفساراتك الخاصة بتطبيق الدرس في مصنعك استناداً إلى المعايير الدولية المعتمدة للوحدة.',
+    howItWorksEn:
+      'Combines the current course title, active module tier (`BEGINNER` / `INTERMEDIATE` / `ADVANCED`), and authorized standard codes (`UNIDO`, `ZDHC`, `ISO 17025`, `EU ESPR`) with your question.',
+    howItWorksAr:
+      'يدمج عنوان الدورة ومستوى الوحدة الحالية وأكواد المعايير الدولية المعتمدة مع سؤالك ليقدم إجابة هندسية مفصلة قابلة للتطبيق الميداني.',
+    formulaOrArchitecture:
+      'Lesson-Context Injection + Authorized Standards Grounding + Bilingual Technical Mentor',
+    whyToUseEn: [
+      'Resolves specific doubts on how to apply a standard to your exact loom, dyeing jet, or yarn count.',
+      'Includes 1-click quick questions tailored to the active module.',
+    ],
+    whyToUseAr: [
+      'الإجابة الفورية على كيفية تطبيق المعيار الدولي على نوع ماكينتك أو نمرة الغزل في مصنعك.',
+      'يحتوي على أزرار أسئلة ذكية جاهزة بضغطة واحدة.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Click a Suggested Question or Type Your Own Factory Scenario',
+        titleAr: '١. اضغط على أحد الأسئلة المقترحة أو اكتب سؤالك الهندسي الخاص',
+        detailEn: 'The AI Tutor will reply with shop-floor implementation steps, audit evidence needed, and expected ROI.',
+        detailAr: 'سيرد المعلم الذكي بخطوات التطبيق الميداني وأدلة التدقيق المطلوبة والعائد المتوقع.',
+      },
+    ],
+    proTipEn: 'Ask the AI Tutor: "What documents will an ISO or OEKO-TEX auditor ask to see on the shop floor for this module?"',
+    proTipAr: 'اسأل المعلم الذكي: "ما هي السجلات والمستندات التي سيطلبها مفتش الأيزو أو أيكوتكس في العنبر لهذه الوحدة؟"',
+  },
+
+  'academy-cert-verifier': {
+    id: 'academy-cert-verifier',
+    category: 'ai_academy',
+    badgeEn: 'Credential Registry Manual',
+    badgeAr: 'دليل سجل التحقق من الشهادات',
+    titleEn: 'Official Credential Registry & SHA-256 Certificate Verification Bar',
+    titleAr: 'سجل التحقق الرقمي الفوري من شهادات أكاديمية التجمع (SHA-256)',
+    subtitleEn: 'Instant public verification of learner certificates for European buyers, auditors & HR managers',
+    subtitleAr: 'تحقق علني فوري من صحة الشهادات التدريبية للمشترين الأوروبيين والمدققين ومديري الموارد البشرية',
+    whatIsThisEn:
+      'The official public verification bar on the Cluster Academy hub that lets any buyer, third-party auditor, or HR manager verify a certificate code (e.g., `MC-LEAN2026A`) in 1 click.',
+    whatIsThisAr:
+      'شريط التحقق الرسمي العلني في أكاديمية التجمع الذي يتيح لأي مشتري دولي أو مدقق جودة أو مدير موارد بشرية التحقق من صحة أي كود شهادة (مثل MC-LEAN2026A) بضغطة واحدة.',
+    howItWorksEn:
+      'Validates the certificate code against the Academy database (or deterministic registry), displays the holder name, completed curriculum, authorized standards, and printable diploma.',
+    howItWorksAr:
+      'يطابق كود الشهادة مع سجل الأكاديمية ويعرض صفحة الشهادة الرسمية متضمنة اسم المتدرب، المعايير الدولية المعتمدة، التوقيع الرقمي SHA-256، وزر الطباعة الرسمية.',
+    formulaOrArchitecture:
+      'Public Credential Lookup + SHA-256 Signature Verification + Print-Ready A4 Diploma View',
+    whyToUseEn: [
+      'Eliminates credential forgery and gives international buyers confidence in your workforce qualifications.',
+      'Provides 1-click access to recently issued cluster certificates as live examples.',
+    ],
+    whyToUseAr: [
+      'يمنح المشترين الدوليين والجهات المانحة ثقة كاملة في كفاءة وتأهيل الكوادر البشرية بمصنعك.',
+      'يتيح معاينة أحدث الشهادات الصادرة في التجمع وطباعتها مباشرة.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Enter Any Certificate Code (e.g. MC-LEAN2026A) or Click a Recent Credential',
+        titleAr: '١. أدخل كود الشهادة أو اضغط على إحدى الشهادات الصادرة حديثاً',
+        detailEn: 'Opens the public verification certificate page with 1-click PDF/Print support.',
+        detailAr: 'يفتح صفحة الشهادة الرسمية الموثقة مع إمكانية طباعتها كملف PDF.',
+      },
+    ],
+    proTipEn: 'Include verification links to your team’s Academy certificates inside your B2B Export Consortium and RFQ proposals!',
+    proTipAr: 'أدرج روابط التحقق من شهادات مهندسي مصنعك داخل عروض الأسعار التصديرية (RFQs) لرفع تقييمك الفني!',
+  },
+
+  'collab-ai-smart-fill': {
+    id: 'collab-ai-smart-fill',
+    category: 'gadgets_calculators',
+    badgeEn: 'AI Smart Auto-Fill Manual',
+    badgeAr: 'دليل الملء الذكي بالذكاء الاصطناعي',
+    titleEn: '✨ 1-Click AI Smart Auto-Fill & Bankable Proposal Drafter',
+    titleAr: '✨ محرك الملء الذكي وصياغة المقترحات الفنية والمالية بضغطة واحدة',
+    subtitleEn: 'Embedded AI auto-completion inside Procurement Pools, Capacity Exchange, Consortia, Facilities & Funding forms',
+    subtitleAr: 'تعبئة ذكية فورية لنماذج الشراء الجماعي، الطاقة الفائضة، التحالفات، حجز المعامل، وطلبات التمويل',
+    whatIsThisEn:
+      'An integrated `✨ AI Smart Fill` button embedded directly inside creation forms across Joint Procurement, Capacity Exchange, Export Consortia, Facility Booking, and Funding Applications.',
+    whatIsThisAr:
+      'زر ذكي مدمج (`✨ تعبئة ذكية بالذكاء الاصطناعي`) داخل نماذج إنشاء مجموعات الشراء، إعلانات الطاقة الفائضة، التحالفات التصديرية، حجز المعامل، وطلبات المنح والتمويل.',
+    howItWorksEn:
+      'Calls `/api/cluster/ai-autofill` with the form `kind` and partial user inputs, generating realistic Mahalla textile specifications, target prices, technical descriptions, and bankable ROI justifications.',
+    howItWorksAr:
+      'يتصل بمحرك `/api/cluster/ai-autofill` لتحويل أي فكرة مختصرة إلى مواصفات فنية نسيجية دقيقة (مثل نمرة الغزل، معيار Uster، أو دراسة جدوى بنكية للمنحة) وتعبئة حقول النموذج تلقائياً.',
+    formulaOrArchitecture:
+      'Context-Aware Form Schema + /api/cluster/ai-autofill + Multi-LLM Free Engine + Deterministic Textile Fallback',
+    whyToUseEn: [
+      'Saves 90% of typing time when creating procurement pools, capacity listings, or grant applications.',
+      'Ensures every listing and grant justification uses professional international textile terminology.',
+    ],
+    whyToUseAr: [
+      'توفير 90% من وقت الكتابة وإدخال البيانات عند نشر العروض أو التقديم على المنح التمويلية.',
+      'ضمان صياغة كافة الطلبات والمناقصات بلغة هندسية وبنكية احترافية تزيد من نسب القبول.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Open Any Creation or Application Form & Click "✨ AI Smart Fill"',
+        titleAr: '١. افتح أي نموذج إضافة أو تقديم طلب واضغط على زر "✨ تعبئة ذكية بالذكاء الاصطناعي"',
+        detailEn: 'Review the auto-populated technical specifications and numbers, adjust if needed, and submit.',
+        detailAr: 'راجع المواصفات والأرقام التي قام الذكاء الاصطناعي بتعبئتها وعدّلها حسب رغبتك ثم اضغط حفظ.',
+      },
+    ],
+    proTipEn: 'In the Funding Hub, clicking "✨ AI Write Bankable Justification" calculates payback period and CO2e abatement automatically!',
+    proTipAr: 'في مركز التمويل، الضغط على "✨ صياغة دراسة جدوى بالذكاء الاصطناعي" يحسب فترة الاسترداد وخفض الانبعاثات تلقائياً لدعم ملفك البنكي!',
+  },
+
+  'esg-cbam-auditor': {
+    id: 'esg-cbam-auditor',
+    category: 'ai_academy',
+    badgeEn: 'ESG & CBAM Ledger Manual',
+    badgeAr: 'دليل سجل الكربون وتدقيق CBAM',
+    titleEn: 'Monthly ESG Resource Ledger, AI CBAM Auditor & CSV Report Exporter',
+    titleAr: 'مسجل الموارد والانبعاثات الشهري ومدقق CBAM الذكي ومُصدّر تقارير CSV',
+    subtitleEn: 'Log monthly kWh, solar, gas, water & waste to compute Scope 1+2 CO2e and generate an AI abatement plan',
+    subtitleAr: 'سجّل استهلاك الكهرباء والطاقة الشمسية والغاز والمياه والعوادم لحساب البصمة الكربونية وتوليد خطة خفض الانبعاثات',
+    whatIsThisEn:
+      'The interactive data-entry, AI carbon auditing, and CSV reporting engine inside the Sustainability & EU CBAM module.',
+    whatIsThisAr:
+      'أداة تسجيل البيانات البيئية الشهرية وتدقيق البصمة الكربونية بالذكاء الاصطناعي وتصدير تقارير (CSV) المعتمدة داخل وحدة الاستدامة و CBAM.',
+    howItWorksEn:
+      'Applies Egyptian grid and fuel emission factors ($0.45\\text{ kg CO}_2\\text{e/kWh}$, $1.96\\text{ kg CO}_2\\text{e/m}^3$ gas, $0\\text{ kg}$ solar) to compute intensity per kg of textile, generates an AI CBAM abatement roadmap, and exports multi-month CSV ledgers.',
+    howItWorksAr:
+      'تطبق معاملات الانبعاثات القياسية للشبكة المصرية والغاز الطبيعي لحساب كثافة الكربون والمياه لكل كجم منتج، وتولد خطة خفض انبعاثات ذكية مع تصدير ملف CSV جاهز للمشترين الأوروبيين.',
+    formulaOrArchitecture:
+      'CO₂e = (kWh_grid × 0.45) + (m³_gas × 1.96) | Water Intensity = (Water_m³ - Recycled_m³) × 1000 / Prod_kg',
+    whyToUseEn: [
+      'Prepares audit-ready monthly carbon and water logs required by European buyers under EU ESPR and CBAM.',
+      'One-click CSV export attaches directly to buyer sustainability questionnaires.',
+    ],
+    whyToUseAr: [
+      'إعداد سجلات كربون ومياه شهرية موثقة وجاهزة لتقديمها للمشترين الأوروبيين وفق لوائح CBAM و ESPR.',
+      'تصدير ملف CSV بضغطة واحدة لإرفاقه في استبيانات الاستدامة الدولية.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Click "Log Monthly ESG & CBAM Data" & Enter Utility Readings',
+        titleAr: '١. اضغط "تسجيل بيانات الاستدامة الشهرية" وأدخل قراءات العدادات والإنتاج',
+        detailEn: 'Click "✨ AI CBAM Audit & Abatement Plan" to inspect engineering recommendations before saving.',
+        detailAr: 'اضغط "✨ تدقيق CBAM وخطة خفض الانبعاثات" للحصول على توصيات هندسية فورية ثم احفظ السجل.',
+      },
+    ],
+    proTipEn: 'Increasing closed-loop UF/RO recycled water and rooftop solar kWh directly boosts your composite ESG score above 80/100!',
+    proTipAr: 'زيادة نسبة المياه المعاد تدويرها والطاقة الشمسية ترفع تقييم الاستدامة (ESG Score) لمصنعك فوق 80/100 وتؤهلك للتمويل الأخضر!',
+  },
+
+  'maturity-6d-wizard': {
+    id: 'maturity-6d-wizard',
+    category: 'ai_academy',
+    badgeEn: '6D Diagnostic Wizard Manual',
+    badgeAr: 'دليل معالج تشخيص النضج الرقمي',
+    titleEn: '6-Dimension Industry 4.0 Diagnostic Wizard & Peer Radar Benchmark',
+    titleAr: 'معالج التقييم الذاتي للنضج الصناعي والرقمي (٦ أبعاد) ومخطط الرادار المقارن',
+    subtitleEn: '24-question UNIDO/SIRI diagnostic across Digital, Production, Quality, ESG, Market & People',
+    subtitleAr: 'استبيان هندسي من ٢٤ سؤالاً عبر ٦ أبعاد مع مقارنة رادارية بمتوسط مصانع التجمع وخارطة طريق ٩٠ يوماً',
+    whatIsThisEn:
+      'An interactive 6-step assessment wizard that evaluates your factory across 24 operational criteria and generates a Radar Chart comparing your mill against the Mahalla cluster benchmark.',
+    whatIsThisAr:
+      'معالج تقييم تفاعلي من 6 خطوات يقيس جاهزية مصنعك عبر 24 معياراً تشغيلياً، ويصدر مخطط رادار يقارن أداء مصنعك بمتوسط مصانع المحلة الكبرى.',
+    howItWorksEn:
+      'Scores each answer from `0` (Manual/Ad-hoc) to `4` (Industry 4.0 Leading), normalizes each of the 6 dimensions to `0–100%`, assigns a Maturity Level (`1..5`), and links your weakest dimensions directly to matching Grants and Academy courses.',
+    howItWorksAr:
+      'يحسب نقاط كل إجابة من 0 إلى 4 ويحولها إلى نسبة مئوية (0–100%) لكل بُعد من الأبعاد الستة، ثم يربط نقاط الضعف تلقائياً بالمنح التمويلية والدورات التدريبية المناسبة.',
+    formulaOrArchitecture:
+      'Dimension Score % = (Σ Answer_i / (4 × N_questions)) × 100 | Overall Maturity = Mean(6 Dimensions)',
+    whyToUseEn: [
+      'Identifies your highest-ROI modernization bottlenecks in under 5 minutes.',
+      'Automatically unlocks the "Recommended for Your Factory" badge on matching grants in the Funding Hub.',
+    ],
+    whyToUseAr: [
+      'تشخيص نقاط الاختناق وأولويات التحديث ذات العائد الأعلى لمصنعك في أقل من 5 دقائق.',
+      'تفعيل شارة "موصى به لمصنعك" تلقائياً على المنح والقروض المطابقة لاحتياجاتك في مركز التمويل.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Complete All 6 Dimension Steps & Click "View Results"',
+        titleAr: '١. أجب على أسئلة الأبعاد الستة واضغط "عرض النتائج"',
+        detailEn: 'Inspect your Radar Chart vs. the Cluster Average and follow the 90-day Now / Next / Later action roadmap.',
+        detailAr: 'راجع مخطط الرادار المقارن وخارطة الطريق التنفيذية لـ 90 يوماً (الآن / التالي / لاحقاً).',
+      },
+    ],
+    proTipEn: 'Re-run the Maturity Assessment every quarter after completing Lean or ESG upgrades to track your score climb!',
+    proTipAr: 'أعد إجراء تقييم النضج الرقمي كل ربع سنة بعد تنفيذ تحسينات اللين أو الاستدامة لمتابعة تقدم مصنعك!',
+  },
 };
 
 /**

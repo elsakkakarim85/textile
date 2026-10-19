@@ -8,6 +8,7 @@ import { tr } from '@/lib/i18n-inline';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ProgressBar, Pill } from '@/components/cluster/ui';
+import { openExpertManual } from '@/components/cluster/ExpertManualModal';
 import {
   extractMultimediaMeta,
   type LessonMultimediaMeta,
@@ -588,36 +589,42 @@ export function AcademyLessonViewer({
                 {[
                   {
                     id: 'video' as MediaTab,
+                    manualId: 'academy-video-slides',
                     icon: Video,
                     label: t('1. Video Lecture', '١. محاضرة مرئية'),
                     done: modalityFlags[0],
                   },
                   {
                     id: 'audio' as MediaTab,
+                    manualId: 'academy-audio-podcast',
                     icon: Headphones,
                     label: t('2. Audio Briefing', '٢. ملخص صوتي'),
                     done: modalityFlags[1],
                   },
                   {
                     id: 'blueprint' as MediaTab,
+                    manualId: 'academy-blueprint-guide',
                     icon: FileText,
                     label: t('3. Study Guide', '٣. الدليل والمخطط'),
                     done: modalityFlags[2],
                   },
                   {
                     id: 'sop' as MediaTab,
+                    manualId: 'academy-sop-checklist',
                     icon: ClipboardCheck,
                     label: t('4. SOP & Sources', '٤. قائمة SOP والمراجع'),
                     done: modalityFlags[3],
                   },
                   {
                     id: 'quiz' as MediaTab,
+                    manualId: 'academy-quiz-engine',
                     icon: HelpCircle,
                     label: t('5. Assessment', '٥. اختبار الوحدة'),
                     done: modalityFlags[4],
                   },
                   {
                     id: 'tutor' as MediaTab,
+                    manualId: 'academy-ai-tutor',
                     icon: Sparkles,
                     label: t('6. AI Tutor', '٦. المدرب الذكي'),
                     done: !!tutorAnswer,
@@ -638,7 +645,7 @@ export function AcademyLessonViewer({
                           }));
                         }
                       }}
-                      className={`p-2.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                      className={`p-2.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                         isActive
                           ? 'border-emerald-600 bg-emerald-600 text-white shadow-sm'
                           : 'bg-background hover:bg-muted/70 text-foreground'
@@ -653,6 +660,22 @@ export function AcademyLessonViewer({
                           }`}
                         />
                       )}
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openExpertManual(tab.manualId);
+                        }}
+                        title={t('Expert Manual for this Learning Tool', 'دليل الخبير لهذه الأداة التعليمية')}
+                        className={`ms-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition ${
+                          isActive
+                            ? 'border-white/30 bg-white/15 text-white hover:bg-white/30'
+                            : 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
+                        }`}
+                      >
+                        <HelpCircle className="h-2.5 w-2.5" />
+                      </span>
                     </button>
                   );
                 })}

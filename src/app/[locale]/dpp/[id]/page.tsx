@@ -3,6 +3,7 @@ import { safeQuery } from '@/server/cluster';
 import { tr } from '@/lib/i18n-inline';
 import { Card, CardContent } from '@/components/ui/card';
 import { Pill, DbOfflineBanner } from '@/components/cluster/ui';
+import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 import { PrintCertificateButton } from '@/components/cluster/modern/PrintCertificateButton';
 import {
   ShieldCheck,
@@ -129,7 +130,7 @@ export default async function DPPVerificationPage({
       <div className="max-w-2xl w-full space-y-6">
         {!ok && <DbOfflineBanner locale={locale} />}
 
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <Link
             href={`/${locale}/marketplaces/products`}
             className="inline-flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-foreground"
@@ -137,7 +138,10 @@ export default async function DPPVerificationPage({
             <ArrowLeft className="w-4 h-4" />
             {t('Back to Product Catalog', 'العودة إلى كتالوج المنتجات')}
           </Link>
-          <PrintCertificateButton label={t('Print EU DPP Passport', 'طباعة جواز المنتج الرقمي')} />
+          <div className="flex items-center gap-2">
+            <ExpertManualButton manualId="dpp-passport" locale={locale} variant="pill" />
+            <PrintCertificateButton label={t('Print EU DPP Passport', 'طباعة جواز المنتج الرقمي')} />
+          </div>
         </div>
 
         {/* Verification Header */}

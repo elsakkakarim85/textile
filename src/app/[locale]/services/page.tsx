@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DbOfflineBanner } from '@/components/cluster/ui';
+import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 import Link from 'next/link';
 import { Ship, FlaskConical, Award, ArrowRight, Gauge, Globe2 } from 'lucide-react';
 
@@ -109,13 +110,16 @@ export default async function ServicesDirectoryPage({
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">
-            {tr(
-              locale,
-              'Cluster B2B Support Services, Accredited Labs & Global Logistics',
-              'دليل الخدمات المساندة والمعامل المعتمدة والشحن اللوجستي بالتجمع'
-            )}
-          </h1>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h1 className="text-3xl font-bold">
+              {tr(
+                locale,
+                'Cluster B2B Support Services, Accredited Labs & Global Logistics',
+                'دليل الخدمات المساندة والمعامل المعتمدة والشحن اللوجستي بالتجمع'
+              )}
+            </h1>
+            <ExpertManualButton manualId="services" locale={locale} variant="pill" />
+          </div>
           <p className="mt-2 text-muted-foreground">
             {tr(
               locale,

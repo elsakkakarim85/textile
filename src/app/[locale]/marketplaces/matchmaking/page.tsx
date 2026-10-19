@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { tr } from '@/lib/i18n-inline';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 import {
   FileText,
   Send,
@@ -169,12 +170,15 @@ export default function MatchmakingPage() {
       {/* Header Banner */}
       <div className="rounded-2xl bg-gradient-to-r from-emerald-950 via-slate-900 to-indigo-950 text-white p-6 md:p-8 border border-emerald-500/30 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-2 max-w-2xl">
-          <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-300 bg-emerald-500/20 border border-emerald-400/30 px-3 py-1 rounded-full">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            {t(
-              'Smart Escrow • Consortia Bidding • AI Technical Proposals',
-              'مناقصات موثقة • تحالفات تصديرية • عروض فنية بالذكاء الاصطناعي'
-            )}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-300 bg-emerald-500/20 border border-emerald-400/30 px-3 py-1 rounded-full">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              {t(
+                'Smart Escrow • Consortia Bidding • AI Technical Proposals',
+                'مناقصات موثقة • تحالفات تصديرية • عروض فنية بالذكاء الاصطناعي'
+              )}
+            </div>
+            <ExpertManualButton manualId="marketplace-matchmaking" locale={locale} variant="pill" />
           </div>
           <h1 className="text-2xl md:text-4xl font-extrabold">
             {t(
