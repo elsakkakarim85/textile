@@ -528,241 +528,223 @@ export default function Navbar({ locale }: { locale: string }) {
 
       {/* Sticky Main Navigation Bar with Bespoke Mahalla Cluster Crest */}
       <nav className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85 shadow-sm">
-        <div className="container mx-auto max-w-7xl px-3 h-14 flex items-center justify-between gap-1.5">
-          {/* Left: Bespoke Brand Emblem + 5 Categorized Mega-Menus */}
-          <div className="flex items-center gap-2 xl:gap-3 min-w-0">
-            <Link
-              href={`/${locale}`}
-              className="group flex items-center gap-2 pe-1 whitespace-nowrap shrink-0"
-            >
-              {/* Custom SVG Industrial Textile & Gear Crest */}
-              <div className="relative w-9 h-9 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-emerald-900 via-slate-900 to-teal-950 p-1 shadow-md border border-emerald-500/40 group-hover:border-emerald-400 transition-all flex items-center justify-center shrink-0">
-                <svg viewBox="0 0 48 48" className="w-full h-full" fill="none">
-                  {/* Outer Precision Gear Ring */}
-                  <circle
-                    cx="24"
-                    cy="24"
-                    r="20"
-                    stroke="url(#mahallaGold)"
-                    strokeWidth="2"
-                    strokeDasharray="4 3"
-                  />
-                  {/* Interlocking Warp & Weft Textile Threads */}
-                  <path
-                    d="M14 18H34M14 24H34M14 30H34"
-                    stroke="#10b981"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                  />
-                  <path
-                    d="M18 14V34M24 14V34M30 14V34"
-                    stroke="#fbbf24"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeOpacity="0.9"
-                  />
-                  {/* Center Diamond Node */}
-                  <rect
-                    x="20.5"
-                    y="20.5"
-                    width="7"
-                    height="7"
-                    rx="1.5"
-                    transform="rotate(45 24 24)"
-                    fill="#10b981"
-                    stroke="#ffffff"
-                    strokeWidth="1.2"
-                  />
-                  <defs>
-                    <linearGradient id="mahallaGold" x1="0" y1="0" x2="48" y2="48">
-                      <stop offset="0%" stopColor="#34d399" />
-                      <stop offset="50%" stopColor="#fbbf24" />
-                      <stop offset="100%" stopColor="#0ea5e9" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-                <span className="absolute -top-0.5 -end-0.5 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-background animate-pulse" />
-              </div>
+        <div className="w-full max-w-[1440px] mx-auto px-3 sm:px-5 h-14 flex items-center justify-between gap-2">
+          {/* Zone 1 (Left): Bespoke Brand Emblem */}
+          <Link
+            href={`/${locale}`}
+            className="group flex items-center gap-2 whitespace-nowrap shrink-0"
+          >
+            {/* Custom SVG Industrial Textile & Gear Crest */}
+            <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-900 via-slate-900 to-teal-950 p-1 shadow-md border border-emerald-500/40 group-hover:border-emerald-400 transition-all flex items-center justify-center shrink-0">
+              <svg viewBox="0 0 48 48" className="w-full h-full" fill="none">
+                {/* Outer Precision Gear Ring */}
+                <circle
+                  cx="24"
+                  cy="24"
+                  r="20"
+                  stroke="url(#mahallaGold)"
+                  strokeWidth="2"
+                  strokeDasharray="4 3"
+                />
+                {/* Interlocking Warp & Weft Textile Threads */}
+                <path
+                  d="M14 18H34M14 24H34M14 30H34"
+                  stroke="#10b981"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M18 14V34M24 14V34M30 14V34"
+                  stroke="#fbbf24"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeOpacity="0.9"
+                />
+                {/* Center Diamond Node */}
+                <rect
+                  x="20.5"
+                  y="20.5"
+                  width="7"
+                  height="7"
+                  rx="1.5"
+                  transform="rotate(45 24 24)"
+                  fill="#10b981"
+                  stroke="#ffffff"
+                  strokeWidth="1.2"
+                />
+                <defs>
+                  <linearGradient id="mahallaGold" x1="0" y1="0" x2="48" y2="48">
+                    <stop offset="0%" stopColor="#34d399" />
+                    <stop offset="50%" stopColor="#fbbf24" />
+                    <stop offset="100%" stopColor="#0ea5e9" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <span className="absolute -top-0.5 -end-0.5 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-background animate-pulse" />
+            </div>
 
-              <div className="flex flex-col">
-                <span className="text-sm md:text-base font-black tracking-tight text-foreground group-hover:text-primary transition-colors leading-none">
-                  {t('Mahalla Cluster', 'تجمع المحلة الكبرى')}
-                </span>
-                <span className="text-[8px] md:text-[9px] font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mt-0.5">
-                  {t('Industrial Textile Hub', 'قلعة صناعة الغزل والنسيج')}
-                </span>
-              </div>
+            <div className="flex flex-col">
+              <span className="text-sm md:text-base font-black tracking-tight text-foreground group-hover:text-primary transition-colors leading-none">
+                {t('Mahalla Cluster', 'تجمع المحلة الكبرى')}
+              </span>
+              <span className="text-[8px] md:text-[9px] font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mt-0.5">
+                {t('Industrial Textile Hub', 'قلعة صناعة الغزل والنسيج')}
+              </span>
+            </div>
+          </Link>
+
+          {/* Zone 2 (Center): Desktop Categorized Navigation */}
+          <div className="hidden lg:flex items-center justify-center gap-0.5 xl:gap-1 shrink-0">
+            {/* Direct Hub Pill */}
+            <Link
+              href={`/${locale}/cluster`}
+              className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] xl:text-xs font-bold transition-all whitespace-nowrap shrink-0 ${
+                pathname === `/${locale}/cluster`
+                  ? 'bg-primary text-primary-foreground shadow-xs'
+                  : 'bg-primary/10 text-primary hover:bg-primary/20'
+              }`}
+            >
+              <Network className="w-3.5 h-3.5 shrink-0" />
+              {t('Cluster Hub', 'المركز الرئيسي')}
             </Link>
 
-            {/* Desktop Categorized Navigation */}
-            <div className="hidden lg:flex items-center gap-0.5 xl:gap-1">
-              {/* Direct Hub Pill */}
-              <Link
-                href={`/${locale}/cluster`}
-                className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] xl:text-xs font-bold transition-all whitespace-nowrap ${
-                  pathname === `/${locale}/cluster`
-                    ? 'bg-primary text-primary-foreground shadow-xs'
-                    : 'bg-primary/10 text-primary hover:bg-primary/20'
-                }`}
-              >
-                <Network className="w-3.5 h-3.5 shrink-0" />
-                {t('Cluster Hub', 'المركز الرئيسي')}
-              </Link>
+            {/* 5 Categorized Dropdown Pillars */}
+            {categories.map((cat, idx) => {
+              const Icon = cat.icon;
+              const active = isCategoryActive(cat);
+              const isOpen = openMenu === cat.id;
+              const alignEnd = idx >= 3;
 
-              {/* 5 Categorized Dropdown Pillars */}
-              {categories.map((cat, idx) => {
-                const Icon = cat.icon;
-                const active = isCategoryActive(cat);
-                const isOpen = openMenu === cat.id;
-                const alignEnd = idx >= 3;
-
-                return (
-                  <div
-                    key={cat.id}
-                    className="relative"
-                    onMouseEnter={() => setOpenMenu(cat.id)}
-                    onMouseLeave={() => setOpenMenu((prev) => (prev === cat.id ? null : prev))}
+              return (
+                <div
+                  key={cat.id}
+                  className="relative shrink-0"
+                  onMouseEnter={() => setOpenMenu(cat.id)}
+                  onMouseLeave={() => setOpenMenu((prev) => (prev === cat.id ? null : prev))}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenMenu(isOpen ? null : cat.id)}
+                    className={`inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] xl:text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                      isOpen || active
+                        ? 'bg-muted text-primary'
+                        : 'text-foreground/85 hover:text-primary hover:bg-muted/60'
+                    }`}
                   >
-                    <button
-                      type="button"
-                      onClick={() => setOpenMenu(isOpen ? null : cat.id)}
-                      className={`inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] xl:text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                        isOpen || active
-                          ? 'bg-muted text-primary'
-                          : 'text-foreground/85 hover:text-primary hover:bg-muted/60'
+                    <Icon className="w-3.5 h-3.5 text-primary/80 shrink-0" />
+                    <span>{cat.label}</span>
+                    <ChevronDown
+                      className={`w-3 h-3 opacity-70 transition-transform duration-150 shrink-0 ${
+                        isOpen ? 'rotate-180 text-primary' : ''
                       }`}
+                    />
+                  </button>
+
+                  {/* Mega-Menu Dropdown Panel */}
+                  {isOpen && (
+                    <div
+                      className={`absolute top-full ${
+                        alignEnd ? 'end-0' : 'start-0'
+                      } pt-2 z-50 ${cat.columns === 2 ? 'w-[620px]' : 'w-[380px]'}`}
                     >
-                      <Icon className="w-3.5 h-3.5 text-primary/80 shrink-0" />
-                      <span>{cat.label}</span>
-                      <ChevronDown
-                        className={`w-3 h-3 opacity-70 transition-transform duration-150 shrink-0 ${
-                          isOpen ? 'rotate-180 text-primary' : ''
-                        }`}
-                      />
-                    </button>
+                      <div className="rounded-2xl border bg-popover/98 backdrop-blur-xl text-popover-foreground shadow-2xl p-3.5 ring-1 ring-black/5 space-y-2.5">
+                        <div className="flex items-center justify-between px-2.5 pb-2 border-b text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                          <span className="flex items-center gap-1.5">
+                            <Icon className="w-3.5 h-3.5 text-primary" />
+                            {cat.label}
+                          </span>
+                          <span>
+                            {cat.items.length} {t('Modules', 'وحدات')}
+                          </span>
+                        </div>
 
-                    {/* Mega-Menu Dropdown Panel */}
-                    {isOpen && (
-                      <div
-                        className={`absolute top-full ${
-                          alignEnd ? 'end-0' : 'start-0'
-                        } pt-2 z-50 ${cat.columns === 2 ? 'w-[620px]' : 'w-[380px]'}`}
-                      >
-                        <div className="rounded-2xl border bg-popover/98 backdrop-blur-xl text-popover-foreground shadow-2xl p-3.5 ring-1 ring-black/5 space-y-2.5">
-                          <div className="flex items-center justify-between px-2.5 pb-2 border-b text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                            <span className="flex items-center gap-1.5">
-                              <Icon className="w-3.5 h-3.5 text-primary" />
-                              {cat.label}
-                            </span>
-                            <span>
-                              {cat.items.length} {t('Modules', 'وحدات')}
-                            </span>
-                          </div>
-
-                          <div
-                            className={`grid gap-1.5 ${
-                              cat.columns === 2 ? 'grid-cols-2' : 'grid-cols-1'
-                            }`}
-                          >
-                            {cat.items.map((sub) => {
-                              const SubIcon = sub.icon;
-                              const isSubActive =
-                                pathname === sub.href || pathname.startsWith(sub.href + '/');
-                              return (
-                                <Link
-                                  key={sub.href}
-                                  href={sub.href}
-                                  onClick={() => setOpenMenu(null)}
-                                  className={`group flex items-start gap-3 p-2.5 rounded-xl transition-all ${
-                                    isSubActive
-                                      ? 'bg-primary/10 border border-primary/30'
-                                      : 'hover:bg-muted/80 border border-transparent'
+                        <div
+                          className={`grid gap-1.5 ${
+                            cat.columns === 2 ? 'grid-cols-2' : 'grid-cols-1'
+                          }`}
+                        >
+                          {cat.items.map((sub) => {
+                            const SubIcon = sub.icon;
+                            const isSubActive =
+                              pathname === sub.href || pathname.startsWith(sub.href + '/');
+                            return (
+                              <Link
+                                key={sub.href}
+                                href={sub.href}
+                                onClick={() => setOpenMenu(null)}
+                                className={`group flex items-start gap-3 p-2.5 rounded-xl transition-all ${
+                                  isSubActive
+                                    ? 'bg-primary/10 border border-primary/30'
+                                    : 'hover:bg-muted/80 border border-transparent'
+                                }`}
+                              >
+                                <div
+                                  className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
+                                    sub.accent === 'emerald'
+                                      ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                                      : sub.accent === 'blue'
+                                      ? 'bg-blue-500/15 text-blue-600 dark:text-blue-400'
+                                      : sub.accent === 'amber'
+                                      ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
+                                      : sub.accent === 'purple'
+                                      ? 'bg-purple-500/15 text-purple-600 dark:text-purple-400'
+                                      : 'bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground'
                                   }`}
                                 >
-                                  <div
-                                    className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
-                                      sub.accent === 'emerald'
-                                        ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
-                                        : sub.accent === 'blue'
-                                        ? 'bg-blue-500/15 text-blue-600 dark:text-blue-400'
-                                        : sub.accent === 'amber'
-                                        ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
-                                        : sub.accent === 'purple'
-                                        ? 'bg-purple-500/15 text-purple-600 dark:text-purple-400'
-                                        : 'bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground'
-                                    }`}
-                                  >
-                                    <SubIcon className="w-4 h-4" />
-                                  </div>
-                                  <div className="min-w-0 flex-1">
-                                    <div className="flex items-center justify-between gap-1.5">
-                                      <span className="text-xs font-bold text-foreground group-hover:text-primary transition-colors truncate">
-                                        {sub.label}
+                                  <SubIcon className="w-4 h-4" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex items-center justify-between gap-1.5">
+                                    <span className="text-xs font-bold text-foreground group-hover:text-primary transition-colors truncate">
+                                      {sub.label}
+                                    </span>
+                                    {sub.badge && (
+                                      <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 shrink-0">
+                                        {sub.badge}
                                       </span>
-                                      {sub.badge && (
-                                        <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 shrink-0">
-                                          {sub.badge}
-                                        </span>
-                                      )}
-                                    </div>
-                                    <p className="text-[11px] text-muted-foreground line-clamp-2 leading-snug mt-0.5">
-                                      {sub.desc}
-                                    </p>
+                                    )}
                                   </div>
-                                </Link>
-                              );
-                            })}
-                          </div>
+                                  <p className="text-[11px] text-muted-foreground line-clamp-2 leading-snug mt-0.5">
+                                    {sub.desc}
+                                  </p>
+                                </div>
+                              </Link>
+                            );
+                          })}
+                        </div>
 
-                          {/* Mega-Menu Quick-Launch Spotlight Footer */}
-                          <div className="pt-2 border-t flex items-center justify-between gap-2 px-2">
-                            <span className="text-[11px] font-medium text-muted-foreground truncate">
-                              {cat.spotlightTitle}
-                            </span>
-                            <Link
-                              href={cat.spotlightHref}
-                              onClick={() => setOpenMenu(null)}
-                              className="inline-flex items-center gap-1 text-[11px] font-extrabold text-primary hover:underline shrink-0"
-                            >
-                              {cat.spotlightCta}
-                              <ArrowRight className="w-3 h-3" />
-                            </Link>
-                          </div>
+                        {/* Mega-Menu Quick-Launch Spotlight Footer */}
+                        <div className="pt-2 border-t flex items-center justify-between gap-2 px-2">
+                          <span className="text-[11px] font-medium text-muted-foreground truncate">
+                            {cat.spotlightTitle}
+                          </span>
+                          <Link
+                            href={cat.spotlightHref}
+                            onClick={() => setOpenMenu(null)}
+                            className="inline-flex items-center gap-1 text-[11px] font-extrabold text-primary hover:underline shrink-0"
+                          >
+                            {cat.spotlightCta}
+                            <ArrowRight className="w-3 h-3" />
+                          </Link>
                         </div>
                       </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
-          {/* Right Controls: Quick Search (Ctrl+K), Persona, Currency, Language, Theme, Dashboard, Auth */}
+          {/* Zone 3 (Right): Workspace Icon, Currency, Language, Theme, Dashboard, Auth */}
           <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-            {/* Quick Search & Engineering Calculators Trigger (Ctrl+K) */}
-            <button
-              type="button"
-              onClick={triggerQuickSearch}
-              className="hidden sm:inline-flex items-center gap-1 px-2 py-1 rounded-lg border bg-muted/40 hover:bg-muted text-[11px] font-bold text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-              title={t(
-                'Open Quick Module Search & Textile Calculators (Ctrl+K)',
-                'البحث السريع وحاسبات الغزل والنسيج (Ctrl+K)'
-              )}
-            >
-              <Search className="w-3 h-3 text-primary" />
-              <kbd className="text-[10px] font-mono bg-background px-1 py-0.5 rounded border text-foreground/80">
-                Ctrl+K
-              </kbd>
-            </button>
-
-            <div className="hidden xl:block">
+            <div className="hidden lg:block shrink-0">
               <PersonaSwitcher locale={locale} />
             </div>
 
             <select
               value={currency}
               onChange={(e) => setCurrency(e.target.value as any)}
-              className="text-[11px] font-bold bg-transparent border rounded-lg px-1.5 py-1 outline-none cursor-pointer text-muted-foreground hover:text-foreground"
+              className="text-[11px] font-bold bg-transparent border rounded-lg px-1.5 py-1 outline-none cursor-pointer text-muted-foreground hover:text-foreground shrink-0"
               aria-label="Currency"
             >
               <option value="EGP">EGP</option>
@@ -772,14 +754,14 @@ export default function Navbar({ locale }: { locale: string }) {
 
             <button
               onClick={toggleLocale}
-              className="text-[11px] font-bold px-2 py-1 rounded-lg border hover:bg-muted transition-colors cursor-pointer"
+              className="text-[11px] font-bold px-2 py-1 rounded-lg border hover:bg-muted transition-colors cursor-pointer shrink-0"
             >
               {locale === 'ar' ? 'EN' : 'عربي'}
             </button>
 
             <ThemeToggle />
 
-            <Link href={`/${locale}/dashboard`} className="hidden sm:inline-block">
+            <Link href={`/${locale}/dashboard`} className="hidden sm:inline-block shrink-0">
               <Button variant="outline" size="sm" className="h-7 px-2.5 text-[11px] font-bold gap-1">
                 <LayoutDashboard className="w-3 h-3 text-primary" />
                 <span className="hidden md:inline">{t('Dashboard', 'لوحة التحكم')}</span>
@@ -787,13 +769,13 @@ export default function Navbar({ locale }: { locale: string }) {
             </Link>
 
             {isSignedIn ? (
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 shrink-0">
                 <NotificationsDropdown locale={locale} />
                 <UserButton />
               </div>
             ) : (
               <SignInButton mode="modal">
-                <Button size="sm" className="h-7 px-2.5 text-[11px] font-bold">
+                <Button size="sm" className="h-7 px-2.5 text-[11px] font-bold shrink-0">
                   {t('Sign In', 'دخول')}
                 </Button>
               </SignInButton>
@@ -802,7 +784,7 @@ export default function Navbar({ locale }: { locale: string }) {
             <button
               type="button"
               onClick={() => setMobileOpen((v) => !v)}
-              className="lg:hidden p-1.5 rounded-lg border hover:bg-muted"
+              className="lg:hidden p-1.5 rounded-lg border hover:bg-muted shrink-0"
               aria-label="Toggle Menu"
             >
               {mobileOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
