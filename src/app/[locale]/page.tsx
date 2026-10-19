@@ -170,76 +170,76 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   return (
     <div className="flex-1 flex flex-col">
       {/* Hero Section */}
-      <section className="w-full bg-gradient-to-br from-primary/15 via-background to-emerald-500/10 py-18 md:py-22 px-4 border-b">
-        <div className="container mx-auto max-w-6xl text-center space-y-6">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-bold text-primary shadow-2xs">
-            <Sparkles className="w-3.5 h-3.5" />
+      <section className="w-full bg-gradient-to-br from-primary/15 via-background to-emerald-500/10 py-6 md:py-8 px-4 border-b">
+        <div className="container mx-auto max-w-6xl text-center space-y-3">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1 text-[11px] font-bold text-primary shadow-2xs">
+            <Sparkles className="w-3 h-3" />
             {t(
               'EU • UNIDO • Egyptian Ministry of Industry — TIGARA Digital Ecosystem',
               'الاتحاد الأوروبي • اليونيدو • وزارة الصناعة — المنصة الرقمية لتجمع المحلة الكبرى (مشروع تجارة)'
             )}
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-black tracking-tight text-foreground leading-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-foreground leading-tight">
             {t(
               'El-Mahalla El-Kubra Industrial Textile Cluster Platform',
               'المنصة المتكاملة لتجمع المحلة الكبرى لصناعة الغزل والنسيج'
             )}
           </h1>
 
-          <p className="text-lg md:text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
+          <p className="text-xs sm:text-sm md:text-base text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             {t(
               'Uniting Egyptian spinning, weaving, dyeing, and garment factories to apply Lean Six Sigma & OEE, discover global export buyers across 190+ countries, pool raw-material procurement, form export consortia, and train teams on any topic with 7 free AI models.',
               'توحيد مصانع الغزل والنسيج والصباغة والملابس بالمحلة الكبرى لتطبيق التصنيع الرشيق ولين 6 سيجما، واستكشاف المشترين الدوليين في 190+ دولة، والشراء المجمع للخامات، وتشكيل التحالفات التصديرية، وتدريب الكوادر بالذكاء الاصطناعي.'
             )}
           </p>
 
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-4">
+          <div className="flex flex-wrap items-center justify-center gap-2 pt-1.5">
             <Link href={`/${locale}/cluster`}>
-              <Button size="lg" className="h-12 px-6 text-sm md:text-base font-bold rounded-full shadow-lg shadow-primary/20">
-                <Network className="w-5 h-5 me-2" />
+              <Button size="sm" className="h-9 px-4 text-xs font-bold rounded-full shadow-md shadow-primary/20">
+                <Network className="w-4 h-4 me-1.5" />
                 {t('Cluster Command Hub', 'مركز قيادة التجمع')}
               </Button>
             </Link>
             <Link href={`/${locale}/cluster/lean-manufacturing`}>
               <Button
-                size="lg"
-                className="h-12 px-6 text-sm md:text-base font-bold rounded-full bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white shadow-lg"
+                size="sm"
+                className="h-9 px-4 text-xs font-bold rounded-full bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white shadow-md"
               >
-                <Gauge className="w-5 h-5 me-2" />
+                <Gauge className="w-4 h-4 me-1.5" />
                 {t('Lean Six Sigma & OEE Hub', 'مركز اللين 6 سيجما و OEE')}
               </Button>
             </Link>
             <Link href={`/${locale}/cluster/export-intelligence`}>
               <Button
-                size="lg"
-                className="h-12 px-6 text-sm md:text-base font-bold rounded-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white shadow-lg"
+                size="sm"
+                className="h-9 px-4 text-xs font-bold rounded-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white shadow-md"
               >
-                <Globe2 className="w-5 h-5 me-2" />
+                <Globe2 className="w-4 h-4 me-1.5" />
                 {t('Global Export & Buyers AI', 'ذكاء التصدير والمشترين الدوليين')}
               </Button>
             </Link>
             <Link href={`/${locale}/cluster/brand-studio`}>
               <Button
-                size="lg"
-                className="h-12 px-6 text-sm md:text-base font-bold rounded-full bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white shadow-lg"
+                size="sm"
+                className="h-9 px-4 text-xs font-bold rounded-full bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white shadow-md"
               >
-                <Megaphone className="w-5 h-5 me-2" />
+                <Megaphone className="w-4 h-4 me-1.5" />
                 {t('AI Brand & Print Studio', 'استوديو الهوية والمطبوعات')}
               </Button>
             </Link>
             <Link href={`/${locale}/cluster/academy`}>
               <Button
-                size="lg"
-                className="h-12 px-6 text-sm md:text-base font-bold rounded-full bg-gradient-to-r from-indigo-600 to-emerald-600 hover:from-indigo-700 hover:to-emerald-700 text-white shadow-lg"
+                size="sm"
+                className="h-9 px-4 text-xs font-bold rounded-full bg-gradient-to-r from-indigo-600 to-emerald-600 hover:from-indigo-700 hover:to-emerald-700 text-white shadow-md"
               >
-                <GraduationCap className="w-5 h-5 me-2" />
+                <GraduationCap className="w-4 h-4 me-1.5" />
                 {t('Academy & AI Course Studio', 'الأكاديمية واستوديو الدورات')}
               </Button>
             </Link>
             <Link href={`/${locale}/ai`}>
-              <Button variant="outline" size="lg" className="h-12 px-6 text-sm md:text-base font-bold rounded-full">
-                <Bot className="w-5 h-5 me-2 text-primary" />
+              <Button variant="outline" size="sm" className="h-9 px-4 text-xs font-bold rounded-full">
+                <Bot className="w-4 h-4 me-1.5 text-primary" />
                 {t('7-LLM AI Arena', 'مركز الذكاء الاصطناعي')}
               </Button>
             </Link>
@@ -248,45 +248,57 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       </section>
 
       {/* Live Telemetry Bar */}
-      <section className="w-full py-10 bg-muted/30 border-b">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-6 text-center">
-            <div className="space-y-1">
-              <Factory className="w-7 h-7 mx-auto text-primary" />
-              <div className="text-3xl font-extrabold">{fmtNumber(locale, stats.factories)}</div>
-              <p className="text-xs text-muted-foreground font-medium">{t('Verified Factories', 'مصانع معتمدة')}</p>
+      <section className="w-full py-4 bg-muted/30 border-b">
+        <div className="container mx-auto max-w-7xl px-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 text-center">
+            <div className="flex items-center justify-center gap-2.5 rounded-xl bg-background/80 border px-3 py-2 shadow-2xs">
+              <Factory className="w-5 h-5 text-primary shrink-0" />
+              <div className="text-start">
+                <div className="text-lg font-black leading-none">{fmtNumber(locale, stats.factories)}</div>
+                <p className="text-[11px] text-muted-foreground font-semibold mt-0.5">{t('Verified Factories', 'مصانع معتمدة')}</p>
+              </div>
             </div>
-            <div className="space-y-1">
-              <ShoppingCart className="w-7 h-7 mx-auto text-sky-600" />
-              <div className="text-3xl font-extrabold">{fmtNumber(locale, stats.pools)}</div>
-              <p className="text-xs text-muted-foreground font-medium">{t('Joint Buying Pools', 'مجموعات شراء مشترك')}</p>
+            <div className="flex items-center justify-center gap-2.5 rounded-xl bg-background/80 border px-3 py-2 shadow-2xs">
+              <ShoppingCart className="w-5 h-5 text-sky-600 shrink-0" />
+              <div className="text-start">
+                <div className="text-lg font-black leading-none">{fmtNumber(locale, stats.pools)}</div>
+                <p className="text-[11px] text-muted-foreground font-semibold mt-0.5">{t('Joint Buying Pools', 'مجموعات شراء')}</p>
+              </div>
             </div>
-            <div className="space-y-1">
-              <Handshake className="w-7 h-7 mx-auto text-emerald-600" />
-              <div className="text-3xl font-extrabold">{fmtNumber(locale, stats.consortia)}</div>
-              <p className="text-xs text-muted-foreground font-medium">{t('Export Consortia', 'تحالفات تصديرية')}</p>
+            <div className="flex items-center justify-center gap-2.5 rounded-xl bg-background/80 border px-3 py-2 shadow-2xs">
+              <Handshake className="w-5 h-5 text-emerald-600 shrink-0" />
+              <div className="text-start">
+                <div className="text-lg font-black leading-none">{fmtNumber(locale, stats.consortia)}</div>
+                <p className="text-[11px] text-muted-foreground font-semibold mt-0.5">{t('Export Consortia', 'تحالفات تصديرية')}</p>
+              </div>
             </div>
-            <div className="space-y-1">
-              <Package className="w-7 h-7 mx-auto text-amber-600" />
-              <div className="text-3xl font-extrabold">{fmtNumber(locale, stats.products)}</div>
-              <p className="text-xs text-muted-foreground font-medium">{t('Active B2B Listings', 'عروض المنتجات والموارد')}</p>
+            <div className="flex items-center justify-center gap-2.5 rounded-xl bg-background/80 border px-3 py-2 shadow-2xs">
+              <Package className="w-5 h-5 text-amber-600 shrink-0" />
+              <div className="text-start">
+                <div className="text-lg font-black leading-none">{fmtNumber(locale, stats.products)}</div>
+                <p className="text-[11px] text-muted-foreground font-semibold mt-0.5">{t('Active B2B Listings', 'عروض المنتجات')}</p>
+              </div>
             </div>
-            <div className="space-y-1">
-              <GraduationCap className="w-7 h-7 mx-auto text-violet-600" />
-              <div className="text-3xl font-extrabold">{fmtNumber(locale, stats.courses)}</div>
-              <p className="text-xs text-muted-foreground font-medium">{t('Academy Programs', 'برامج الأكاديمية')}</p>
+            <div className="flex items-center justify-center gap-2.5 rounded-xl bg-background/80 border px-3 py-2 shadow-2xs">
+              <GraduationCap className="w-5 h-5 text-violet-600 shrink-0" />
+              <div className="text-start">
+                <div className="text-lg font-black leading-none">{fmtNumber(locale, stats.courses)}</div>
+                <p className="text-[11px] text-muted-foreground font-semibold mt-0.5">{t('Academy Programs', 'برامج الأكاديمية')}</p>
+              </div>
             </div>
-            <div className="space-y-1">
-              <Briefcase className="w-7 h-7 mx-auto text-primary" />
-              <div className="text-3xl font-extrabold">{fmtNumber(locale, stats.jobs)}</div>
-              <p className="text-xs text-muted-foreground font-medium">{t('Industrial Jobs', 'وظائف صناعية')}</p>
+            <div className="flex items-center justify-center gap-2.5 rounded-xl bg-background/80 border px-3 py-2 shadow-2xs">
+              <Briefcase className="w-5 h-5 text-primary shrink-0" />
+              <div className="text-start">
+                <div className="text-lg font-black leading-none">{fmtNumber(locale, stats.jobs)}</div>
+                <p className="text-[11px] text-muted-foreground font-semibold mt-0.5">{t('Industrial Jobs', 'وظائف صناعية')}</p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Instant Any-Topic AI Lean, Export Intelligence, Course & Brand Studio Spotlights */}
-      <section className="container mx-auto pt-12 px-4 space-y-6">
+      <section className="container mx-auto pt-8 px-4 space-y-5">
         <InstantLeanStudioBar locale={locale} />
         <InstantExportIntelligenceBar locale={locale} />
         <InstantTopicCourseBar locale={locale} />

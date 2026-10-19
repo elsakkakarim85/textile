@@ -203,16 +203,16 @@ export function GlobalQuickToolsDock({ locale }: { locale: string }) {
   return (
     <>
       {/* Floating Quick-Tools & Command Palette Trigger */}
-      <div className="fixed bottom-5 end-5 z-40 flex items-center gap-2 print:hidden">
+      <div className="fixed bottom-4 start-4 z-40 flex items-center gap-2 print:hidden">
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex items-center gap-2 rounded-full border-2 border-emerald-400/50 bg-slate-950/95 px-4 py-2.5 text-xs font-extrabold text-white shadow-2xl hover:bg-emerald-950 transition cursor-pointer"
+          className="inline-flex items-center gap-2 rounded-full border-2 border-emerald-400/50 bg-slate-950/95 px-3.5 py-2 text-xs font-extrabold text-white shadow-2xl hover:bg-emerald-950 transition cursor-pointer"
           title="Open Industrial Toolkit & Command Palette (Ctrl+K)"
         >
-          <Calculator className="h-4 w-4 text-emerald-400" />
-          <span>{t('Textile Toolkit & Quick Jump', 'أدوات المهندس والانتقال السريع')}</span>
-          <kbd className="hidden sm:inline-block rounded bg-white/15 px-1.5 py-0.5 text-[10px] font-mono text-emerald-300">
+          <Calculator className="h-3.5 w-3.5 text-emerald-400" />
+          <span className="hidden sm:inline">{t('Textile Toolkit', 'أدوات المهندس')}</span>
+          <kbd className="rounded bg-white/15 px-1.5 py-0.5 text-[10px] font-mono text-emerald-300">
             Ctrl+K
           </kbd>
         </button>

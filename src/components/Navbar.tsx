@@ -106,7 +106,7 @@ export default function Navbar({ locale }: { locale: string }) {
   const categories: NavCategory[] = [
     {
       id: 'excellence',
-      label: t('Industrial Excellence', 'التميز الصناعي والتحديث'),
+      label: t('Excellence & Lean', 'التميز واللين'),
       icon: Gauge,
       columns: 1,
       spotlightTitle: t(
@@ -171,7 +171,7 @@ export default function Navbar({ locale }: { locale: string }) {
     },
     {
       id: 'trade',
-      label: t('Marketplaces & Export', 'البورصات والتصدير'),
+      label: t('Trade & Export', 'التجارة والتصدير'),
       icon: Globe2,
       columns: 2,
       spotlightTitle: t(
@@ -262,7 +262,7 @@ export default function Navbar({ locale }: { locale: string }) {
     },
     {
       id: 'collaboration',
-      label: t('Cluster Collaboration', 'التعاون الصناعي'),
+      label: t('Collaboration', 'التعاون الصناعي'),
       icon: Handshake,
       columns: 1,
       spotlightTitle: t(
@@ -323,7 +323,7 @@ export default function Navbar({ locale }: { locale: string }) {
     },
     {
       id: 'ai_academy',
-      label: t('AI Studios & Academy', 'الذكاء الاصطناعي والأكاديمية'),
+      label: t('AI & Academy', 'الذكاء والأكاديمية'),
       icon: Sparkles,
       columns: 1,
       spotlightTitle: t(
@@ -378,7 +378,7 @@ export default function Navbar({ locale }: { locale: string }) {
     },
     {
       id: 'ecosystem',
-      label: t('Observatory & Community', 'المرصد والمجتمع'),
+      label: t('Observatory', 'المرصد والمجتمع'),
       icon: BarChart3,
       columns: 1,
       spotlightTitle: t(
@@ -454,20 +454,20 @@ export default function Navbar({ locale }: { locale: string }) {
   return (
     <div ref={navRef} className="contents">
       {/* Top Sovereign & European Multi-Color Protocol Ribbon */}
-      <div className="h-1.5 w-full bg-gradient-to-r from-[#003399] via-[#009fe3] via-[#f36f21] to-[#c59b27]" />
+      <div className="h-1 w-full bg-gradient-to-r from-[#003399] via-[#009fe3] via-[#f36f21] to-[#c59b27]" />
 
       {/* Clean Compact Institutional Partner Logos Strip */}
-      <div className="w-full bg-gradient-to-b from-slate-50 via-white to-slate-50/90 border-b border-slate-200/90 px-3 sm:px-6 py-2.5 shadow-2xs">
+      <div className="w-full bg-gradient-to-b from-slate-50 via-white to-slate-50/90 border-b border-slate-200/90 px-3 sm:px-4 py-1.5 shadow-2xs">
         <div className="container mx-auto max-w-7xl">
           <div
             dir="ltr"
-            className="grid grid-cols-2 sm:grid-cols-5 items-center gap-2.5 md:gap-3"
+            className="grid grid-cols-2 sm:grid-cols-5 items-center gap-2"
           >
             {/* 1. European Union */}
-            <div className="rounded-xl bg-white border border-blue-200/90 hover:border-[#003399] px-3 py-2 flex items-center justify-center shadow-2xs transition-colors">
+            <div className="rounded-lg bg-white border border-blue-200/90 hover:border-[#003399] px-2.5 py-1 flex items-center justify-center shadow-2xs transition-colors">
               <svg
                 viewBox="48 24 94 98"
-                className="h-12 sm:h-14 md:h-16 w-auto"
+                className="h-10 sm:h-11 md:h-12 w-auto"
                 role="img"
                 aria-label="Funded by the European Union"
               >
@@ -476,10 +476,10 @@ export default function Navbar({ locale }: { locale: string }) {
             </div>
 
             {/* 2. UNIDO */}
-            <div className="rounded-xl bg-white border border-sky-200/90 hover:border-[#009fe3] px-3 py-2 flex items-center justify-center shadow-2xs transition-colors">
+            <div className="rounded-lg bg-white border border-sky-200/90 hover:border-[#009fe3] px-2.5 py-1 flex items-center justify-center shadow-2xs transition-colors">
               <svg
                 viewBox="158 24 184 98"
-                className="h-12 sm:h-14 md:h-16 w-auto"
+                className="h-10 sm:h-11 md:h-12 w-auto"
                 role="img"
                 aria-label="UNIDO - United Nations Industrial Development Organization"
               >
@@ -488,10 +488,10 @@ export default function Navbar({ locale }: { locale: string }) {
             </div>
 
             {/* 3. TIGARA Flagship Centerpiece */}
-            <div className="col-span-2 sm:col-span-1 rounded-xl bg-white border-2 border-[#f36f21]/60 hover:border-[#f36f21] px-3 py-1.5 flex items-center justify-center shadow-xs transition-colors">
+            <div className="col-span-2 sm:col-span-1 rounded-lg bg-white border-2 border-[#f36f21]/60 hover:border-[#f36f21] px-2.5 py-1 flex items-center justify-center shadow-2xs transition-colors">
               <svg
                 viewBox="360 22 304 102"
-                className="h-14 sm:h-16 md:h-18 w-auto"
+                className="h-11 sm:h-12 md:h-14 w-auto"
                 role="img"
                 aria-label="TIGARA - Driving Trade Growth"
               >
@@ -500,10 +500,10 @@ export default function Navbar({ locale }: { locale: string }) {
             </div>
 
             {/* 4. Ministry of Foreign Affairs & International Cooperation */}
-            <div className="rounded-xl bg-white border border-amber-200/90 hover:border-[#c59b27] px-3 py-2 flex items-center justify-center shadow-2xs transition-colors">
+            <div className="rounded-lg bg-white border border-amber-200/90 hover:border-[#c59b27] px-2.5 py-1 flex items-center justify-center shadow-2xs transition-colors">
               <svg
                 viewBox="680 24 174 98"
-                className="h-12 sm:h-14 md:h-16 w-auto"
+                className="h-10 sm:h-11 md:h-12 w-auto"
                 role="img"
                 aria-label="Ministry of Foreign Affairs and International Cooperation"
               >
@@ -512,10 +512,10 @@ export default function Navbar({ locale }: { locale: string }) {
             </div>
 
             {/* 5. Ministry of Industry */}
-            <div className="rounded-xl bg-white border border-amber-200/90 hover:border-[#c59b27] px-3 py-2 flex items-center justify-center shadow-2xs transition-colors">
+            <div className="rounded-lg bg-white border border-amber-200/90 hover:border-[#c59b27] px-2.5 py-1 flex items-center justify-center shadow-2xs transition-colors">
               <svg
                 viewBox="878 24 76 98"
-                className="h-12 sm:h-14 md:h-16 w-auto"
+                className="h-10 sm:h-11 md:h-12 w-auto"
                 role="img"
                 aria-label="Ministry of Industry - Egypt"
               >
@@ -528,15 +528,15 @@ export default function Navbar({ locale }: { locale: string }) {
 
       {/* Sticky Main Navigation Bar with Bespoke Mahalla Cluster Crest */}
       <nav className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85 shadow-sm">
-        <div className="container mx-auto px-4 h-16 md:h-18 flex items-center justify-between gap-2.5">
+        <div className="container mx-auto max-w-7xl px-3 h-14 flex items-center justify-between gap-1.5">
           {/* Left: Bespoke Brand Emblem + 5 Categorized Mega-Menus */}
-          <div className="flex items-center gap-3 lg:gap-4">
+          <div className="flex items-center gap-2 xl:gap-3 min-w-0">
             <Link
               href={`/${locale}`}
-              className="group flex items-center gap-3 pe-1 whitespace-nowrap"
+              className="group flex items-center gap-2 pe-1 whitespace-nowrap shrink-0"
             >
               {/* Custom SVG Industrial Textile & Gear Crest */}
-              <div className="relative w-11 h-11 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-emerald-900 via-slate-900 to-teal-950 p-1.5 shadow-md border border-emerald-500/40 group-hover:border-emerald-400 transition-all flex items-center justify-center shrink-0">
+              <div className="relative w-9 h-9 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-emerald-900 via-slate-900 to-teal-950 p-1 shadow-md border border-emerald-500/40 group-hover:border-emerald-400 transition-all flex items-center justify-center shrink-0">
                 <svg viewBox="0 0 48 48" className="w-full h-full" fill="none">
                   {/* Outer Precision Gear Ring */}
                   <circle
@@ -581,39 +581,40 @@ export default function Navbar({ locale }: { locale: string }) {
                     </linearGradient>
                   </defs>
                 </svg>
-                <span className="absolute -top-1 -end-1 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-background animate-pulse" />
+                <span className="absolute -top-0.5 -end-0.5 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-background animate-pulse" />
               </div>
 
               <div className="flex flex-col">
-                <span className="text-base md:text-xl font-black tracking-tight text-foreground group-hover:text-primary transition-colors leading-none">
+                <span className="text-sm md:text-base font-black tracking-tight text-foreground group-hover:text-primary transition-colors leading-none">
                   {t('Mahalla Cluster', 'تجمع المحلة الكبرى')}
                 </span>
-                <span className="text-[9px] md:text-[10px] font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mt-1">
+                <span className="text-[8px] md:text-[9px] font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mt-0.5">
                   {t('Industrial Textile Hub', 'قلعة صناعة الغزل والنسيج')}
                 </span>
               </div>
             </Link>
 
             {/* Desktop Categorized Navigation */}
-            <div className="hidden xl:flex items-center gap-1">
+            <div className="hidden lg:flex items-center gap-0.5 xl:gap-1">
               {/* Direct Hub Pill */}
               <Link
                 href={`/${locale}/cluster`}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] xl:text-xs font-bold transition-all whitespace-nowrap ${
                   pathname === `/${locale}/cluster`
                     ? 'bg-primary text-primary-foreground shadow-xs'
                     : 'bg-primary/10 text-primary hover:bg-primary/20'
                 }`}
               >
-                <Network className="w-3.5 h-3.5" />
+                <Network className="w-3.5 h-3.5 shrink-0" />
                 {t('Cluster Hub', 'المركز الرئيسي')}
               </Link>
 
               {/* 5 Categorized Dropdown Pillars */}
-              {categories.map((cat) => {
+              {categories.map((cat, idx) => {
                 const Icon = cat.icon;
                 const active = isCategoryActive(cat);
                 const isOpen = openMenu === cat.id;
+                const alignEnd = idx >= 3;
 
                 return (
                   <div
@@ -625,16 +626,16 @@ export default function Navbar({ locale }: { locale: string }) {
                     <button
                       type="button"
                       onClick={() => setOpenMenu(isOpen ? null : cat.id)}
-                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                      className={`inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] xl:text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                         isOpen || active
                           ? 'bg-muted text-primary'
                           : 'text-foreground/85 hover:text-primary hover:bg-muted/60'
                       }`}
                     >
-                      <Icon className="w-3.5 h-3.5 text-primary/80" />
+                      <Icon className="w-3.5 h-3.5 text-primary/80 shrink-0" />
                       <span>{cat.label}</span>
                       <ChevronDown
-                        className={`w-3.5 h-3.5 opacity-70 transition-transform duration-150 ${
+                        className={`w-3 h-3 opacity-70 transition-transform duration-150 shrink-0 ${
                           isOpen ? 'rotate-180 text-primary' : ''
                         }`}
                       />
@@ -643,9 +644,9 @@ export default function Navbar({ locale }: { locale: string }) {
                     {/* Mega-Menu Dropdown Panel */}
                     {isOpen && (
                       <div
-                        className={`absolute top-full start-0 pt-2 z-50 ${
-                          cat.columns === 2 ? 'w-[660px]' : 'w-[400px]'
-                        }`}
+                        className={`absolute top-full ${
+                          alignEnd ? 'end-0' : 'start-0'
+                        } pt-2 z-50 ${cat.columns === 2 ? 'w-[620px]' : 'w-[380px]'}`}
                       >
                         <div className="rounded-2xl border bg-popover/98 backdrop-blur-xl text-popover-foreground shadow-2xl p-3.5 ring-1 ring-black/5 space-y-2.5">
                           <div className="flex items-center justify-between px-2.5 pb-2 border-b text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
@@ -737,32 +738,31 @@ export default function Navbar({ locale }: { locale: string }) {
           </div>
 
           {/* Right Controls: Quick Search (Ctrl+K), Persona, Currency, Language, Theme, Dashboard, Auth */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
             {/* Quick Search & Engineering Calculators Trigger (Ctrl+K) */}
             <button
               type="button"
               onClick={triggerQuickSearch}
-              className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-muted/40 hover:bg-muted text-xs font-bold text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+              className="hidden sm:inline-flex items-center gap-1 px-2 py-1 rounded-lg border bg-muted/40 hover:bg-muted text-[11px] font-bold text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
               title={t(
                 'Open Quick Module Search & Textile Calculators (Ctrl+K)',
                 'البحث السريع وحاسبات الغزل والنسيج (Ctrl+K)'
               )}
             >
-              <Search className="w-3.5 h-3.5 text-primary" />
-              <span className="hidden 2xl:inline">{t('Quick Tools', 'الأدوات السريعة')}</span>
-              <kbd className="text-[10px] font-mono bg-background px-1.5 py-0.5 rounded border text-foreground/80">
+              <Search className="w-3 h-3 text-primary" />
+              <kbd className="text-[10px] font-mono bg-background px-1 py-0.5 rounded border text-foreground/80">
                 Ctrl+K
               </kbd>
             </button>
 
-            <div className="hidden md:block">
+            <div className="hidden xl:block">
               <PersonaSwitcher locale={locale} />
             </div>
 
             <select
               value={currency}
               onChange={(e) => setCurrency(e.target.value as any)}
-              className="text-xs font-bold bg-transparent border rounded-lg px-2 py-1.5 outline-none cursor-pointer text-muted-foreground hover:text-foreground"
+              className="text-[11px] font-bold bg-transparent border rounded-lg px-1.5 py-1 outline-none cursor-pointer text-muted-foreground hover:text-foreground"
               aria-label="Currency"
             >
               <option value="EGP">EGP</option>
@@ -772,7 +772,7 @@ export default function Navbar({ locale }: { locale: string }) {
 
             <button
               onClick={toggleLocale}
-              className="text-xs font-bold px-2.5 py-1.5 rounded-lg border hover:bg-muted transition-colors cursor-pointer"
+              className="text-[11px] font-bold px-2 py-1 rounded-lg border hover:bg-muted transition-colors cursor-pointer"
             >
               {locale === 'ar' ? 'EN' : 'عربي'}
             </button>
@@ -780,20 +780,20 @@ export default function Navbar({ locale }: { locale: string }) {
             <ThemeToggle />
 
             <Link href={`/${locale}/dashboard`} className="hidden sm:inline-block">
-              <Button variant="outline" size="sm" className="h-8 text-xs font-bold gap-1.5">
-                <LayoutDashboard className="w-3.5 h-3.5 text-primary" />
-                {t('Dashboard', 'لوحة التحكم')}
+              <Button variant="outline" size="sm" className="h-7 px-2.5 text-[11px] font-bold gap-1">
+                <LayoutDashboard className="w-3 h-3 text-primary" />
+                <span className="hidden md:inline">{t('Dashboard', 'لوحة التحكم')}</span>
               </Button>
             </Link>
 
             {isSignedIn ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <NotificationsDropdown locale={locale} />
                 <UserButton />
               </div>
             ) : (
               <SignInButton mode="modal">
-                <Button size="sm" className="h-8 text-xs font-bold">
+                <Button size="sm" className="h-7 px-2.5 text-[11px] font-bold">
                   {t('Sign In', 'دخول')}
                 </Button>
               </SignInButton>
@@ -802,17 +802,17 @@ export default function Navbar({ locale }: { locale: string }) {
             <button
               type="button"
               onClick={() => setMobileOpen((v) => !v)}
-              className="xl:hidden p-2 rounded-lg border hover:bg-muted"
+              className="lg:hidden p-1.5 rounded-lg border hover:bg-muted"
               aria-label="Toggle Menu"
             >
-              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
           </div>
         </div>
 
         {/* Categorized Mobile & Tablet Accordion Drawer */}
         {mobileOpen && (
-          <div className="xl:hidden border-t bg-background px-4 py-4 space-y-3 max-h-[82vh] overflow-y-auto">
+          <div className="lg:hidden border-t bg-background px-4 py-4 space-y-3 max-h-[82vh] overflow-y-auto">
             <div className="flex items-center justify-between gap-2 pb-2 border-b">
               <PersonaSwitcher locale={locale} />
               <div className="flex items-center gap-1.5">

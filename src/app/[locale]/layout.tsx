@@ -71,8 +71,8 @@ export default async function LocaleLayout({
 
   return (
     <ClerkProvider localization={locale === 'ar' ? arSA : undefined}>
-      <html lang={locale} dir={dir} suppressHydrationWarning>
-        <body className={`${firaSans.variable} antialiased min-h-screen flex flex-col bg-background font-sans`}>
+      <html lang={locale} dir={dir} className="overflow-x-hidden" suppressHydrationWarning>
+        <body className={`${firaSans.variable} antialiased min-h-screen flex flex-col bg-background font-sans overflow-x-hidden`}>
           <NextIntlClientProvider messages={messages}>
             <Providers>
               <Navbar locale={locale} />

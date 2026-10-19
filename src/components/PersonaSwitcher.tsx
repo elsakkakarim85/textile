@@ -67,11 +67,11 @@ export function PersonaSwitcher({ locale }: { locale: string }) {
         type="button"
         onClick={() => setOpen((o) => !o)}
         disabled={loading}
-        className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/10 transition-colors max-w-[200px]"
+        className="inline-flex items-center gap-1 rounded-lg border border-primary/30 bg-primary/5 px-2 py-1 text-[11px] font-semibold text-primary hover:bg-primary/10 transition-colors max-w-[130px] 2xl:max-w-[170px] cursor-pointer"
         title={t('Switch active workspace / factory persona', 'تبديل حساب المصنع أو الدور النشط')}
       >
-        <Building2 className="w-3.5 h-3.5 shrink-0" />
-        <span className="truncate">{activeLabel || t('Select Workspace', 'اختر الحساب')}</span>
+        <Building2 className="w-3 h-3 shrink-0" />
+        <span className="truncate">{activeLabel || t('Workspace', 'الحساب')}</span>
         <ChevronDown className="w-3 h-3 shrink-0 opacity-70" />
       </button>
 
