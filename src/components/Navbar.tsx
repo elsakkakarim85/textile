@@ -73,7 +73,7 @@ export default function Navbar({ locale }: { locale: string }) {
   const pathname = usePathname();
   const { currency, setCurrency } = useCurrency();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [mobileExpandedCat, setMobileExpandedCat] = useState<string | null>('excellence');
+  const [mobileExpandedCat, setMobileExpandedCat] = useState<string | null>('marketplaces');
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const navRef = useRef<HTMLDivElement>(null);
 
@@ -108,8 +108,129 @@ export default function Navbar({ locale }: { locale: string }) {
 
   const categories: NavCategory[] = [
     {
+      id: 'marketplaces',
+      label: t('Marketplaces', 'الأسواق التجارية'),
+      icon: ShoppingBag,
+      columns: 1,
+      spotlightTitle: t(
+        'Source Verified Giza Yarns, Fabrics, Dyestuffs & Circular Waste Lots',
+        'تسوق الغزول والأقمشة والخامات والعوادم مباشرة من مصانع المحلة المعتمدة'
+      ),
+      spotlightHref: `/${locale}/marketplaces/products`,
+      spotlightCta: t('Browse B2B Catalog', 'تصفح سوق المنتجات'),
+      items: [
+        {
+          href: `/${locale}/marketplaces/products`,
+          label: t('Finished Products Marketplace', 'سوق المنتجات النهائية والغزول'),
+          desc: t(
+            'Export-grade Giza yarns, fabrics, hotel bedlinen & terry towels with EU DPP',
+            'غزول قطن جيزة، أقمشة، مفروشات فندقية، ووبريات جاهزة للتصدير مع جواز المنتج'
+          ),
+          icon: ShoppingBag,
+          badge: 'B2B',
+          accent: 'emerald',
+        },
+        {
+          href: `/${locale}/marketplaces/resources`,
+          label: t('Raw Materials, Yarns & Dyestuffs', 'سوق الخامات والغزول والصبغات'),
+          desc: t(
+            'Uster® 5% Giza yarns, ZDHC reactive dyes, auxiliaries & loom spare parts',
+            'غزول معتمدة، صبغات نشطة ZDHC، كيماويات مساعدة، وقطع غيار الأنوال'
+          ),
+          icon: Package,
+          accent: 'blue',
+        },
+        {
+          href: `/${locale}/marketplaces/waste`,
+          label: t('Circular Waste & GRS Exchange', 'بورصة العوادم والتدوير الدائري'),
+          desc: t(
+            'Sorted comber noil, cutting clips & 5S Red-Tag salvage with CO2e metrics',
+            'عوادم تمشيط وقصاقيص مفروزة للتدوير مع حاسبة وفر الكربون والمياه'
+          ),
+          icon: Recycle,
+          badge: 'GRS',
+          accent: 'emerald',
+        },
+        {
+          href: `/${locale}/marketplaces/matchmaking`,
+          label: t('B2B RFQ Matchmaking & Tenders', 'بورصة مناقصات التوريد (RFQ)'),
+          desc: t(
+            'Post sourcing specs or submit AI-assisted factory quotations',
+            'انشر مواصفات طلبيتك أو قدم عروض أسعار فنية ومالية من مصنعك'
+          ),
+          icon: FileText,
+          badge: 'RFQ',
+          accent: 'amber',
+        },
+        {
+          href: `/${locale}/factories`,
+          label: t('Verified Factories Directory', 'دليل المصانع المعتمدة بالمحلة'),
+          desc: t(
+            '520+ spinning, weaving, knitting, dyeing & garment mills with KYC badges',
+            'أكثر من 520 مصنع غزل ونسيج وتريكو وصباغة وملابس موثق'
+          ),
+          icon: Building2,
+        },
+      ],
+    },
+    {
+      id: 'trade',
+      label: t('Export & Trade', 'التصدير والشحن'),
+      icon: Globe2,
+      columns: 1,
+      spotlightTitle: t(
+        'Discover Verified International Buyers & Live Tenders across 190+ Countries',
+        'اكتشف المشترين الدوليين الموثقين والمناقصات العالمية في أكثر من 190 دولة'
+      ),
+      spotlightHref: `/${locale}/cluster/export-intelligence`,
+      spotlightCta: t('Launch Export AI', 'افتح ذكاء التصدير'),
+      items: [
+        {
+          href: `/${locale}/cluster/export-intelligence`,
+          label: t('Global Export & Buyers AI Hub', 'ذكاء التصدير والمشترين الدوليين'),
+          desc: t(
+            'Market studies, verified international buyers, export tenders & NTM tariffs',
+            'دراسات الأسواق، قاعدة المشترين المعتمدين، المناقصات الدولية، وتحليل الجمارك'
+          ),
+          icon: Globe2,
+          badge: t('Flagship AI', 'رائد'),
+          accent: 'emerald',
+        },
+        {
+          href: `/${locale}/services/logistics`,
+          label: t('Incoterms 2020 Freight & Duty Simulator', 'محاكي الشحن والجمارك (Incoterms)'),
+          desc: t(
+            'EXW/FOB/CIF/DDP container freight & EUR.1 / QIZ duty savings calculator',
+            'حاسبة تكلفة الحاويات البحرية والجوية والوفر الجمركي لاتفاقيات التجارة'
+          ),
+          icon: Ship,
+          accent: 'blue',
+        },
+        {
+          href: `/${locale}/dashboard/contracts`,
+          label: t('Smart Milestone Escrow (30/40/30)', 'عقود الضمان الذكية (30/40/30)'),
+          desc: t(
+            'CBE-regulated milestone payment protection for buyers & mills',
+            'حماية المدفوعات التصديرية بنظام الدفعات المرحلية الموثقة'
+          ),
+          icon: ShieldCheck,
+        },
+        {
+          href: `/${locale}/dpp/demo-giza-yarn`,
+          label: t('EU Digital Product Passport (DPP)', 'جواز المنتج الرقمي الأوروبي (DPP)'),
+          desc: t(
+            'Cryptographic SHA-256 origin, carbon & Six Sigma quality traceability',
+            'شهادة التتبع الرقمي الموثقة للمنشأ والبصمة الكربونية وجودة التصدير لأوروبا'
+          ),
+          icon: ShieldCheck,
+          badge: 'ESPR',
+          accent: 'blue',
+        },
+      ],
+    },
+    {
       id: 'excellence',
-      label: t('Excellence & Lean', 'التميز واللين'),
+      label: t('Lean & ESG', 'اللين والاستدامة'),
       icon: Gauge,
       columns: 1,
       spotlightTitle: t(
@@ -158,108 +279,6 @@ export default function Navbar({ locale }: { locale: string }) {
             'منح مشروع تجارة والبنك الأوروبي EBRD وجهاز تنمية المشروعات ومركز تحديث الصناعة'
           ),
           icon: Landmark,
-        },
-        {
-          href: `/${locale}/dpp/demo-giza-yarn`,
-          label: t('EU Digital Product Passport (DPP)', 'جواز المنتج الرقمي الأوروبي (DPP)'),
-          desc: t(
-            'Cryptographic SHA-256 origin, carbon & Six Sigma quality traceability',
-            'شهادة التتبع الرقمي الموثقة للمنشأ والبصمة الكربونية وجودة التصدير لأوروبا'
-          ),
-          icon: ShieldCheck,
-          badge: 'ESPR',
-          accent: 'blue',
-        },
-      ],
-    },
-    {
-      id: 'trade',
-      label: t('Trade & Export', 'التجارة والتصدير'),
-      icon: Globe2,
-      columns: 2,
-      spotlightTitle: t(
-        'Discover Verified International Buyers & Live Tenders across 190+ Countries',
-        'اكتشف المشترين الدوليين الموثقين والمناقصات العالمية في أكثر من 190 دولة'
-      ),
-      spotlightHref: `/${locale}/cluster/export-intelligence`,
-      spotlightCta: t('Launch Export AI', 'افتح ذكاء التصدير'),
-      items: [
-        {
-          href: `/${locale}/cluster/export-intelligence`,
-          label: t('Global Export & Buyers AI Hub', 'ذكاء التصدير والمشترين الدوليين'),
-          desc: t(
-            'Market studies, verified international buyers, export tenders & NTM tariffs',
-            'دراسات الأسواق، قاعدة المشترين المعتمدين، المناقصات الدولية، وتحليل الجمارك'
-          ),
-          icon: Globe2,
-          badge: t('Flagship AI', 'رائد'),
-          accent: 'emerald',
-        },
-        {
-          href: `/${locale}/factories`,
-          label: t('Verified Factories Directory', 'دليل المصانع المعتمدة بالمحلة'),
-          desc: t(
-            '520+ spinning, weaving, knitting, dyeing & garment mills with KYC badges',
-            'أكثر من 520 مصنع غزل ونسيج وتريكو وصباغة وملابس موثق'
-          ),
-          icon: Building2,
-        },
-        {
-          href: `/${locale}/marketplaces/products`,
-          label: t('Finished Products Marketplace', 'سوق المنتجات النهائية والغزول'),
-          desc: t(
-            'Export-grade Giza yarns, fabrics, hotel bedlinen & terry towels',
-            'غزول قطن جيزة، أقمشة، مفروشات فندقية، ووبريات جاهزة للتصدير'
-          ),
-          icon: ShoppingBag,
-        },
-        {
-          href: `/${locale}/marketplaces/resources`,
-          label: t('Raw Materials & Dyestuffs', 'سوق الخامات والكيماويات وقطع الغيار'),
-          desc: t(
-            'Giza lint, ZDHC reactive dyes, auxiliaries & loom spare parts',
-            'أقطان خام، صبغات نشطة، كيماويات مساعدة، وقطع غيار الأنوال'
-          ),
-          icon: Package,
-        },
-        {
-          href: `/${locale}/marketplaces/waste`,
-          label: t('Circular Waste & GRS Exchange', 'بورصة العوادم والتدوير الدائري'),
-          desc: t(
-            'Sorted comber noil, cutting clips & 5S Red-Tag salvage with CO2e metrics',
-            'عوادم تمشيط وقصاقيص مفروزة للتدوير مع حاسبة وفر الكربون والمياه'
-          ),
-          icon: Recycle,
-          badge: 'GRS',
-          accent: 'emerald',
-        },
-        {
-          href: `/${locale}/marketplaces/matchmaking`,
-          label: t('B2B RFQ Matchmaking & Tenders', 'مناقصات التوريد وطلبات الأسعار (RFQ)'),
-          desc: t(
-            'Post sourcing specs or submit AI-assisted factory quotations',
-            'انشر مواصفات طلبيتك أو قدم عروض أسعار فنية ومالية من مصنعك'
-          ),
-          icon: FileText,
-        },
-        {
-          href: `/${locale}/services/logistics`,
-          label: t('Incoterms 2020 Freight & Duty Simulator', 'محاكي الشحن والجمارك (Incoterms)'),
-          desc: t(
-            'EXW/FOB/CIF/DDP container freight & EUR.1 / QIZ duty savings calculator',
-            'حاسبة تكلفة الحاويات البحرية والجوية والوفر الجمركي لاتفاقيات التجارة'
-          ),
-          icon: Ship,
-          accent: 'blue',
-        },
-        {
-          href: `/${locale}/dashboard/contracts`,
-          label: t('Smart Milestone Escrow (30/40/30)', 'عقود الضمان الذكية (30/40/30)'),
-          desc: t(
-            'CBE-regulated milestone payment protection for buyers & mills',
-            'حماية المدفوعات التصديرية بنظام الدفعات المرحلية الموثقة'
-          ),
-          icon: ShieldCheck,
         },
       ],
     },
@@ -601,7 +620,7 @@ export default function Navbar({ locale }: { locale: string }) {
             {/* Direct Hub Pill */}
             <Link
               href={`/${locale}/cluster`}
-              className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] xl:text-xs font-bold transition-all whitespace-nowrap shrink-0 ${
+              className={`inline-flex items-center gap-1 px-2 xl:px-2.5 py-1.5 rounded-lg text-[11px] xl:text-xs font-bold transition-all whitespace-nowrap shrink-0 ${
                 pathname === `/${locale}/cluster`
                   ? 'bg-primary text-primary-foreground shadow-xs'
                   : 'bg-primary/10 text-primary hover:bg-primary/20'
@@ -611,12 +630,13 @@ export default function Navbar({ locale }: { locale: string }) {
               {t('Cluster Hub', 'المركز الرئيسي')}
             </Link>
 
-            {/* 5 Categorized Dropdown Pillars */}
+            {/* 6 Categorized Dropdown Pillars (including Marketplaces) */}
             {categories.map((cat, idx) => {
               const Icon = cat.icon;
               const active = isCategoryActive(cat);
               const isOpen = openMenu === cat.id;
               const alignEnd = idx >= 3;
+              const isMarketplaces = cat.id === 'marketplaces';
 
               return (
                 <div
@@ -628,13 +648,19 @@ export default function Navbar({ locale }: { locale: string }) {
                   <button
                     type="button"
                     onClick={() => setOpenMenu(isOpen ? null : cat.id)}
-                    className={`inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] xl:text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                    className={`inline-flex items-center gap-1 px-1.5 xl:px-2 py-1.5 rounded-lg text-[11px] xl:text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                       isOpen || active
                         ? 'bg-muted text-primary'
+                        : isMarketplaces
+                        ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25 hover:bg-emerald-500/20'
                         : 'text-foreground/85 hover:text-primary hover:bg-muted/60'
                     }`}
                   >
-                    <Icon className="w-3.5 h-3.5 text-primary/80 shrink-0" />
+                    <Icon
+                      className={`w-3.5 h-3.5 shrink-0 ${
+                        isMarketplaces ? 'text-emerald-600 dark:text-emerald-400' : 'text-primary/80'
+                      }`}
+                    />
                     <span>{cat.label}</span>
                     <ChevronDown
                       className={`w-3 h-3 opacity-70 transition-transform duration-150 shrink-0 ${
@@ -785,9 +811,9 @@ export default function Navbar({ locale }: { locale: string }) {
             <ThemeToggle />
 
             <Link href={`/${locale}/dashboard`} className="hidden sm:inline-block shrink-0">
-              <Button variant="outline" size="sm" className="h-7 px-2.5 text-[11px] font-bold gap-1">
-                <LayoutDashboard className="w-3 h-3 text-primary" />
-                <span className="hidden md:inline">{t('Dashboard', 'لوحة التحكم')}</span>
+              <Button variant="outline" size="sm" className="h-7 px-2 text-[11px] font-bold gap-1" title={t('Dashboard', 'لوحة التحكم')}>
+                <LayoutDashboard className="w-3.5 h-3.5 text-primary" />
+                <span className="hidden xl:inline">{t('Dashboard', 'لوحة التحكم')}</span>
               </Button>
             </Link>
 
