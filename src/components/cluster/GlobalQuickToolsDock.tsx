@@ -19,10 +19,11 @@ import {
   ShieldCheck,
   Calculator,
   Command,
+  HelpCircle,
 } from 'lucide-react';
 import { tr } from '@/lib/i18n-inline';
 import { Pill } from '@/components/cluster/ui';
-import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
+import { ExpertManualButton, openExpertManual } from '@/components/cluster/ExpertManualModal';
 
 export function GlobalQuickToolsDock({ locale }: { locale: string }) {
   const isAr = locale === 'ar';
@@ -260,18 +261,21 @@ export function GlobalQuickToolsDock({ locale }: { locale: string }) {
               {[
                 {
                   id: 'navigator' as const,
+                  manualId: 'gadget-quick-tools',
                   icon: Search,
                   en: '1. Quick Module Jump (Ctrl+K)',
                   ar: '١. الانتقال السريع لوحدات المنصة',
                 },
                 {
                   id: 'yarn_gsm' as const,
+                  manualId: 'gadget-yarn-gsm',
                   icon: Calculator,
                   en: '2. Yarn (Ne/Tex/Den) & Fabric GSM Calculator',
                   ar: '٢. حاسبة نمر الغزل ووزن القماش GSM',
                 },
                 {
                   id: 'takt_fx' as const,
+                  manualId: 'gadget-takt-fx',
                   icon: Gauge,
                   en: '3. Pocket Takt Time & Export FX Converter',
                   ar: '٣. حاسبة التاكت السريعة والعملات',
@@ -292,6 +296,22 @@ export function GlobalQuickToolsDock({ locale }: { locale: string }) {
                   >
                     <Icon className="h-3.5 w-3.5" />
                     {isAr ? tb.ar : tb.en}
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openExpertManual(tb.manualId);
+                      }}
+                      title={isAr ? 'دليل الخبير لهذه الحاسبة' : 'Expert Manual for this Calculator'}
+                      className={`ms-1 inline-flex h-4 w-4 items-center justify-center rounded-full border transition ${
+                        active
+                          ? 'border-white/30 bg-white/15 text-white hover:bg-white/30'
+                          : 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
+                      }`}
+                    >
+                      <HelpCircle className="h-2.5 w-2.5" />
+                    </span>
                   </button>
                 );
               })}

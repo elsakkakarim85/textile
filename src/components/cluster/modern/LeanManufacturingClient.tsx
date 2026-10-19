@@ -610,7 +610,7 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
       icon: ShieldAlert,
       labelEn: '6. Jidoka, Poka-Yoke & FMEA RPN',
       labelAr: '٦. أندون و Poka-Yoke وتحليل FMEA',
-      manualId: 'lean-wastes',
+      manualId: 'lean-jidoka-fmea',
     },
     {
       id: 'six_sigma',
@@ -624,7 +624,7 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
       icon: ClipboardCheck,
       labelEn: '8. SQDC Gemba Board & Leader Work',
       labelAr: '٨. لوحة الإدارة اليومية SQDC والجيمبا',
-      manualId: 'lean-5s',
+      manualId: 'lean-sqdc-daily',
     },
     {
       id: 'a3_hoshin',

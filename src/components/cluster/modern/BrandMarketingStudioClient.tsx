@@ -37,7 +37,9 @@ import {
   Globe,
   Zap,
   RefreshCw,
+  HelpCircle,
 } from 'lucide-react';
+import { ExpertManualButton, openExpertManual } from '@/components/cluster/ExpertManualModal';
 
 interface Props {
   locale: string;
@@ -887,36 +889,42 @@ export function BrandMarketingStudioClient({
             icon: Palette,
             en: '1. Brand Identity & Logo Book',
             ar: '١. الهوية البصرية والشعار',
+            manualId: 'brand-identity-logo',
           },
           {
             id: 'STRATEGY',
             icon: Target,
             en: '2. 360° Marketing Plan & ROAS',
             ar: '٢. الخطة التسويقية والميزانية',
+            manualId: 'brand-strategy-roas',
           },
           {
             id: 'AUTOMATION',
             icon: Workflow,
             en: '3. Campaign Automation & Calendar',
             ar: '٣. أتمتة الحملات والجدولة',
+            manualId: 'brand-automation-calendar',
           },
           {
             id: 'MEDIA',
             icon: Video,
             en: '4. Promo Video & Photo Studio',
             ar: '٤. استوديو الفيديو والصور',
+            manualId: 'brand-media-studio',
           },
           {
             id: 'PRINT',
             icon: FileText,
             en: '5. Brochures, Flyers & Posters',
             ar: '٥. البروشورات والفلايرز والبوسترات',
+            manualId: 'brand-print-collateral',
           },
           {
             id: 'CMO_AI',
             icon: Bot,
             en: '6. AI CMO Copywriter',
             ar: '٦. المساعد التسويقي الذكي',
+            manualId: 'brand-cmo-ai',
           },
         ].map((tab) => {
           const Icon = tab.icon;
@@ -926,14 +934,34 @@ export function BrandMarketingStudioClient({
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id as any)}
-              className={`px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${
+              className={`px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all cursor-pointer ${
                 active
                   ? 'bg-primary text-primary-foreground shadow-md'
                   : 'bg-muted/50 hover:bg-muted text-foreground'
               }`}
             >
               <Icon className="w-4 h-4" />
-              {isAr ? tab.ar : tab.en}
+              <span>{isAr ? tab.ar : tab.en}</span>
+              <span
+                role="button"
+                tabIndex={0}
+                title={t(
+                  'Open Expert Manual for this Studio Tool',
+                  'افتح الدليل الهندسي الشامل لهذه الأداة'
+                )}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  openExpertManual(tab.manualId);
+                }}
+                className={`inline-flex items-center justify-center w-4 h-4 rounded-full transition-colors ${
+                  active
+                    ? 'bg-white/25 text-white hover:bg-amber-400 hover:text-slate-950'
+                    : 'bg-amber-500/20 text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-slate-950'
+                }`}
+              >
+                <HelpCircle className="w-3 h-3" />
+              </span>
             </button>
           );
         })}

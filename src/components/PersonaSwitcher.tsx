@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Building2, ChevronDown, Check, Sparkles } from 'lucide-react';
 import { tr } from '@/lib/i18n-inline';
+import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 
 interface PersonaItem {
   id: string;
@@ -81,9 +82,12 @@ export function PersonaSwitcher({ locale }: { locale: string }) {
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           <div className="absolute end-0 mt-2 w-72 rounded-xl border bg-card p-2 shadow-xl z-50">
-            <div className="px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 border-b mb-1">
-              <Sparkles className="w-3.5 h-3.5 text-primary" />
-              {t('Active Workspace / Persona', 'مساحة العمل / الدور النشط')}
+            <div className="px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center justify-between gap-1.5 border-b mb-1">
+              <span className="flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-primary" />
+                {t('Active Workspace / Persona', 'مساحة العمل / الدور النشط')}
+              </span>
+              <ExpertManualButton manualId="gadget-persona-switcher" locale={locale} variant="icon" />
             </div>
             <div className="max-h-64 overflow-y-auto space-y-1">
               {personas.map((p) => {

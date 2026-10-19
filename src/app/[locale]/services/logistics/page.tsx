@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Pill } from '@/components/cluster/ui';
+import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 import { tr, fmtNumber } from '@/lib/i18n-inline';
 import {
   Ship,
@@ -92,12 +93,15 @@ export default function LogisticsCalculatorPage() {
   return (
     <div className="container mx-auto py-10 px-4 space-y-10">
       <div className="text-center max-w-3xl mx-auto space-y-3">
-        <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1 text-xs font-extrabold text-emerald-600">
-          <Ship className="w-4 h-4" />
-          {t(
-            'INCOTERMS 2020 • CONTAINER LOAD • PREFERENTIAL TARIFF SIMULATOR',
-            'حاسبة الشحن الدولي • الحاويات • الإنكوتيرمز ٢٠٢٠ والاعفاءات الجمركية'
-          )}
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1 text-xs font-extrabold text-emerald-600">
+            <Ship className="w-4 h-4" />
+            {t(
+              'INCOTERMS 2020 • CONTAINER LOAD • PREFERENTIAL TARIFF SIMULATOR',
+              'حاسبة الشحن الدولي • الحاويات • الإنكوتيرمز ٢٠٢٠ والاعفاءات الجمركية'
+            )}
+          </div>
+          <ExpertManualButton manualId="logistics-incoterms" locale={locale} variant="pill" />
         </div>
         <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">
           {t(

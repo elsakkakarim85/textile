@@ -32,9 +32,11 @@ import {
   Palette,
   BadgeDollarSign,
   Scale,
+  HelpCircle,
 } from 'lucide-react';
 import { tr } from '@/lib/i18n-inline';
 import { Pill } from '@/components/cluster/ui';
+import { ExpertManualButton, openExpertManual } from '@/components/cluster/ExpertManualModal';
 import {
   EXPORT_INTELLIGENCE_PRESETS,
   synthesizeExportIntelligence,
@@ -676,36 +678,42 @@ Write a persuasive, executive counter-response to this buyer objection/scenario:
             icon: TrendingUp,
             labelEn: '1. Market Study & Competitors',
             labelAr: '١. دراسة السوق والمنافسين',
+            manualId: 'export-market-study',
           },
           {
             id: 'MARKET_ENTRY' as const,
             icon: Compass,
             labelEn: '2. Market Entry & Landed Cost',
             labelAr: '٢. استراتيجية الدخول وحاسبة التسعير',
+            manualId: 'export-entry-strategy',
           },
           {
             id: 'TENDERS' as const,
             icon: Briefcase,
             labelEn: `3. Export Tenders & RFQs (${report.opportunitiesAndTenders.length})`,
             labelAr: `٣. المناقصات والفرص التصديرية (${report.opportunitiesAndTenders.length})`,
+            manualId: 'export-tenders',
           },
           {
             id: 'PROMOTION' as const,
             icon: Award,
             labelEn: '4. Export Promotional Strategy',
             labelAr: '٤. خطة الترويج والمعارض الدولية',
+            manualId: 'export-promotion',
           },
           {
             id: 'BUYERS' as const,
             icon: Building2,
             labelEn: `5. Trusted Buyers & Outreach (${report.trustedBuyers.length})`,
             labelAr: `٥. المشترون الموثوقون والتواصل (${report.trustedBuyers.length})`,
+            manualId: 'export-buyers',
           },
           {
             id: 'NTM_STANDARDS' as const,
             icon: Scale,
             labelEn: `6. Country Standards & NTMs (${report.ntmAndStandards.measures.length})`,
             labelAr: `٦. المواصفات القياسية والعوائق غير الجمركية (${report.ntmAndStandards.measures.length})`,
+            manualId: 'export-ntm',
           },
         ].map((tab) => {
           const Icon = tab.icon;
@@ -723,6 +731,27 @@ Write a persuasive, executive counter-response to this buyer objection/scenario:
             >
               <Icon className="h-4 w-4" />
               <span>{isAr ? tab.labelAr : tab.labelEn}</span>
+              <span
+                role="button"
+                tabIndex={0}
+                title={tr(
+                  locale,
+                  'Open Expert Manual for this Export Pillar',
+                  'افتح الدليل الهندسي الشامل لهذه الأداة'
+                )}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  openExpertManual(tab.manualId);
+                }}
+                className={`inline-flex items-center justify-center w-4 h-4 rounded-full transition-colors ${
+                  isActive
+                    ? 'bg-white/25 text-white hover:bg-amber-400 hover:text-slate-950'
+                    : 'bg-amber-500/20 text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-slate-950'
+                }`}
+              >
+                <HelpCircle className="w-3 h-3" />
+              </span>
             </button>
           );
         })}

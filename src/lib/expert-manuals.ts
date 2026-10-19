@@ -2582,6 +2582,759 @@ export const EXPERT_MANUALS: Record<string, ExpertManualEntry> = {
     proTipEn: 'All CSV exports from `/api/admin/export` include a UTF-8 Byte-Order Mark (`\\uFEFF`) so Arabic factory names and columns open with zero encoding garble in Microsoft Excel!',
     proTipAr: 'جميع ملفات CSV المصدرة من لوحة الإدارة مزودة بترميز (UTF-8 BOM) لتفتح الأسماء والبيانات العربية بشكل سليم تماماً داخل برنامج Microsoft Excel!',
   },
+
+  // ============================================================================
+  // 8. GRANULAR INNER PILLARS, STUDIO TABS & POCKET CALCULATORS
+  // ============================================================================
+  'lean-jidoka-fmea': {
+    id: 'lean-jidoka-fmea',
+    category: 'lean_excellence',
+    badgeEn: 'Lean Pillar 6 • Jidoka & FMEA',
+    badgeAr: 'ركيزة اللين ٦ • جيدوكا و FMEA',
+    titleEn: 'Jidoka Andon Cord, Poka-Yoke Mistake-Proofing & FMEA RPN Matrix',
+    titleAr: 'نظام أندون (Jidoka)، منع الأخطاء (Poka-Yoke) ومصفوفة تحليل المخاطر (FMEA RPN)',
+    subtitleEn: 'Autonomation, zero-defect poka-yoke sensors & Risk Priority Number (RPN = S × O × D) scoring',
+    subtitleAr: 'الإيقاف الذاتي عند الخلل، حساسات منع الخطأ من المنبع، وحساب رقم أولوية المخاطر (RPN = الشدة × التكرار × الاكتشاف)',
+    whatIsThisEn:
+      'An integrated Toyota Jidoka (Autonomation with a Human Touch) and Failure Mode & Effects Analysis (FMEA) workbench designed to stop defects at the source before an entire warp beam, dye lot, or sewing bundle is ruined.',
+    whatIsThisAr:
+      'منظومة متكاملة لتطبيق ركيزة «جيدوكا» (الجودة المدمجة في العملية والإيقاف الفوري عند اكتشاف خلل) مع مصفوفة تحليل أنماط الفشل وآثارها (FMEA) لمنع إنتاج العيوب من المنبع قبل تلف تشغيلة كاملة.',
+    howItWorksEn:
+      'Scores each potential failure mode across Severity (S: 1–10), Occurrence (O: 1–10), and Detection (D: 1–10) to compute RPN = S × O × D, triggers live Andon cord escalation states, and prescribes mechanical/optical Poka-Yoke devices.',
+    howItWorksAr:
+      'تقوم بتقييم كل نمط فشل محتمل عبر 3 أبعاد: الشدة (S من 1 إلى 10)، احتمالية الحدوث (O من 1 إلى 10)، وصعوبة الاكتشاف (D من 1 إلى 10) لحساب مؤشر الخطورة RPN = S × O × D وتحديد وسائل Poka-Yoke الهندسية.',
+    formulaOrArchitecture: 'RPN = Severity (1..10) × Occurrence (1..10) × Detection (1..10)  |  Action Threshold: RPN ≥ 100',
+    whyToUseEn: [
+      'Prevents off-shade dye lots and warp streak defects from advancing to downstream cutting and sewing.',
+      'Replaces subjective quality firefighting with quantitative RPN prioritization.',
+      'Provides ready-to-install textile Poka-Yoke blueprints (optical weft stop motions, barcode dyestuff interlocks, needle guards).',
+    ],
+    whyToUseAr: [
+      'منع انتقال الأقمشة المعيبة أو فروق الألوان إلى مراحل القص والحياكة اللاحقة.',
+      'تحويل إدارة الجودة من رد الفعل العشوائي إلى ترتيب كمي دقيق للمخاطر حسب رقم RPN.',
+      'توفير حلول Poka-Yoke جاهزة للتطبيق في الغزل والنسيج والصباغة والملابس.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Simulate Shop-Floor Andon States',
+        titleAr: '١. حاكِ حالات لوحة الإنذار المرئي (Andon Cord)',
+        detailEn: 'Toggle between Running Green, Yellow Team-Leader Assist, and Red Line-Stop to test escalation protocols.',
+        detailAr: 'بدّل بين الحالة الخضراء والصفراء والحمراء لاختبار بروتوكول الاستجابة الفورية للأعطال.',
+      },
+      {
+        titleEn: '2. Score FMEA Severity, Occurrence & Detection',
+        titleAr: '٢. قيّم عناصر مصفوفة FMEA (الشدة × التكرار × الاكتشاف)',
+        detailEn: 'Identify failure modes with RPN > 100 and assign Poka-Yoke Engineering Controls.',
+        detailAr: 'رصد نقاط الفشل التي يتجاوز فيها مؤشر RPN حاجز 100 وتطبيق ضوابط المنع الهندسي.',
+      },
+    ],
+    proTipEn: 'Lowering Detection (D) from 8 to 2 by installing an inline optical sensor or barcode interlock cuts your RPN by 75% overnight!',
+    proTipAr: 'خفض معامل صعوبة الاكتشاف (D) من 8 إلى 2 عبر تركيب حساس ضوئي أو قارئ باركود للصبغات يخفض مؤشر المخاطر RPN بنسبة 75% فوراً!',
+  },
+
+  'lean-sqdc-daily': {
+    id: 'lean-sqdc-daily',
+    category: 'lean_excellence',
+    badgeEn: 'Lean Pillar 8 • Daily Gemba SQDC',
+    badgeAr: 'ركيزة اللين ٨ • لوحة SQDC اليومية',
+    titleEn: 'SQDC Daily Gemba Tier Board & Leader Standard Work (LSW)',
+    titleAr: 'لوحة الإدارة المرئية اليومية (SQDC) والعمل القياسي للقادة (Leader Standard Work)',
+    subtitleEn: 'Safety • Quality • Delivery • Cost daily stand-up tracking & shift-leader Gemba routines',
+    subtitleAr: 'متابعة مؤشرات السلامة (S) والجودة (Q) والتسليم (D) والتكلفة (C) وجدول الجيمبا اليومي للمشرفين',
+    whatIsThisEn:
+      'A digital shop-floor Tier-1 / Tier-2 visual management board tracking Safety, Quality, Delivery, and Cost (SQDC) targets alongside structured Leader Standard Work (LSW) checklists for shift supervisors and plant managers.',
+    whatIsThisAr:
+      'لوحة إدارة مرئية يومية لصالة الإنتاج تتابع 4 محاور رئيسية: السلامة (Safety)، الجودة (Quality)، الالتزام بالتسليم (Delivery)، والتكلفة (Cost)، مع قائمة المهام القياسية اليومية لمشرفي الورديات ومديري المصانع.',
+    howItWorksEn:
+      'Displays live RAG (Red/Amber/Green) status across S-Q-D-C metrics for morning 10-minute stand-up Gemba meetings and tracks completion of time-blocked Leader Standard Work audits.',
+    howItWorksAr:
+      'تعرض حالة المؤشرات الأربعة بالألوان (أخضر/أصفر/أحمر) لاجتماع الصباح اليومي (10 دقائق في صالة الإنتاج) وتوثق إنجاز المهام القياسية للمشرفين.',
+    formulaOrArchitecture: 'SQDC Tier Meeting = 10 Min @ 08:00 AM  |  LSW Compliance % = (Completed Leader Checks / Scheduled Checks) × 100',
+    whyToUseEn: [
+      'Sustains Lean improvements so 5S, OEE, and SMED gains do not regress after initial workshops.',
+      'Aligns shift supervisors, maintenance, and quality engineers around the same daily bottlenecks in 10 minutes.',
+    ],
+    whyToUseAr: [
+      'ضمان استدامة تحسينات اللين (5S و OEE و SMED) ومنع تراجع الأداء بمرور الوقت.',
+      'توحيد جهود مشرفي الإنتاج والصيانة والجودة يومياً خلال اجتماع مدته 10 دقائق فقط.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Review S-Q-D-C Targets vs. Actuals',
+        titleAr: '١. راجع المستهدف مقابل الفعلي في مؤشرات SQDC الأربعة',
+        detailEn: 'Flag any metric in Red/Amber and assign an immediate 24-hour countermeasure owner.',
+        detailAr: 'حدد أي مؤشر باللون الأحمر أو الأصفر وعيّن مسؤولاً عن الإجراء التصحيحي خلال 24 ساعة.',
+      },
+      {
+        titleEn: '2. Check Off Leader Standard Work (LSW) Tasks',
+        titleAr: '٢. أشّر على مهام العمل القياسي للقادة (LSW) خلال الوردية',
+        detailEn: 'Complete the scheduled Gemba walks, 5S spot-checks, and bottleneck hourly verifications.',
+        detailAr: 'أكمل جولات الجيمبا المجدولة وفحوصات 5S ومراجعة إنتاجية خط العنق كل ساعة.',
+      },
+    ],
+    proTipEn: 'Lean transformations fail without Leader Standard Work—make the 08:00 AM SQDC stand-up board non-negotiable!',
+    proTipAr: 'استدامة اللين تعتمد بنسبة 80% على التزام القادة بجولة الجيمبا الصباحية أمام لوحة SQDC في تمام الثامنة صباحاً!',
+  },
+
+  'export-market-study': {
+    id: 'export-market-study',
+    category: 'export_trade',
+    badgeEn: 'Export Pillar 1 • Market Study & FTAs',
+    badgeAr: 'ركيزة التصدير ١ • دراسة السوق والاتفاقيات',
+    titleEn: 'Global Market Study, HS Code Demand & Preferential FTA Tariff Analyzer',
+    titleAr: 'دراسة السوق الدولية، حجم الطلب حسب البند الجمركي (HS Code) ومزايا الاتفاقيات التجارية',
+    subtitleEn: 'Total import volume, 5-year CAGR, untapped Egyptian potential, competitor benchmarking & 0% FTA duty rules',
+    subtitleAr: 'حجم الواردات السنوية، معدل النمو، الفرص غير المستغلة لمصر، تحليل الدول المنافسة، وشروط الإعفاء الجمركي 0%',
+    whatIsThisEn:
+      'An executive trade intelligence analyzer that computes target-country import demand, Egypt’s untapped export gap, competing supplier countries (Turkey, India, Pakistan, Portugal), and exact preferential customs tariffs under EUR.1, QIZ, AFCFTA, GAFTA, and MERCOSUR.',
+    whatIsThisAr:
+      'محرك دراسات سوقية وتصديرية يحلل حجم واردات الدولة المستهدفة، الفجوة التصديرية المتاحة لمصر، حصة الدول المنافسة، ونسبة الإعفاء الجمركي الدقيق بموجب اتفاقيات مصر التجارية.',
+    howItWorksEn:
+      'Cross-references 6-digit HS codes with destination tariff schedules and rules of origin (e.g., Double Transformation for EU EUR.1 vs. 35% value-added + 10.5% QIZ input for USA) to quantify your exact tariff margin over Asian competitors.',
+    howItWorksAr:
+      'يربط البند الجمركي (HS Code) بجدول التعريفة الجمركية للدولة المستهدفة وقواعد المنشأ (مثل قاعدة التحول المزدوج لأوروبا أو الكويز لأمريكا) لحساب ميزتك التنافسية السعرية.',
+    formulaOrArchitecture: 'Tariff Advantage (%) = Competitor MFN Duty (%) − Egypt Preferential FTA Duty (%)',
+    whyToUseEn: [
+      'Identifies high-margin export markets where Egyptian textiles enjoy a 9.6% to 28% customs duty advantage.',
+      'Prevents customs rejection by clarifying exact Origin Certificate (EUR.1 / QIZ / COMESA) rules before quoting.',
+    ],
+    whyToUseAr: [
+      'اكتشاف الأسواق التي تتمتع فيها الصادرات المصرية بميزة إعفاء جمركي تتراوح بين 9.6% و28% مقارنة بالمنافسين.',
+      'ضمان استيفاء قواعد شهادة المنشأ الصحيحة قبل تقديم عروض الأسعار للمستوردين.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Enter Your Product & Target Country at the Top',
+        titleAr: '١. أدخل المنتج والدولة المستهدفة في شريط التوليد العلوي',
+        detailEn: 'Or click any of the 12 quick country flags / 5 trade corridor presets.',
+        detailAr: 'أو اختر أي دولة من أزرار الدول السريعة أو المسارات التصديرية الجاهزة.',
+      },
+      {
+        titleEn: '2. Inspect Tariff Advantage & Competitor Matrix',
+        titleAr: '٢. راجع مقارنة الجمارك ومصفوفة الدول المنافسة',
+        detailEn: 'Use your preferential 0% duty advantage as the primary hook in buyer negotiations.',
+        detailAr: 'استخدم ميزة الإعفاء الجمركي (0%) كورقة تفاوض رئيسية أمام المشتري الأجنبي.',
+      },
+    ],
+    proTipEn: 'When quoting German, Italian, or French buyers on HS 6302 (bedding/towels), highlight that Egypt’s EUR.1 0% duty saves them 12% landed cost compared to Indian or Pakistani mills!',
+    proTipAr: 'عند تسعير المفروشات والمناشف (HS 6302) لأوروبا، أبرز للمشتري أن شهادة EUR.1 المصرية توفر عليه 12% رسوماً جمركية مقارنة بالمورد الهندي أو الباكستاني!',
+  },
+
+  'export-entry-strategy': {
+    id: 'export-entry-strategy',
+    category: 'export_trade',
+    badgeEn: 'Export Pillar 2 • Landed Cost & Entry',
+    badgeAr: 'ركيزة التصدير ٢ • التسعير واستراتيجية الدخول',
+    titleEn: 'Interactive Export Pricing Waterfall (FOB → CIF → Landed → Retail) & Entry Strategy',
+    titleAr: 'حاسبة تسعير التصدير التفاعلية (FOB ← CIF ← تكلفة الوصول ← سعر التجزئة) واستراتيجية الدخول',
+    subtitleEn: 'Real-time landed-cost simulator, FTA duty-savings calculator, distribution channels & positioning',
+    subtitleAr: 'محاكاة حية لتكلفة البضاعة الواصلة للمستورد، حساب الوفر الجمركي للصفقة، واختيار قنوات التوزيع',
+    whatIsThisEn:
+      'An interactive export pricing and market-entry simulator that models every cost layer from FOB Alexandria/Damietta to CIF port of arrival, customs clearance, importer wholesale markup, and final retail shelf price.',
+    whatIsThisAr:
+      'حاسبة تسعير تصديري ومخطط دخول أسواق يحسب كل طبقة تكلفة بدءاً من سعر التسليم على ظهر السفينة (FOB الإسكندرية/دمياط) مروراً بالشحن والتأمين (CIF) والجمارك وهامش الموزع وحتى سعر البيع النهائي للمستهلك.',
+    howItWorksEn:
+      'Lets you adjust FOB unit price, order quantity, freight %, customs duty %, and importer margin via interactive sliders and calculates total order value and net FTA duty savings in USD.',
+    howItWorksAr:
+      'يتيح لك تعديل سعر الوحدة (FOB) والكمية ونسبة الشحن والجمارك وهامش المستورد تفاعلياً، ليحسب فوراً إجمالي قيمة العقد وصافي الوفر الجمركي للمشتري بالدولار.',
+    formulaOrArchitecture: 'Landed Unit Cost = FOB × (1 + Freight%) × (1 + Duty%)  |  FTA Savings = (MFN Landed − Egypt FTA Landed) × Order Qty',
+    whyToUseEn: [
+      'Allows export managers to defend their FOB price by proving the buyer’s final landed cost is still lower than Asian competitors.',
+      'Defines the optimal distribution channel (Direct Retail Private Label vs. Hospitality Distributor vs. Industrial Converter).',
+    ],
+    whyToUseAr: [
+      'تمكين مدير التصدير من الدفاع عن سعره (FOB) عبر إثبات أن التكلفة النهائية الواصلة للمشتري أقل من المنافسين.',
+      'تحديد قناة الدخول الأنسب (تصنيع للعلامات الخاصة Private Label، موزعي الفنادق، أو مستوردي الغزول والأقمشة).',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Adjust FOB Price, Order Quantity & Freight Sliders',
+        titleAr: '١. عدّل سعر الوحدة (FOB) والكمية ونسبة الشحن في الحاسبة',
+        detailEn: 'Watch the CIF, Landed Cost, Wholesale, and Retail prices update instantaneously.',
+        detailAr: 'شاهد تحديث أسعار CIF والتكلفة الواصلة وسعر الجملة والتجزئة لحظياً.',
+      },
+      {
+        titleEn: '2. Follow the Recommended Entry Channel & Payment Terms',
+        titleAr: '٢. راجع توصيات قنوات التوزيع وشروط الدفع الآمنة',
+        detailEn: 'Check recommended Incoterms 2020 and payment structures (Confirmed L/C, CAD, or Export Credit Insurance).',
+        detailAr: 'اعتمد شروط الشحن والدفع الموصى بها (اعتماد مستندي معزز أو ضد المستندات مع تأمين صادرات).',
+      },
+    ],
+    proTipEn: 'Always quote both FOB Alexandria and CIF Destination Port so the buyer sees how fast (6–12 days to Europe) and economical Egyptian sea freight is!',
+    proTipAr: 'قدّم دائماً عرض السعر شاملاً خيارَي (FOB الإسكندرية) و(CIF ميناء الوصول) ليلمس المشتري سرعة الشحن البحري المصري (6–12 يوماً لأوروبا) وانخفاض تكلفته!',
+  },
+
+  'export-tenders': {
+    id: 'export-tenders',
+    category: 'export_trade',
+    badgeEn: 'Export Pillar 3 • International Tenders',
+    badgeAr: 'ركيزة التصدير ٣ • المناقصات الدولية',
+    titleEn: 'Live International Textile Tenders, RFQs & Technical Bid Proposal Generator',
+    titleAr: 'المناقصات الدولية والعطاءات الحكومية والفندقية ومولد العروض الفنية والمالية',
+    subtitleEn: 'Hospitality, healthcare, workwear & retail sourcing tenders + 1-click Technical Bid Dossier generator',
+    subtitleAr: 'مناقصات توريد الفنادق والمستشفيات والملابس المهنية وسلاسل التجزئة + توليد عرض فني ومالي فوري',
+    whatIsThisEn:
+      'A curated international procurement and tender radar for textile, home-linen, medical scrub, uniform, and yarn contracts, complete with an instant Technical & Commercial Bid Generator.',
+    whatIsThisAr:
+      'رادار للمناقصات والعطاءات الدولية في قطاعات المفروشات الفندقية، الزي الطبي، ملابس العمل، والغزول والأقمشة، مزود بمولد فوري لخطاب العرض الفني والمالي.',
+    howItWorksEn:
+      'Lists active public and private tenders (EU TED, UNGM, GCC NUPCO/Hospitality, US Hospitality Groups) with technical specs, volume, deadline, and eligibility, and synthesizes a customized bid letter when you click "Generate Technical Bid".',
+    howItWorksAr:
+      'يعرض المناقصات الدولية المتاحة مع الكميات والمواصفات الفنية وتاريخ الإغلاق، وعند النقر على «توليد العرض الفني للمناقصة» يقوم بصياغة مسودة عرض رسمي متكامل جاهز للنسخ والإرسال.',
+    formulaOrArchitecture: 'Bid Readiness = Technical Spec Match + ISO/OEKO-TEX Certs + Bid Bond (1–5%) + Delivery Lead-Time Fit',
+    whyToUseEn: [
+      'Opens high-volume institutional contracts (hospitality chains, ministries of health, industrial uniforms) with predictable repeat orders.',
+      'Allows smaller Mahalla factories to bid jointly by forming an Export Consortium (`/[locale]/cluster/consortia`).',
+    ],
+    whyToUseAr: [
+      'فتح أبواب عقود التوريد المؤسسية الكبرى (سلاسل الفنادق، المستشفيات، الملابس المهنية) ذات الطلبيات المتكررة.',
+      'تمكين المصانع المتوسطة من التقدم للمناقصات الضخمة عبر تشكيل تحالف تصديري مشترك.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Inspect Open Tenders & Technical Requirements',
+        titleAr: '١. استعرض المناقصات المفتوحة والمواصفات الفنية المطلوبة',
+        detailEn: 'Check GSM, yarn count, colorfastness, and required certifications for each tender.',
+        detailAr: 'راجع وزن القماش GSM ونمرة الخيط وشهادات الجودة المطلوبة في كراسة الشروط.',
+      },
+      {
+        titleEn: '2. Click "Generate Technical Bid Proposal"',
+        titleAr: '٢. اضغط على «توليد العرض الفني والمالي للمناقصة»',
+        detailEn: 'Enter your company name and lead time in weeks, then copy the complete formal bid proposal.',
+        detailAr: 'أدخل اسم مصنعك وزمن التوريد بالأسابيع ثم انسخ خطاب العرض الفني والمالي الجاهز.',
+      },
+    ],
+    proTipEn: 'If a tender volume exceeds your single-mill monthly capacity, click "Form Export Consortium" to split the order across 2–3 verified Mahalla mills!',
+    proTipAr: 'إذا كانت كمية المناقصة أكبر من طاقة مصنعك بمفرده، شكّل «تحالفاً تصديرياً» مع مصنعين آخرين بالتجمع لتنفيذ الطلبية معاً!',
+  },
+
+  'export-promotion': {
+    id: 'export-promotion',
+    category: 'export_trade',
+    badgeEn: 'Export Pillar 4 • Promotion & Trade Fairs',
+    badgeAr: 'ركيزة التصدير ٤ • خطة الترويج والمعارض',
+    titleEn: '90-Day Export Promotional Roadmap, Global Trade Fairs & Sample Kit Engineering',
+    titleAr: 'خطة الترويج التصديري (90 يوماً)، المعارض الدولية المتخصصة وهندسة صندوق العينات',
+    subtitleEn: 'Heimtextil, Première Vision, ITMA & Techtextil calendars + physical swatch-box conversion strategy',
+    subtitleAr: 'خارطة المعارض العالمية (Heimtextil, Première Vision, ITMA) + مواصفات حقيبة العينات القابلة لإبرام العقود',
+    whatIsThisEn:
+      'A structured 90-day B2B export marketing and trade-show playbook detailing target international exhibitions, digital ABM funnel tactics, and physical Swatch Box engineering.',
+    whatIsThisAr:
+      'خطة تنفيذية للترويج التصديري لمدة 90 يوماً تشمل أهم المعارض الدولية المتخصصة، استراتيجيات التسويق الرقمي الموجه للمشترين (B2B ABM)، والمواصفات القياسية لصندوق العينات التصديري.',
+    howItWorksEn:
+      'Matches your product category and destination region to the highest-ROI global trade shows, prescribes pre-show, at-show, and post-show buyer capture workflows, and lists exact swatch hanger specifications.',
+    howItWorksAr:
+      'تربط منتجك والسوق المستهدف بأهم المعارض العالمية ذات العائد الأعلى، وتحدد خطوات استقطاب المشترين قبل وأثناء وبعد المعرض، ومحتويات صندوق العينات.',
+    formulaOrArchitecture: 'Trade-Show ROI = (Booked Pre-Show Meetings × Sample Kit Conversion % × Avg Container LTV) / Booth Cost',
+    whyToUseEn: [
+      'Transforms expensive trade-fair participation into booked buyer meetings scheduled 4 weeks before the exhibition opens.',
+      'Standardizes your physical swatch kit with QR Digital Product Passports and ISO 17025 lab test strips.',
+    ],
+    whyToUseAr: [
+      'تحويل المشاركة في المعارض الدولية إلى اجتماعات محجوزة مسبقاً مع مديري المشتريات قبل السفر بأربعة أسابيع.',
+      'تجهيز حقيبة عينات احترافية مزودة برمز QR لجواز المنتج الرقمي وتقرير معمل ISO 17025.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Review Priority Trade Fairs & Subsidies',
+        titleAr: '١. راجع قائمة المعارض الدولية الموصى بها لمنتجك',
+        detailEn: 'Note exhibition dates, locations, and Egyptian Export Council / TIGARA pavilion opportunities.',
+        detailAr: 'تعرف على مواعيد المعارض وفرص الاشتراك في الجناح المصري المدعوم.',
+      },
+      {
+        titleEn: '2. Build the Prescribed Physical Swatch Kit',
+        titleAr: '٢. جهّز صندوق العينات القياسي (Swatch Kit) وفق القائمة المحددة',
+        detailEn: 'Include 20×20 cm fabric headers, shade cards, wash-tested swatches, and FOB/CIF price sheets.',
+        detailAr: 'ضمّن عينات مقاس 20×20 سم، كارتة الألوان، عينة بعد الغسيل، وقائمة الأسعار حسب الكميات.',
+      },
+    ],
+    proTipEn: 'Never attend Heimtextil or Première Vision without booking at least 15 buyer appointments in advance using Tab 5 (Trusted Buyers & Outreach)!',
+    proTipAr: 'لا تسافر إلى أي معرض دولي قبل حجز 15 اجتماعاً على الأقل مسبقاً مع المشترين باستخدام التبويب الخامس (المشترون الموثوقون والتواصل)!',
+  },
+
+  'export-buyers': {
+    id: 'export-buyers',
+    category: 'export_trade',
+    badgeEn: 'Export Pillar 5 • Buyers & 5-Stage Outreach',
+    badgeAr: 'ركيزة التصدير ٥ • المشترون والتواصل الذكي',
+    titleEn: 'Verified International Buyers Directory, 5-Stage Outreach Sequence & Proforma Invoice Studio',
+    titleAr: 'دليل المشترين الدوليين الموثوقين، منظومة المراسلات من 5 مراحل، ومولد الفاتورة المبدئية',
+    subtitleEn: 'Vetted importers, B2B outreach templates (Cold Email, LinkedIn, WhatsApp, Swatch Follow-up) + AI Negotiation Copilot',
+    subtitleAr: 'قوائم مستوردين محققين، رسائل استهداف احترافية عبر 5 مراحل، فاتورة مبدئية (PI)، ومساعد تفاوض ذكي',
+    whatIsThisEn:
+      'An end-to-end B2B buyer acquisition studio combining verified international textile buyers with a 5-stage outreach sequence generator, an instant Proforma Invoice (PI) builder, and an AI Buyer Objection & Negotiation Copilot.',
+    whatIsThisAr:
+      'استوديو متكامل لاستقطاب المشترين الدوليين يجمع بين بيانات المستوردين الموثقين، ومولد رسائل التواصل عبر 5 مراحل (بريد إلكتروني، لينكدإن، واتساب، متابعة العينات)، ومولد الفاتورة المبدئية (Proforma Invoice)، ومساعد التفاوض الذكي.',
+    howItWorksEn:
+      'Select any verified buyer profile to auto-populate personalized English or Arabic outreach messages referencing their exact sourcing category, HS code, and Egypt’s FTA tariff advantage, or generate a printable Proforma Invoice.',
+    howItWorksAr:
+      'اختر أي مشتري من القائمة ليقوم النظام تلقائياً بتخصيص رسائل التواصل (بالإسبانية/الإنجليزية/العربية) شاملة البند الجمركي وميزة الإعفاء الجمركي، مع إمكانية إصدار فاتورة مبدئية (PI) فوراً.',
+    formulaOrArchitecture: '5-Stage B2B Funnel: 1. Executive Hook → 2. LinkedIn Connect → 3. DHL Swatch Dispatch → 4. Lab-Dip Tech Review → 5. Trial Order PI',
+    whyToUseEn: [
+      'Eliminates generic cold emails by referencing concrete landed-cost savings, OEKO-TEX/ZDHC compliance, and 5-day DHL swatch dispatch.',
+      'Handles tough buyer objections (price, MOQ, lead time, payment terms) via the built-in AI Negotiation Copilot.',
+    ],
+    whyToUseAr: [
+      'القضاء على رسائل التسويق العشوائية واستبدالها بمراسلات هندسية وتجارية دقيقة تقنع مدير المشتريات الدولي.',
+      'الرد الاحترافي الفوري على اعتراضات المشتري (السعر، الحد الأدنى للطلب MOQ، شروط الدفع) عبر مساعد التفاوض الذكي.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Select a Verified Buyer Card & Customize Your Sender Info',
+        titleAr: '١. اختر المشتري من القائمة وأدخل اسمك واسم مصنعك',
+        detailEn: 'Filter or search buyers by tier and click any buyer card to load their profile.',
+        detailAr: 'ابحث في قائمة المشترين واضغط على بطاقة المشتري لتحميل بياناته كاملة.',
+      },
+      {
+        titleEn: '2. Copy the 5-Stage Outreach Sequence or Generate a Proforma Invoice',
+        titleAr: '٢. انسخ رسائل المراحل الخمس أو أصدر فاتورة مبدئية (Proforma Invoice)',
+        detailEn: 'Switch between Stage 1 to Stage 5, copy the tailored message, or click "Generate Proforma Invoice".',
+        detailAr: 'تنقل بين المراحل الـ 5 لنسخ الرسالة المناسبة، أو اضغط على زر إصدار الفاتورة المبدئية.',
+      },
+    ],
+    proTipEn: 'Stage 3 (The 5-Day DHL Physical Swatch Box Follow-Up) has the highest reply rate (38%+) among European and GCC textile sourcing directors!',
+    proTipAr: 'المرحلة الثالثة (متابعة إرسال صندوق العينات الفعلي عبر DHL) تحقق أعلى معدل استجابة (أكثر من 38%) لدى مديري المشتريات في أوروبا والخليج!',
+  },
+
+  'export-ntm': {
+    id: 'export-ntm',
+    category: 'export_trade',
+    badgeEn: 'Export Pillar 6 • NTM Standards & Labs',
+    badgeAr: 'ركيزة التصدير ٦ • المواصفات القياسية و NTM',
+    titleEn: 'Country Non-Tariff Measures (NTM), Technical Regulations, Accredited Labs & Document Checklist',
+    titleAr: 'المواصفات القياسية الإلزامية والعوائق غير الجمركية (NTM) والمعامل المعتمدة وقائمة مستندات الشحن',
+    subtitleEn: 'EU REACH/ESPR/CBAM, Saudi SABER/SASO, US CPSIA/UFLPA, ISO/AATCC physical tests & export readiness score',
+    subtitleAr: 'متطلبات REACH و ESPR الأوروبية، منصة سابر السعودية، اختبارات ISO/AATCC الفيزيائية، ومؤشر جاهزية الشحن',
+    whatIsThisEn:
+      'A regulatory compliance and Non-Tariff Measure (NTM) analyzer detailing every mandatory law, buyer sustainability mandate, physical/chemical lab test threshold, accredited Egyptian testing body, and shipping document required by the destination customs authority.',
+    whatIsThisAr:
+      'محلل للمواصفات القياسية والعوائق غير الجمركية (NTMs) يفصّل كافة القوانين الإلزامية، متطلبات الاستدامة الخاصة بالمشترين، حدود الاختبارات الفيزيائية والكيميائية (ISO / AATCC)، المعامل المعتمدة في مصر، ومستندات التخليص الجمركي.',
+    howItWorksEn:
+      'Classifies each NTM by UNCTAD code (SPS / TBT / Pre-Shipment Inspection) and legal status (Mandatory Law vs. Buyer Mandate), lists exact pass/fail thresholds (e.g., pH 4.0–7.5, Formaldehyde < 75 ppm, Shrinkage ≤ ±3%), and calculates your live Export Document Readiness % as you check off documents.',
+    howItWorksAr:
+      'يصنف كل إجراء حسب كود الأونكتاد (TBT / فحص ما قبل الشحن) ودرجة الإلزام، ويعرض الحدود الرقمية للقبول والرفض في الفحوصات المعملية، ويحسب نسبة جاهزية مستندات الشحنة تفاعلياً.',
+    formulaOrArchitecture: 'Export Clearance Readiness (%) = (Verified Compliance Documents / Total Mandatory Destination Docs) × 100',
+    whyToUseEn: [
+      'Prevents costly customs holds, container demurrages, or rejected shipments at European, Saudi (SABER), or US ports.',
+      'Connects you directly to accredited testing labs in Egypt (EOS, Hohenstein Cairo, SGS, Intertek, Mahalla TIGARA Lab).',
+    ],
+    whyToUseAr: [
+      'حماية الشحنات التصديرية من التوقف الجمركي أو الغرامات أو الرفض في موانئ أوروبا والسعودية وأمريكا.',
+      'ربط المصنع مباشرة بجهات الفحص والاعتماد المعترف بها دولياً داخل مصر.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Filter NTMs by Mandatory Law vs. Buyer Mandate',
+        titleAr: '١. استعرض العوائق غير الجمركية وصنفها (قانون إلزامي / شرط مشتري)',
+        detailEn: 'Verify the exact limit values and accredited testing bodies for each regulation.',
+        detailAr: 'تحقق من الحدود القصوى المسموح بها والجهات المانحة للشهادات لكل معيار.',
+      },
+      {
+        titleEn: '2. Complete the Interactive Pre-Shipment Document Checklist',
+        titleAr: '٢. أكمل قائمة فحص مستندات الشحن التفاعلية للوصول إلى جاهزية 100%',
+        detailEn: 'Check off EUR.1/Origin, Commercial Invoice, Packing List, Lab Report, and DPP QR.',
+        detailAr: 'أشّر على المستندات المكتملة لمتابعة مؤشر الجاهزية الجمركية قبل شحن الحاوية.',
+      },
+    ],
+    proTipEn: 'For Saudi Arabia exports, always register the product on the SABER platform and issue the PCoC + SCoC certificates BEFORE the vessel departs Alexandria/Sokhna!',
+    proTipAr: 'عند التصدير للسعودية، يجب دائماً تسجيل المنتج على منصة «سابر» وإصدار شهادتَي المطابقة (PCoC و SCoC) قبل إبحار السفينة من الميناء المصري!',
+  },
+
+  'brand-identity-logo': {
+    id: 'brand-identity-logo',
+    category: 'ai_academy',
+    badgeEn: 'Brand Studio Tab 1 • Identity & SVG Logo',
+    badgeAr: 'تبويب الهوية ١ • الشعار والألوان البانتون',
+    titleEn: 'AI Brand Identity, Pantone® TCX Color System & Vector SVG Logo Architect',
+    titleAr: 'معماري الهوية البصرية، نظام ألوان بانتون للنسيج (Pantone® TCX) ومولد الشعارات المتجهة (SVG)',
+    subtitleEn: 'Bilingual brand names, positioning story, 4 emblem geometries, 5 Pantone TCX swatches & instant SVG download',
+    subtitleAr: 'توليد الاسم التجاري والشعار اللفظي، القصة التسويقية، ٤ أشكال هندسية للشعار، و٥ ألوان بانتون قابلة للتحميل',
+    whatIsThisEn:
+      'A specialized textile brand identity and vector logo studio that generates bilingual brand names, taglines, heritage positioning narratives, 5 Pantone® Fashion, Home + Interiors (TCX) dye swatches, and downloadable vector `.SVG` logos.',
+    whatIsThisAr:
+      'استوديو متخصص لتصميم الهوية البصرية لعلامات الغزل والنسيج والملابس يولّد الاسم التجاري (عربي/إنجليزي)، الشعار اللفظي، القصة التسويقية، 5 ألوان قياسية بنظام Pantone® TCX، وشعارات متجهة قابلة للتحميل بصيغة SVG.',
+    howItWorksEn:
+      'Synthesizes geometric textile emblems (Royal Crest, Loom Diamond, Cotton Crown, Hex Tech) with customizable color palettes and exports clean XML `.svg` files ready for woven jacquard labels, hangtags, and carton stencils.',
+    howItWorksAr:
+      'يقوم بتوليد الشعارات الهندسية بأربعة أنماط بصرية مع لوحة ألوان متناسقة، ويصدّر ملفات SVG نقية جاهزة لماكينات نسيج التيكيت الجاكار والمطبوعات.',
+    formulaOrArchitecture: 'Vector SVG Output (1200×520 px) + 5 Pantone® TCX Hex/Dye Codes + Typography Pairing',
+    whyToUseEn: [
+      'Allows Egyptian OEM mills to launch their own high-margin private-label brands for European and GCC retail.',
+      'Provides exact Pantone TCX codes so the dyehouse can match brand colors on physical fabric headers.',
+    ],
+    whyToUseAr: [
+      'تمكين مصانع المحلة من الانتقال من التصنيع للغير فقط (OEM) إلى امتلاك علامات تجارية خاصة عالية الربحية.',
+      'توفير أكواد ألوان Pantone TCX الدقيقة لربط الهوية البصرية بوصفات الصباغة الفعلية.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Switch Between the 4 Emblem Geometries',
+        titleAr: '١. بدّل بين الأشكال الهندسية الأربعة للشعار لاختيار الأنسب',
+        detailEn: 'Test Crest, Loom Diamond, Cotton Crown, and Hex Tech styles.',
+        detailAr: 'جرّب أنماط الدرع الملكي، ماسة النول، تاج القطن، والشكل السداسي التقني.',
+      },
+      {
+        titleEn: '2. Click "Export SVG Logo" & Copy Hex/TCX Codes',
+        titleAr: '٢. اضغط «تحميل الشعار SVG» وانسخ أكواد الألوان',
+        detailEn: 'Download the crisp vector logo file and copy any Pantone swatch code with one click.',
+        detailAr: 'حمّل ملف الشعار المتجه وانسخ أكواد الألوان لاستخدامها في التيكيت والتغليف.',
+      },
+    ],
+    proTipEn: 'Vector `.SVG` logos scale infinitely without pixelation—send the downloaded SVG directly to your woven label loom or carton printer!',
+    proTipAr: 'ملفات الشعار بصيغة (SVG) تحتفظ بدقتها مهما تم تكبيرها—يمكنك إرسالها مباشرة لمطبعة الكرتون أو ماكينة نسيج التيكيت!',
+  },
+
+  'brand-strategy-roas': {
+    id: 'brand-strategy-roas',
+    category: 'ai_academy',
+    badgeEn: 'Brand Studio Tab 2 • 360° Strategy & ROAS',
+    badgeAr: 'تبويب الهوية ٢ • الخطة التسويقية والعائد',
+    titleEn: '360° Export Marketing Strategy, Channel Budget Allocation & ROAS Simulator',
+    titleAr: 'الخطة التسويقية التصديرية الشاملة (360°)، توزيع الميزانية، ومحاكاة العائد على الإنفاق (ROAS)',
+    subtitleEn: '90-day phased roadmap, LinkedIn ABM, trade-show & sample-kit budget split, and buyer persona cards',
+    subtitleAr: 'خارطة طريق 90 يوماً، توزيع ميزانية التسويق عبر القنوات، وملفات المشترين المستهدفين',
+    whatIsThisEn:
+      'A comprehensive 90-day B2B/B2C textile marketing plan that defines target buyer personas, unique value propositions (UVPs), channel budget percentages, expected Return on Ad Spend (ROAS), and weekly execution milestones.',
+    whatIsThisAr:
+      'خطة تسويق تصديري متكاملة لمدة 90 يوماً تحدد شرائح المشترين المستهدفين، القيمة التنافسية المضافة، التوزيع الأمثل للميزانية التسويقية، والعائد المتوقع على الاستثمار (ROAS).',
+    howItWorksEn:
+      'Breaks down marketing investment across LinkedIn Account-Based Marketing (ABM), DHL Physical Swatch Kits, Trade-Show Digital Retargeting, and SEO Technical Catalogs with concrete KPIs.',
+    howItWorksAr:
+      'تقسم الميزانية التسويقية علمياً بين حملات لينكدإن الموجهة لمديري المشتريات، إرسال صناديق العينات، إعادة الاستهداف الرقمي لزوار المعارض، والكتالوجات الفنية.',
+    formulaOrArchitecture: 'Projected Export ROAS = (Attributed Export Contract Value) / (ABM + Swatch Kit + Trade-Show Spend)',
+    whyToUseEn: [
+      'Prevents wasted ad spend on consumer channels when targeting high-ticket B2B wholesale textile buyers.',
+      'Provides a week-by-week 90-day execution checklist for the factory export and marketing team.',
+    ],
+    whyToUseAr: [
+      'حماية ميزانية المصنع من الهدر في إعلانات غير مستهدفة، والتركيز على قنوات استقطاب مستوردي الجملة.',
+      'توفير جدول عمل تنفيذي واضح لمدة 90 يوماً لفريق التسويق والتصدير بالمصنع.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Review Buyer Personas & Channel Budget Split',
+        titleAr: '١. راجع ملفات المشترين وتوزيع الميزانية على القنوات التسويقية',
+        detailEn: 'Compare expected ROAS across LinkedIn ABM, Swatch Dispatch, and Trade Fairs.',
+        detailAr: 'قارن العائد المتوقع لكل قناة تسويقية ومؤشرات الأداء المستهدفة.',
+      },
+      {
+        titleEn: '2. Execute the 3-Phase 90-Day Roadmap',
+        titleAr: '٢. نفّذ خارطة الطريق المقسمة إلى 3 مراحل (٣٠ / ٦٠ / ٩٠ يوماً)',
+        detailEn: 'Follow Phase 1 (Foundation & Swatches), Phase 2 (Outreach), and Phase 3 (Closing).',
+        detailAr: 'اتبع خطوات التأسيس وتجهيز العينات ثم الإطلاق والاستقطاب ثم إغلاق العقود.',
+      },
+    ],
+    proTipEn: 'In B2B textile export, allocating 35% of your marketing budget to physical DHL Swatch Boxes sent to pre-qualified LinkedIn leads yields 4x higher conversion than digital ads alone!',
+    proTipAr: 'في تصدير المنسوجات (B2B)، تخصيص 35% من ميزانية التسويق لإرسال صناديق عينات فعلية للعملاء المستهدفين عبر لينكدإن يحقق عائداً يفوق الإعلانات الرقمية بـ 4 أضعاف!',
+  },
+
+  'brand-automation-calendar': {
+    id: 'brand-automation-calendar',
+    category: 'ai_academy',
+    badgeEn: 'Brand Studio Tab 3 • Automation & Calendar',
+    badgeAr: 'تبويب الهوية ٣ • أتمتة الحملات والجدولة',
+    titleEn: 'Omnichannel Campaign Automation Workflows & 30-Day Content Calendar',
+    titleAr: 'مسارات أتمتة الحملات التسويقية متعددة القنوات وجدول النشر الشهري (30 يوماً)',
+    subtitleEn: 'Interactive trigger-action workflow simulator (LinkedIn + Email + WhatsApp + CRM) & 1-click social publishing',
+    subtitleAr: 'محاكي مسارات الأتمتة التفاعلي (لينكدإن + بريد + واتساب + CRM) وجدول محتوى جاهز للنشر',
+    whatIsThisEn:
+      'An interactive marketing automation engine and 30-day content calendar featuring multi-step trigger-action workflows and ready-to-publish bilingual posts with hashtags and visual prompts.',
+    whatIsThisAr:
+      'محرك أتمتة تسويقية وجدول نشر شهري يتضمن مسارات عمل تلقائية متعددة الخطوات ومنشورات جاهزة باللغتين العربية والإنجليزية مع الوسوم (Hashtags).',
+    howItWorksEn:
+      'Lets you toggle automation workflows on/off, run live step-by-step execution simulations, and copy or mark calendar posts as published across LinkedIn, Instagram, Email, and WhatsApp.',
+    howItWorksAr:
+      'يتيح لك تفعيل مسارات الأتمتة، وتشغيل محاكاة حية لخطوات المسار خطوة بخطوة، ونسخ منشورات الجدول الشهري أو اعتماد نشرها.',
+    formulaOrArchitecture: 'Workflow Pipeline: Trigger Event → AI Personalization → Multi-Channel Dispatch → CRM Lead Scoring',
+    whyToUseEn: [
+      'Automates repetitive buyer follow-ups so no trade-fair visitor or RFQ inquiry slips through the cracks.',
+      'Supplies a full month of technical and promotional social content without hiring an external agency.',
+    ],
+    whyToUseAr: [
+      'أتمتة متابعة العملاء المحتملين وزوار المعارض لضمان عدم ضياع أي فرصة تصديرية.',
+      'توفير محتوى تسويقي وهندسي احترافي جاهز للنشر طوال الشهر دون الحاجة لوكالة خارجية.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Click "Simulate Live Run" on Any Automation Workflow',
+        titleAr: '١. اضغط «محاكاة التشغيل الحي» على أي مسار أتمتة',
+        detailEn: 'Watch the trigger, delay, and omnichannel dispatch steps execute in sequence.',
+        detailAr: 'تابع تنفيذ خطوات المسار التسويقي من لحظة التقاط العميل حتى حجز الاجتماع.',
+      },
+      {
+        titleEn: '2. Copy & Publish Posts from the Content Calendar',
+        titleAr: '٢. انسخ المنشورات الجاهزة من جدول المحتوى واعتمد نشرها',
+        detailEn: 'Copy caption + hashtags and click "Publish Now" to track campaign completion.',
+        detailAr: 'انسخ نص المنشور والهاشتاجات بضغطة واحدة وحدد حالته كمنشور مكتمل.',
+      },
+    ],
+    proTipEn: 'Pair Workflow #1 (EU Buyer Swatch Kit Funnel) with your QR Digital Product Passport link so you get notified the exact minute a buyer scans your fabric hanger!',
+    proTipAr: 'اربط مسار الأتمتة الأول برابط رمز (QR) الخاص بجواز المنتج الرقمي لتعرف اللحظة التي يقوم فيها المشتري بفحص عينة القماش!',
+  },
+
+  'brand-media-studio': {
+    id: 'brand-media-studio',
+    category: 'ai_academy',
+    badgeEn: 'Brand Studio Tab 4 • Video & Photo Studio',
+    badgeAr: 'تبويب الهوية ٤ • استوديو الفيديو والصور',
+    titleEn: '30-Second Promo Video Player (with Voiceover) & 4-Angle High-Res Photo Studio',
+    titleAr: 'مشغل ومولد الفيديو الترويجي (30 ثانية بالتعليق الصوتي) واستوديو الصور الإعلانية عالية الدقة',
+    subtitleEn: 'Multi-scene animated storyboard with TTS narration + 4 downloadable PNG product artboards (16:9, 1:1, 9:16)',
+    subtitleAr: 'عرض فيديو إعلاني متعدد المشاهد بالصوت الحي + ٤ لوحات إعلانية قابلة للتحميل بصيغة PNG بمقاسات متعددة',
+    whatIsThisEn:
+      'A browser-native multimedia production studio that plays an animated multi-scene 30-second promotional video with synchronized voiceover narration and renders 4 high-resolution promotional photo artboards downloadable as PNGs.',
+    whatIsThisAr:
+      'استوديو إنتاج مرئي وصوتي يقوم بتشغيل فيديو ترويجي متعدد المشاهد مع تعليق صوتي متزامن، ويصمم 4 لوحات صور إعلانية احترافية قابلة للتحميل المباشر بصيغة PNG.',
+    howItWorksEn:
+      'Uses Web Speech API synthesis for bilingual voiceover playback across scenes and HTML5 Canvas rendering (`1600×900`, `1200×1200`, or `1080×1920`) to export crisp branded PNG visuals.',
+    howItWorksAr:
+      'يستخدم تقنية النطق الصوتي للمتصفح لقراءة التعليق الإعلاني لكل مشهد، ومحرك الرسم Canvas لتصدير صور PNG عالية الدقة بثلاثة أبعاد قياسية.',
+    formulaOrArchitecture: '5-Scene Storyboard (30s) + HTML5 Canvas PNG Exporter (16:9 Landscape | 1:1 Square | 9:16 Vertical Reel)',
+    whyToUseEn: [
+      'Produces instant visual assets for LinkedIn posts, WhatsApp buyer catalogs, and trade-show booth screens.',
+      'Provides exact lighting, camera lens, and art-direction prompts for studio shoots or AI image generators.',
+    ],
+    whyToUseAr: [
+      'إنتاج مواد بصرية وفيديوهات ترويجية فورية لمنصات التواصل وكتالوجات واتساب وشاشات العرض بالمعارض.',
+      'توفير توجيهات تصوير احترافية (الإضاءة، العدسة، التكوين) جاهزة للتنفيذ.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Click "Play Promo Video" to Preview the Animated Storyboard & Voiceover',
+        titleAr: '١. اضغط «تشغيل الفيديو الترويجي» لمشاهدة المشاهد والاستماع للتعليق الصوتي',
+        detailEn: 'Switch between scenes or toggle voice narration on/off.',
+        detailAr: 'تنقل بين المشاهد الخمسة أو تحكم في تشغيل الصوت المصاحب.',
+      },
+      {
+        titleEn: '2. Choose Aspect Ratio (16:9, 1:1, 9:16) & Download PNG Photos',
+        titleAr: '٢. اختر مقاس الصورة (16:9 أو 1:1 أو 9:16) واضغط تحميل بصيغة PNG',
+        detailEn: 'Click "Download PNG" on any of the 4 studio photo concepts.',
+        detailAr: 'اضغط زر التحميل أسفل أي لوحة من اللوحات الإعلانية الأربع لحفظها على جهازك.',
+      },
+    ],
+    proTipEn: 'Use the 16:9 aspect ratio for LinkedIn company updates and trade-portal banners, and 9:16 for WhatsApp Status and Instagram Reels!',
+    proTipAr: 'استخدم مقاس (16:9) لمنشورات لينكدإن الرسمية، ومقاس (9:16 الطولي) لحالات واتساب مع المشترين وريلز إنستغرام!',
+  },
+
+  'brand-print-collateral': {
+    id: 'brand-print-collateral',
+    category: 'ai_academy',
+    badgeEn: 'Brand Studio Tab 5 • Brochure, Flyer & Poster',
+    badgeAr: 'تبويب الهوية ٥ • البروشور والفلاير والبوستر',
+    titleEn: 'Print-Ready 6-Panel Trifold Brochure, A4 Sales Flyer & Trade-Show Roll-Up Poster Studio',
+    titleAr: 'استوديو المطبوعات الجاهزة: بروشور ثلاثي الطي (6 أوجه)، فلاير مبيعات A4، وبوستر رول أب للمعارض',
+    subtitleEn: 'Interactive live preview + 1-click export as high-res PNG or standalone printable HTML/PDF',
+    subtitleAr: 'معاينة حية للمطبوعات + تحميل فوري كصورة PNG عالية الدقة أو ملف HTML/PDF جاهز للطباعة',
+    whatIsThisEn:
+      'A complete print-collateral layout engine that designs a 6-panel tri-fold corporate brochure, an A4 technical sales flyer, and an 85×200 cm trade-show exhibition roll-up banner with embedded QR codes and technical specification tables.',
+    whatIsThisAr:
+      'محرك تصميم مطبوعات متكامل ينشئ بروشور تعريفي ثلاثي الطي (6 صفحات)، فلاير عروض مبيعات ومواصفات فنية مقاس A4، وستاند رول أب للمعارض الدولية مقاس 85×200 سم.',
+    howItWorksEn:
+      'Populates all panels with your brand palette, ISO/OEKO-TEX badges, technical specs, and contact details, and exports either a high-resolution PNG artboard or a standalone print-ready HTML/PDF file.',
+    howItWorksAr:
+      'يدمج شعار علامتك وألوانها وجداول المواصفات الفنية وشارات الجودة تلقائياً في القوالب الثلاثة، ويتيح تحميلها كصورة عالية الدقة أو ملف طباعة مستقل.',
+    formulaOrArchitecture: 'Tri-Fold Brochure (6 Panels) + A4 Spec Sheet Flyer + 85×200cm Trade-Show Roll-Up Banner',
+    whyToUseEn: [
+      'Equips your sales delegation with professional printed brochures and booth roll-up banners in minutes.',
+      'Ensures technical buyers see exact yarn counts, GSM ranges, MOQs, and lead times on every handout.',
+    ],
+    whyToUseAr: [
+      'تجهيز وفد المبيعات والتصدير بالمطبوعات التعريفية ولافتات الجناح (Roll-Up) خلال دقائق.',
+      'إبراز المواصفات الهندسية الدقيقة (نمر الخيوط، الأوزان GSM، كميات الطلب MOQ، زمن التوريد) في كافة المطبوعات.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Switch Between 6-Panel Brochure, A4 Flyer & Roll-Up Poster',
+        titleAr: '١. تنقل بين البروشور (6 أوجه) والفلاير (A4) وبوستر المعارض (Roll-Up)',
+        detailEn: 'Select color themes (Dark Gold, Emerald Eco, Royal Blue) for the exhibition poster.',
+        detailAr: 'اختر النمط اللوني المفضل لبوستر المعرض وراجع توزيع المحتوى.',
+      },
+      {
+        titleEn: '2. Click "Download Print HTML/PDF" or "Download PNG"',
+        titleAr: '٢. اضغط «تحميل ملف الطباعة HTML/PDF» أو «تحميل كصورة PNG»',
+        detailEn: 'Open the downloaded file and press Ctrl+P to save as PDF or send to your print shop.',
+        detailAr: 'افتح الملف المحمّل واضغط طباعة لحفظه كملف PDF قياسي جاهز للمطبعة.',
+      },
+    ],
+    proTipEn: 'Always place your Roll-Up Poster at the front corner of your Heimtextil booth with the QR code at eye level (150 cm height) so passing buyers can scan your Digital Product Passport in 2 seconds!',
+    proTipAr: 'ضع لافتة الرول أب في زاوية جناحك بالمعرض بحيث يكون رمز (QR) في مستوى النظر (ارتفاع 150 سم) ليتمكن المشترون المارون من مسحه بهواتفهم خلال ثانيتين!',
+  },
+
+  'brand-cmo-ai': {
+    id: 'brand-cmo-ai',
+    category: 'ai_academy',
+    badgeEn: 'Brand Studio Tab 6 • AI CMO Copywriter',
+    badgeAr: 'تبويب الهوية ٦ • المساعد التسويقي الذكي',
+    titleEn: 'AI Chief Marketing Officer (CMO) Copywriter & B2B Export Campaign Consultant',
+    titleAr: 'المستشار التسويقي الذكي (AI CMO) وكاتب المحتوى التصديري المخصص',
+    subtitleEn: 'Context-aware AI copywriter grounded in your generated brand identity, product specs & target market',
+    subtitleAr: 'مساعد ذكاء اصطناعي مرتبط بهويتك التجارية ومنتجك لصياغة رسائل المبيعات والإعلانات والترجمة التسويقية',
+    whatIsThisEn:
+      'An interactive AI Chief Marketing Officer chat studio pre-loaded with your active brand name, positioning, product specs, and target export market to generate custom emails, press releases, exhibition invitations, and ad copy on demand.',
+    whatIsThisAr:
+      'استوديو محادثة ذكي يعمل كمدير تسويق تنفيذي (AI CMO) مزود تلقائياً ببيانات علامتك التجارية ومنتجك والسوق المستهدف لكتابة رسائل المبيعات والدعوات الرسمية للمعارض والنصوص الإعلانية.',
+    howItWorksEn:
+      'Injects your live `BrandMarketingKit` context into the multi-provider LLM router (`/api/chat`) and provides 1-click prompt chips for common export marketing deliverables.',
+    howItWorksAr:
+      'يقوم بتمرير كافة تفاصيل الهوية التجارية النشطة إلى محرك الذكاء الاصطناعي لتوليد نصوص مخصصة جاهزة للنسخ الفوري.',
+    formulaOrArchitecture: 'Brand Context Injection + Multi-LLM Copywriting Engine → Tailored B2B Export Copy',
+    whyToUseEn: [
+      'Generates custom trade-show booth invitations, distributor pitch decks, and LinkedIn cold messages in seconds.',
+      'Maintains 100% tone consistency with your selected brand archetype (Luxury Heritage, Eco Innovation, or Industrial B2B).',
+    ],
+    whyToUseAr: [
+      'كتابة دعوات زيارة جناح المصنع في المعارض الدولية وعروض الوكلاء والموزعين في ثوانٍ.',
+      'الحفاظ على نبرة تسويقية متسقة تماماً مع شخصية العلامة التجارية التي اخترتها.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Click a 1-Click CMO Prompt Pill or Type Your Custom Request',
+        titleAr: '١. اختر أحد الطلبات السريعة الجاهزة أو اكتب طلبك التسويقي الخاص',
+        detailEn: 'Ask for cold emails, exhibition invites, or landing page headlines.',
+        detailAr: 'اطلب كتابة سلسلة بريد إلكتروني للمشترين أو دعوة رسمية لمعرض دولي.',
+      },
+      {
+        titleEn: '2. Copy the Generated Copy Directly into Your Campaign',
+        titleAr: '٢. انسخ النص المولّد بضغطة واحدة لاستخدامه في حملاتك',
+        detailEn: 'Every response is tailored to your active brand name and product focus.',
+        detailAr: 'تأتي كافة النصوص مخصصة باسم علامتك التجارية ومواصفات منتجك.',
+      },
+    ],
+    proTipEn: 'Ask the AI CMO to translate your value proposition into German, Italian, or French when reaching out to boutique European home-textile buyers!',
+    proTipAr: 'اطلب من المساعد التسويقي الذكي صياغة رسالة الاستهداف باللغة الألمانية أو الإيطالية أو الفرنسية عند مراسلة بيوت الأزياء والمفروشات الأوروبية!',
+  },
+
+  'gadget-persona-switcher': {
+    id: 'gadget-persona-switcher',
+    category: 'gadgets_calculators',
+    badgeEn: 'Header Gadget • Workspace & Role Switcher',
+    badgeAr: 'أداة الشريط العلوي • مبدّل بيئة العمل والأدوار',
+    titleEn: 'Role & Demo Workspace Persona Switcher (Factory • Buyer • Expert • Worker • Admin)',
+    titleAr: 'أداة التبديل الفوري بين بيئات العمل والأدوار (مصنع • مشتري دولي • خبير • مهندس • إدارة التجمع)',
+    subtitleEn: '1-click role simulation and tailored workspace routing across all 5 stakeholder personas',
+    subtitleAr: 'محاكاة فورية للأدوار الخمسة في المنصة مع توجيه ذكي للوحدات ولوحات التحكم الخاصة بكل دور',
+    whatIsThisEn:
+      'An integrated header utility gadget (`PersonaSwitcher.tsx`) that lets you switch between the 5 core platform personas (Factory Owner, International Buyer, Industrial Expert/Consultant, Mill Engineer/Worker, and Cluster Admin PMO) with 1 click.',
+    whatIsThisAr:
+      'أداة مدمجة في شريط التنقل العلوي تتيح لك التبديل الفوري بضغطة واحدة بين الأدوار الخمسة الرئيسية في المنصة (صاحب مصنع، مشتري دولي، خبير استشاري، مهندس/فني، وإدارة التجمع PMO).',
+    howItWorksEn:
+      'Persists your active persona via `/api/cluster/persona` and displays a curated list of recommended shortcuts and dashboards tailored specifically to that stakeholder role.',
+    howItWorksAr:
+      'تحفظ الدور النشط وتعرض قائمة مخصصة بأهم الروابط السريعة ولوحات التحكم والأدوات الهندسية المصممة لهذا الدور تحديداً.',
+    formulaOrArchitecture: '5 Stakeholder Personas × Role-Specific Quick Launch Links + API Session Persistence',
+    whyToUseEn: [
+      'Allows evaluators, UNIDO/EU project officers, and factory teams to experience the platform from both the Factory and International Buyer perspectives.',
+      'Provides instant 1-click navigation to the exact dashboard and tools relevant to your daily job.',
+    ],
+    whyToUseAr: [
+      'تمكين مسؤولي المشروع والمصانع من تجربة المنصة من منظور المصنع العارض ومنظور المشتري الدولي أو مدير التجمع.',
+      'الوصول السريع لأهم الأدوات ولوحات التحكم المرتبطة بطبيعة عملك اليومي.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Click the Persona Icon in the Top Navigation Bar',
+        titleAr: '١. اضغط على أيقونة الدور الشخصي في شريط التنقل العلوي',
+        detailEn: 'Open the dropdown panel to see all 5 available platform roles.',
+        detailAr: 'افتح القائمة المنسدلة لاستعراض الأدوار الخمسة المتاحة في المنصة.',
+      },
+      {
+        titleEn: '2. Select a Role & Click Any Recommended Shortcut',
+        titleAr: '٢. اختر الدور المطلوب وانتقل مباشرة إلى أدواته المخصصة',
+        detailEn: 'Switch between Factory Owner, Buyer, Expert, Worker, or Cluster Admin.',
+        detailAr: 'بدّل بين صاحب المصنع أو المشتري أو الخبير واستعرض الروابط المقترحة.',
+      },
+    ],
+    proTipEn: 'Switch to "Cluster Admin (PMO)" to inspect the macro Cluster Observatory and KYC verification queues, or "International Buyer" to test RFQ creation!',
+    proTipAr: 'اختر دور «إدارة التجمع PMO» لاستعراض المرصد الكلي ولوحة التوثيق، أو دور «مشتري دولي» لتجربة طرح مناقصات الشراء (RFQs)!',
+  },
+
+  'gadget-yarn-gsm': {
+    id: 'gadget-yarn-gsm',
+    category: 'gadgets_calculators',
+    badgeEn: 'Pocket Calculator • Yarn Count & GSM',
+    badgeAr: 'حاسبة جيب هندسية • نمر الغزل ووزن القماش',
+    titleEn: 'Pocket Yarn Count Converter (Ne / Nm / Tex / Denier) & Fabric GSM Roll Weight Calculator',
+    titleAr: 'حاسبة تحويل نمر الخيوط (Ne / Nm / Tex / Denier) وحساب وزن رول القماش (GSM)',
+    subtitleEn: 'Instant textile physics conversions inside the Ctrl+K Quick Tools Dock',
+    subtitleAr: 'تحويل فوري لمعادلات الغزل والنسيج وحساب وزن الأتواب والأمتار الطولية',
+    whatIsThisEn:
+      'A real-time textile engineering calculator embedded inside the bottom-left Quick Tools Dock (`Ctrl+K`) that converts English Cotton Count (`Ne`) into Metric (`Nm`), `Tex`, and `Denier`, and computes total roll area ($m^2$), roll weight (kg), and grams per linear meter (`GLM`).',
+    whatIsThisAr:
+      'حاسبة هندسية فورية مدمجة داخل حقيبة المهندس السفلية (`Ctrl+K`) تقوم بتحويل نمرة الغزل القطني الإنجليزي (Ne) إلى النظام المتري (Nm) والتكس (Tex) والدينير (Denier)، وتحسب مساحة ووزن رول القماش بالكيلوجرام.',
+    howItWorksEn:
+      'Applies exact textile physical constants (`Tex = 590.5 / Ne`, `Denier = 5315 / Ne`, `Nm = 1.693 × Ne`) and fabric geometry (`Roll Weight kg = Width(m) × Length(m) × GSM / 1000`).',
+    howItWorksAr:
+      'تطبق الثوابت القياسية لفيزياء المنسوجات لتحويل النمر بدقة، وتحسب وزن الرول والوزن الطولي للمتر بناءً على العرض ووزن المتر المربع GSM.',
+    formulaOrArchitecture: 'Tex = 590.5 / Ne  |  Denier = 5315 / Ne  |  Nm = 1.693 × Ne  |  Roll kg = (Width_m × Length_m × GSM) / 1000',
+    whyToUseEn: [
+      'Eliminates manual calculation errors when quoting yarn requirements or container packing weights.',
+      'Accessible from any screen in 1 second via `Ctrl+K` without leaving your current form.',
+    ],
+    whyToUseAr: [
+      'القضاء على أخطاء الحساب اليدوي عند تسعير الطلبيات أو حساب أوزان التعبئة والشحن.',
+      'متاحة في أي لحظة ومن أي صفحة عبر اختصار (Ctrl+K) دون مغادرة شاشة عملك.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Open the Textile Toolkit (`Ctrl+K`) & Select Tab 2',
+        titleAr: '١. افتح حقيبة المهندس (Ctrl+K) واختر التبويب الثاني (حاسبة الغزل و GSM)',
+        detailEn: 'Enter the English Cotton Count (Ne) or fabric GSM, width (cm), and roll length (m).',
+        detailAr: 'أدخل نمرة الخيط (Ne) أو وزن القماش (GSM) والعرض بالسم وطول الرول بالمتر.',
+      },
+      {
+        titleEn: '2. Read Instant Conversions & Roll Weight',
+        titleAr: '٢. اقرأ نتائج التحويل الفورية ووزن الرول بالكيلوجرام',
+        detailEn: 'Use the computed kg/roll to estimate container loading in the Logistics calculator.',
+        detailAr: 'استخدم وزن الرول الناتج لحساب حمولة الحاوية بدقة في حاسبة اللوجستيات.',
+      },
+    ],
+    proTipEn: 'For Giza 86 fine shirting and sateen (Ne 60/1 to Ne 80/1), check the Tex value (9.8 to 7.4 Tex) when configuring European air-jet loom tensions!',
+    proTipAr: 'عند تشغيل خيوط جيزة 86 الرفيعة (Ne 60/1 إلى Ne 80/1) على أنوال الهواء الحديثة، استخدم قيمة (Tex) الناتجة لضبط شد الخيط بدقة!',
+  },
+
+  'gadget-takt-fx': {
+    id: 'gadget-takt-fx',
+    category: 'gadgets_calculators',
+    badgeEn: 'Pocket Calculator • Takt Time & Export FX',
+    badgeAr: 'حاسبة جيب هندسية • زمن التاكت والعملات',
+    titleEn: 'Pocket Customer Takt Time, Hourly Line Target & Export Currency (USD / EUR / EGP) Calculator',
+    titleAr: 'حاسبة زمن التاكت (Takt Time)، الإنتاج المستهدف في الساعة، وتحويل عملات التصدير',
+    subtitleEn: 'Instant industrial engineering line beat & export contract FX conversion inside Ctrl+K',
+    subtitleAr: 'حساب فوري لإيقاع خط الإنتاج المطلوب وتحويل قيم عقود التصدير بين الدولار واليورو والجنيه',
+    whatIsThisEn:
+      'A dual-purpose industrial engineering and export finance calculator inside the `Ctrl+K` Quick Tools Dock that computes net shift seconds, Customer Takt Time, required units per hour, and live USD/EUR/EGP contract values.',
+    whatIsThisAr:
+      'حاسبة مزدوجة للهندسة الصناعية والمالية التصديرية داخل نافذة (`Ctrl+K`) تحسب صافي ثواني الوردية، زمن التاكت، معدل الإنتاج المطلوب في الساعة، وتحويل قيم العقود بين الدولار واليورو والجنيه المصري.',
+    howItWorksEn:
+      'Divides net available working time (`(Shift Minutes − Breaks) × 60`) by daily customer demand to establish the exact Takt beat in seconds per unit.',
+    howItWorksAr:
+      'تقسم صافي وقت العمل المتاح بالثواني بعد خصم الاستراحات على كمية الطلب اليومي للعميل لتحديد إيقاع الإنتاج المطلوب بالثانية لكل قطعة.',
+    formulaOrArchitecture: 'Takt Time (sec/unit) = ((Shift Min − Break Min) × 60) / Daily Customer Demand  |  Hourly Target = 3600 / Takt',
+    whyToUseEn: [
+      'Gives production managers an instant Takt benchmark before walking onto the sewing or weaving floor.',
+      'Converts USD export quotes into EGP and EUR simultaneously during live buyer calls.',
+    ],
+    whyToUseAr: [
+      'تزويد مدير الإنتاج بزمن التاكت المستهدف ومعدل الساعة فوراً قبل بدء جولة صالة الإنتاج.',
+      'تحويل عروض الأسعار التصديرية بين الدولار واليورو والجنيه لحظياً أثناء التفاوض مع المشتري.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Open the Textile Toolkit (`Ctrl+K`) & Select Tab 3',
+        titleAr: '١. افتح حقيبة المهندس (Ctrl+K) واختر التبويب الثالث (زمن التاكت والعملات)',
+        detailEn: 'Input shift minutes, break minutes, and daily customer demand.',
+        detailAr: 'أدخل دقائق الوردية ودقائق الراحة والكمية اليومية المطلوبة للعميل.',
+      },
+      {
+        titleEn: '2. Check Takt Seconds/Unit & Convert USD/EUR/EGP',
+        titleAr: '٢. راجع زمن التاكت بالثانية وحوّل قيمة العقد بالعملات الثلاث',
+        detailEn: 'Enter any USD contract amount and exchange rates to see instant EGP and EUR totals.',
+        detailAr: 'أدخل قيمة الصفقة بالدولار وسعر الصرف لمعاينة القيمة المقابلة بالجنيه واليورو فوراً.',
+      },
+    ],
+    proTipEn: 'Design your sewing or inspection line cycle time at 90–93% of Takt Time (called Pitch/Target Cycle Time) to buffer against minor thread breaks!',
+    proTipAr: 'صمّم زمن دورة خط الحياكة أو الفحص ليكون عند 90% إلى 93% من زمن التاكت لتوفير هامش أمان ضد التوقفات الصغرى وانقطاع الخيط!',
+  },
 };
 
 /**

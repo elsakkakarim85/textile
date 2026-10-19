@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { tr } from '@/lib/i18n-inline';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import mermaid from 'mermaid';
@@ -350,12 +351,15 @@ export default function AIBrainPage() {
       {/* Header Banner */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-gradient-to-r from-emerald-950 via-slate-900 to-indigo-950 text-white p-6 rounded-2xl border border-emerald-500/30 shadow-lg">
         <div className="space-y-1.5">
-          <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-300 bg-emerald-500/20 border border-emerald-400/30 px-3 py-1 rounded-full">
-            <Sparkles className="w-3.5 h-3.5" />
-            {t(
-              'MULTI-LLM FREE AI ENGINE • 18 MODULE AGENTS • 72 WORKFLOWS • SIDE-BY-SIDE ARENA',
-              'محرك الذكاء الاصطناعي المجاني متعدد النماذج • ١٨ وكيلاً متخصصاً • ٧٢ مهمة صناعية'
-            )}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-300 bg-emerald-500/20 border border-emerald-400/30 px-3 py-1 rounded-full">
+              <Sparkles className="w-3.5 h-3.5" />
+              {t(
+                'MULTI-LLM FREE AI ENGINE • 18 MODULE AGENTS • 72 WORKFLOWS • SIDE-BY-SIDE ARENA',
+                'محرك الذكاء الاصطناعي المجاني متعدد النماذج • ١٨ وكيلاً متخصصاً • ٧٢ مهمة صناعية'
+              )}
+            </div>
+            <ExpertManualButton manualId="ai-command-center" locale={locale} variant="pill" />
           </div>
           <h1 className="text-2xl md:text-3xl font-extrabold">
             {t(
