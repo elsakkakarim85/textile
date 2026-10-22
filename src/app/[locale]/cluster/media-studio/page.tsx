@@ -41,8 +41,8 @@ export default async function AiMediaStudioPage({
           'استوديو إنتاج الصور والفيديوهات بالذكاء الاصطناعي (FLUX.1 • Imagen 3 • Veo 2 • Wan 2.1)'
         )}
         subtitle={t(
-          'Generate 4-angle photorealistic commercial & 100mm macro textile images and 5-scene HD promotional videos (.WEBM) integrated with your Company DNA Analysis and commercial purpose.',
-          'أنتج صوراً فوتوغرافية وماكرو بـ ٤ زوايا كاميرا وفيديوهات ترويجية وصناعية عالية الدقة (٥ مشاهد بصيغة .WEBM) متكاملة مع تحليل بيانات مصنعك والغرض التسويقي.'
+          'Generate 4-angle photorealistic commercial & 100mm macro textile images and 5-scene HD promotional videos (.MP4) integrated with your Company DNA Analysis and commercial purpose.',
+          'أنتج صوراً فوتوغرافية وماكرو بـ ٤ زوايا كاميرا وفيديوهات ترويجية وصناعية عالية الدقة (٥ مشاهد بصيغة .MP4) متكاملة مع تحليل بيانات مصنعك والغرض التسويقي.'
         )}
         actions={
           <div className="flex flex-wrap items-center gap-2">

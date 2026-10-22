@@ -391,11 +391,11 @@ export default function Navbar({ locale }: { locale: string }) {
           href: `/${locale}/cluster/media-studio`,
           label: t('AI Image & Video Production Studio', 'استوديو إنتاج الصور والفيديوهات الذكي'),
           desc: t(
-            'Generate 4-angle FLUX images & 5-scene HD WebM videos from company DNA & purpose',
-            'توليد صور فوتوغرافية بـ 4 زوايا وفيديوهات HD من 5 مشاهد بتحليل بيانات الشركة'
+            'Generate 4-angle FLUX images & 5-scene HD MP4 videos from company DNA & purpose',
+            'توليد صور فوتوغرافية بـ 4 زوايا وفيديوهات HD MP4 من 5 مشاهد بتحليل بيانات الشركة'
           ),
           icon: Sparkles,
-          badge: 'FLUX + Veo',
+          badge: 'FLUX + MP4',
           accent: 'emerald',
         },
         {

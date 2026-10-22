@@ -3918,16 +3918,16 @@ export const EXPERT_MANUALS: Record<string, ExpertManualEntry> = {
     badgeAr: 'دليل استوديو إنتاج الصور والفيديوهات الذكي',
     titleEn: 'AI Image & Multi-Scene HD Video Production Studio (Company DNA + Purpose Engine)',
     titleAr: 'استوديو إنتاج الصور والفيديوهات عالية الدقة بالذكاء الاصطناعي (تحليل الشركة والغرض التسويقي)',
-    subtitleEn: 'Generate 4-angle photorealistic commercial & 100mm macro textile images and 5-scene HD promotional videos (.WEBM) grounded in your mill capabilities, certifications, and commercial purpose.',
-    subtitleAr: 'توليد صور فوتوغرافية وماكرو بـ ٤ زوايا كاميرا وفيديوهات ترويجية من ٥ مشاهد بالتعليق الصوتي وتحميل مباشر بصيغة .WEBM و .PNG بناءً على تحليل بيانات مصنعك والغرض المستهدف.',
+    subtitleEn: 'Generate 4-angle photorealistic commercial & 100mm macro textile images and 5-scene HD promotional videos (.MP4) grounded in your mill capabilities, certifications, and commercial purpose.',
+    subtitleAr: 'توليد صور فوتوغرافية وماكرو بـ ٤ زوايا كاميرا وفيديوهات ترويجية من ٥ مشاهد بالتعليق الصوتي وتحميل مباشر بصيغة .MP4 و .PNG بناءً على تحليل بيانات مصنعك والغرض المستهدف.',
     whatIsThisEn:
-      'An end-to-end industrial and commercial media production studio that combines your Company Information Analysis (machinery, yarn counts, OEKO-TEX/ISO/EUR.1 certifications, target export market, and HEX colors) with 8 specialized purposes (B2B Buyer Pitch, 100mm Macro Swatch, Heimtextil Booth, Factory OEE Documentary, Social Reel, ESG/DPP Proof, SOP Training, and Luxury Catalog) to generate real photorealistic images via Free FLUX.1/SDXL models and multi-scene HD videos (.WEBM) with synchronized bilingual voiceover.',
+      'An end-to-end industrial and commercial media production studio that combines your Company Information Analysis (machinery, yarn counts, OEKO-TEX/ISO/EUR.1 certifications, target export market, and HEX colors) with 8 specialized purposes (B2B Buyer Pitch, 100mm Macro Swatch, Heimtextil Booth, Factory OEE Documentary, Social Reel, ESG/DPP Proof, SOP Training, and Luxury Catalog) to generate real photorealistic images via Free FLUX.1/SDXL models and multi-scene HD videos (.MP4) with synchronized bilingual voiceover.',
     whatIsThisAr:
-      'استوديو متكامل لإنتاج الوسائط الصناعية والتجارية يدمج تحليل بيانات مصنعك (الماكينات، نمر الغزل، شهادات الأيزو والأيكوتكس و EUR.1، السوق التصديري، وألوان الهوية) مع ٨ أغراض متخصصة لتوليد ٤ لقطات فوتوغرافية وماكرو حقيقية عبر نماذج FLUX.1 المجانية، وإنتاج فيديو إعلاني من ٥ مشاهد بالتعليق الصوتي وتحميل ملف الفيديو الحقيقي بصيغة .WEBM.',
+      'استوديو متكامل لإنتاج الوسائط الصناعية والتجارية يدمج تحليل بيانات مصنعك (الماكينات، نمر الغزل، شهادات الأيزو والأيكوتكس و EUR.1، السوق التصديري، وألوان الهوية) مع ٨ أغراض متخصصة لتوليد ٤ لقطات فوتوغرافية وماكرو حقيقية عبر نماذج FLUX.1 المجانية، وإنتاج فيديو إعلاني من ٥ مشاهد بالتعليق الصوتي وتحميل ملف الفيديو الحقيقي بصيغة .MP4.',
     howItWorksEn:
-      '1) Company DNA & Purpose Analyzer sends your mill capabilities, certifications, target market, and text prompt to the Free LLM Creative Director to synthesize a purpose-aligned visual positioning brief, 4 specialized camera-angle prompts, and a 5-scene broadcast video script. 2) 4-Angle Free AI Image Suite generates 4 live photorealistic images (Hero Shot, 100mm Macro Weave, Automated Factory & QC Lab, and Export Swatch Box) via FLUX.1-Schnell / FLUX-Realism / SDXL Turbo with optional branded company overlay and 1-click PNG export. 3) 5-Scene HTML5 Cinema Player & WebM Video Recorder renders a 60fps multi-scene video with Ken Burns camera motion, broadcast lower-thirds, synchronized Arabic/English voiceover, and native MediaRecorder export to a downloadable .WEBM video file.',
+      '1) Company DNA & Purpose Analyzer sends your mill capabilities, certifications, target market, and text prompt to the Free LLM Creative Director to synthesize a purpose-aligned visual positioning brief, 4 specialized camera-angle prompts, and a 5-scene broadcast video script. 2) 4-Angle Free AI Image Suite generates 4 live photorealistic images (Hero Shot, 100mm Macro Weave, Automated Factory & QC Lab, and Export Swatch Box) via FLUX.1-Schnell / FLUX-Realism / SDXL Turbo with optional branded company overlay and 1-click PNG export. 3) 5-Scene HTML5 Cinema Player & H.264 MP4 Video Recorder renders a 60fps multi-scene video with Ken Burns camera motion, broadcast lower-thirds, synchronized Arabic/English voiceover, and H.264/AVC1 MP4 muxing to a downloadable .MP4 video file.',
     howItWorksAr:
-      '١) محلل بيانات الشركة والغرض الإعلاني يحلل قدرات المصنع وشهاداته والسوق المستهدف عبر المخرج الإبداعي الذكي لصياغة توجيه بصري، ٤ أوامر تصوير متخصصة، وسيناريو فيديو من ٥ مشاهد. ٢) جناح الصور بالذكاء الاصطناعي (٤ زوايا) يولد ٤ صور حقيقية (اللقطة الرئيسية، لقطة ماكرو 100mm للنسيج، صالة الإنتاج ومعمل الجودة، وصندوق عينات التصدير) عبر نماذج FLUX.1 المجانية مع إمكانية دمج شعار الشركة وتحميل PNG. ٣) مشغل ومسجل الفيديو السينمائي (.WEBM) يعرض فيديو من ٥ مشاهد بحركة كاميرا سينمائية وتعليق صوتي ثنائي اللغة مع تسجيل وتحميل ملف فيديو حقيقي بصيغة HD WebM.',
+      '١) محلل بيانات الشركة والغرض الإعلاني يحلل قدرات المصنع وشهاداته والسوق المستهدف عبر المخرج الإبداعي الذكي لصياغة توجيه بصري، ٤ أوامر تصوير متخصصة، وسيناريو فيديو من ٥ مشاهد. ٢) جناح الصور بالذكاء الاصطناعي (٤ زوايا) يولد ٤ صور حقيقية (اللقطة الرئيسية، لقطة ماكرو 100mm للنسيج، صالة الإنتاج ومعمل الجودة، وصندوق عينات التصدير) عبر نماذج FLUX.1 المجانية مع إمكانية دمج شعار الشركة وتحميل PNG. ٣) مشغل ومسجل الفيديو السينمائي (.MP4) يعرض فيديو من ٥ مشاهد بحركة كاميرا سينمائية وتعليق صوتي ثنائي اللغة مع تسجيل وتحميل ملف فيديو حقيقي بصيغة HD MP4.',
     whyToUseEn: [
       'Eliminates $5,000–$15,000 commercial photography and industrial video production costs before international trade fairs like Heimtextil Frankfurt.',
       'Ensures every generated image and video is technically accurate and badged with your mill’s real ISO 17025, OEKO-TEX, EUR.1 0% duty, and EU DPP credentials.',
@@ -3950,10 +3950,10 @@ export const EXPERT_MANUALS: Record<string, ExpertManualEntry> = {
         detailAr: 'حدد الغرض التسويقي أو الصناعي واختر نموذج الصور (FLUX.1) ونموذج الفيديو (Veo 2 / Wan 2.1).',
       },
       {
-        titleEn: '3. Click "Produce AI Images & Video" and Download PNG / WebM',
-        titleAr: '٣. اضغط "إنتاج الصور والفيديو" وحمّل ملفات .PNG و .WEBM',
-        detailEn: 'Download high-res branded PNGs from the 4-angle gallery, play the 5-scene voiced video, or click "Render & Download HD Video (.WEBM)".',
-        detailAr: 'حمّل الصور عالية الدقة بصيغة PNG، وشغّل الفيديو المكون من ٥ مشاهد بالتعليق الصوتي، أو اضغط "تصدير وتحميل الفيديو (.WEBM)".',
+        titleEn: '3. Click "Produce AI Images & Video" and Download PNG / MP4',
+        titleAr: '٣. اضغط "إنتاج الصور والفيديو" وحمّل ملفات .PNG و .MP4',
+        detailEn: 'Download high-res branded PNGs from the 4-angle gallery, play the 5-scene voiced video, or click "Render & Download HD Video (.MP4)".',
+        detailAr: 'حمّل الصور عالية الدقة بصيغة PNG، وشغّل الفيديو المكون من ٥ مشاهد بالتعليق الصوتي، أو اضغط "تصدير وتحميل الفيديو (.MP4)".',
       },
     ],
     proTipEn: 'Toggle "Composite Company Brand & KPI Overlay" ON when exporting LinkedIn B2B ads so European buyers immediately see your company name and 0% EUR.1 duty badge on the visual!',

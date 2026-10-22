@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { Muxer, ArrayBufferTarget } from 'mp4-muxer';
 import {
   BRAND_STUDIO_PRESETS,
   synthesizeExpertBrandKit,
@@ -405,7 +406,7 @@ export function BrandMarketingStudioClient({
     URL.revokeObjectURL(url);
   };
 
-  // Render & Download Playable .WEBM Promotional Video via HTML5 Canvas + MediaRecorder
+  // Render & Download Playable .MP4 Promotional Video via H.264 WebCodecs + mp4-muxer (with MediaRecorder MP4 fallback)
   const [renderingVideo, setRenderingVideo] = useState(false);
   const downloadCommercialVideoWebm = async () => {
     if (renderingVideo || typeof window === 'undefined') return;
@@ -415,16 +416,113 @@ export function BrandMarketingStudioClient({
       canvas.width = 1280;
       canvas.height = 720;
       const ctx = canvas.getContext('2d');
-      if (!ctx || typeof MediaRecorder === 'undefined') {
+      if (!ctx) {
         setRenderingVideo(false);
         return;
       }
 
+      const scenes = kit.videoSpec.scenes;
+      const framesPerScene = 45; // 1.5s per scene at 30fps
+      const primary = kit.palette[0]?.hex || '#0F172A';
+      const gold = kit.palette[1]?.hex || '#D4AF37';
+      const fileName = `${kit.brandNameEn.toLowerCase().replace(/\s+/g, '-')}-commercial.mp4`;
+
+      const drawFrame = (sc: any, progress: number) => {
+        const grad = ctx.createLinearGradient(0, 0, 1280, 720);
+        grad.addColorStop(0, sc.accentHex || primary);
+        grad.addColorStop(1, '#050811');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, 1280, 720);
+
+        ctx.strokeStyle = gold;
+        ctx.lineWidth = 4;
+        ctx.strokeRect(40, 40, 1200, 640);
+
+        ctx.fillStyle = gold;
+        ctx.font = 'bold 22px sans-serif';
+        ctx.fillText(
+          `SCENE 0${sc.sceneNumber} • ${isAr ? sc.onScreenTextAr : sc.onScreenTextEn}`,
+          80,
+          105
+        );
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 42px sans-serif';
+        const vo = isAr ? sc.voiceoverAr : sc.voiceoverEn;
+        ctx.fillText(vo.slice(0, 58), 80, 320);
+        if (vo.length > 58) {
+          ctx.fillText(vo.slice(58, 116), 80, 380);
+        }
+
+        ctx.fillStyle = '#CBD5E1';
+        ctx.font = '24px monospace';
+        ctx.fillText(
+          `${isAr ? kit.brandNameAr : kit.brandNameEn} • ISO 17025 • OEKO-TEX 100 • EU DPP`,
+          80,
+          610
+        );
+
+        ctx.fillStyle = gold;
+        ctx.fillRect(40, 672, Math.round(1200 * progress), 8);
+      };
+
+      if ('VideoEncoder' in window && 'VideoFrame' in window) {
+        const target = new ArrayBufferTarget();
+        const muxer = new Muxer({
+          target,
+          video: { codec: 'avc', width: 1280, height: 720 },
+          fastStart: 'in-memory',
+        });
+        const encoder = new (window as any).VideoEncoder({
+          output: (chunk: any, meta: any) => muxer.addVideoChunk(chunk, meta),
+          error: (err: any) => console.error(err),
+        });
+        encoder.configure({
+          codec: 'avc1.42001f',
+          width: 1280,
+          height: 720,
+          bitrate: 4_500_000,
+          framerate: 30,
+        });
+
+        let frameIndex = 0;
+        for (let sIdx = 0; sIdx < scenes.length; sIdx++) {
+          const sc = scenes[sIdx];
+          for (let f = 0; f < framesPerScene; f++) {
+            const progress = (sIdx * framesPerScene + f) / (scenes.length * framesPerScene);
+            drawFrame(sc, progress);
+            const vf = new (window as any).VideoFrame(canvas, {
+              timestamp: Math.round((frameIndex * 1_000_000) / 30),
+              duration: Math.round(1_000_000 / 30),
+            });
+            encoder.encode(vf, { keyFrame: frameIndex % 30 === 0 });
+            vf.close();
+            frameIndex++;
+            if (frameIndex % 6 === 0) await new Promise((r) => setTimeout(r, 8));
+          }
+        }
+        await encoder.flush();
+        muxer.finalize();
+        const blob = new Blob([target.buffer], { type: 'video/mp4' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        URL.revokeObjectURL(url);
+        return;
+      }
+
+      if (typeof MediaRecorder === 'undefined') return;
       const stream = canvas.captureStream(30);
-      const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
-        ? 'video/webm;codecs=vp9'
-        : 'video/webm';
-      const recorder = new MediaRecorder(stream, { mimeType });
+      const mp4Mimes = [
+        'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
+        'video/mp4;codecs=avc1',
+        'video/mp4',
+        'video/webm',
+      ];
+      const chosenMime = mp4Mimes.find((m) => MediaRecorder.isTypeSupported(m)) || '';
+      const recorder = new MediaRecorder(stream, chosenMime ? { mimeType: chosenMime } : undefined);
       const chunks: BlobPart[] = [];
       recorder.ondataavailable = (e) => {
         if (e.data && e.data.size > 0) chunks.push(e.data);
@@ -432,11 +530,11 @@ export function BrandMarketingStudioClient({
 
       const donePromise = new Promise<void>((resolve) => {
         recorder.onstop = () => {
-          const blob = new Blob(chunks, { type: 'video/webm' });
+          const blob = new Blob(chunks, { type: 'video/mp4' });
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = `${kit.brandNameEn.toLowerCase().replace(/\s+/g, '-')}-commercial.webm`;
+          a.download = fileName;
           a.click();
           URL.revokeObjectURL(url);
           resolve();
@@ -444,58 +542,14 @@ export function BrandMarketingStudioClient({
       });
 
       recorder.start();
-      const scenes = kit.videoSpec.scenes;
-      const framesPerScene = 36; // ~1.2s per scene in fast render mode (total ~4.8s HD reel)
-      const primary = kit.palette[0]?.hex || '#0F172A';
-      const gold = kit.palette[1]?.hex || '#D4AF37';
-
       for (let sIdx = 0; sIdx < scenes.length; sIdx++) {
         const sc = scenes[sIdx];
         for (let f = 0; f < framesPerScene; f++) {
           const progress = (sIdx * framesPerScene + f) / (scenes.length * framesPerScene);
-          const grad = ctx.createLinearGradient(0, 0, 1280, 720);
-          grad.addColorStop(0, sc.accentHex || primary);
-          grad.addColorStop(1, '#050811');
-          ctx.fillStyle = grad;
-          ctx.fillRect(0, 0, 1280, 720);
-
-          // Border & Crest
-          ctx.strokeStyle = gold;
-          ctx.lineWidth = 4;
-          ctx.strokeRect(40, 40, 1200, 640);
-
-          ctx.fillStyle = gold;
-          ctx.font = 'bold 22px sans-serif';
-          ctx.fillText(
-            `SCENE 0${sc.sceneNumber} • ${isAr ? sc.onScreenTextAr : sc.onScreenTextEn}`,
-            80,
-            105
-          );
-
-          ctx.fillStyle = '#FFFFFF';
-          ctx.font = 'bold 42px sans-serif';
-          const vo = isAr ? sc.voiceoverAr : sc.voiceoverEn;
-          ctx.fillText(vo.slice(0, 58), 80, 320);
-          if (vo.length > 58) {
-            ctx.fillText(vo.slice(58, 116), 80, 380);
-          }
-
-          ctx.fillStyle = '#CBD5E1';
-          ctx.font = '24px monospace';
-          ctx.fillText(
-            `${isAr ? kit.brandNameAr : kit.brandNameEn} • ISO 17025 • OEKO-TEX 100 • EU DPP`,
-            80,
-            610
-          );
-
-          // Progress bar
-          ctx.fillStyle = gold;
-          ctx.fillRect(40, 672, Math.round(1200 * progress), 8);
-
+          drawFrame(sc, progress);
           await new Promise((r) => setTimeout(r, 33));
         }
       }
-
       recorder.stop();
       await donePromise;
     } catch {
@@ -1734,8 +1788,8 @@ export function BrandMarketingStudioClient({
                 >
                   <Download className="w-4 h-4 text-primary" />
                   {renderingVideo
-                    ? t('Rendering HD .WEBM...', 'جاري تصدير الفيديو .WEBM...')
-                    : t('Download Video (.WEBM)', 'تحميل الفيديو (.WEBM)')}
+                    ? t('Rendering HD .MP4...', 'جاري تصدير الفيديو .MP4...')
+                    : t('Download Video (.MP4)', 'تحميل الفيديو (.MP4)')}
                 </Button>
                 <Button
                   size="sm"

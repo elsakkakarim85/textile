@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Muxer, ArrayBufferTarget } from 'mp4-muxer';
 import { tr } from '@/lib/i18n-inline';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -239,9 +240,9 @@ const FREE_IMAGE_MODELS: { id: FreeImageModelId; labelEn: string; labelAr: strin
 const FREE_VIDEO_MODELS: { id: FreeVideoModelId; labelEn: string; labelAr: string; badge: string }[] = [
   {
     id: 'veo-2',
-    labelEn: 'Google Veo 2 / VideoFX + Live HTML5 WebM Studio Producer',
-    labelAr: 'محرك Google Veo 2 + منتج الفيديو المباشر بصيغة WebM HD',
-    badge: 'Cinema 24/30fps',
+    labelEn: 'Google Veo 2 / VideoFX + Live HTML5 H.264 MP4 Studio Producer',
+    labelAr: 'محرك Google Veo 2 + منتج الفيديو المباشر بصيغة MP4 HD',
+    badge: 'Cinema MP4 30fps',
   },
   {
     id: 'wan-2.1-t2v',
@@ -693,7 +694,7 @@ export function AiMediaProductionStudio({
     a.click();
   };
 
-  // Record & Download Real Multi-Scene HD Video (.webm) using MediaRecorder API
+  // Record & Download Real Multi-Scene HD Video (.mp4) using H.264 WebCodecs + mp4-muxer (with MediaRecorder MP4 fallback)
   const handleRecordAndDownloadWebm = async () => {
     const canvas = videoCanvasRef.current;
     if (!canvas || !productionData?.videoStoryboard?.scenes || isRecordingWebm) return;
@@ -704,15 +705,97 @@ export function AiMediaProductionStudio({
     setIsRecordingWebm(true);
     setRecordingProgressPct(0);
 
+    const scenes = productionData.videoStoryboard.scenes;
+    const fps = 30;
+    const framesPerScene = 60; // 2.0s per scene at 30fps (10s HD MP4 commercial)
+    const totalFrames = scenes.length * framesPerScene;
+    const fileName = `${companyName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${purposeId.toLowerCase()}.mp4`;
+
     try {
-      const stream = canvas.captureStream(30);
-      const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
-        ? 'video/webm;codecs=vp9'
-        : 'video/webm';
-      const recorder = new MediaRecorder(stream, {
-        mimeType,
-        videoBitsPerSecond: 4500000,
-      });
+      const w = canvas.width % 2 === 0 ? canvas.width : canvas.width - 1;
+      const h = canvas.height % 2 === 0 ? canvas.height : canvas.height - 1;
+      canvas.width = w;
+      canvas.height = h;
+
+      // Primary Path: Hardware-accelerated H.264 / AVC1 MP4 Muxer via WebCodecs VideoEncoder
+      if (typeof window !== 'undefined' && 'VideoEncoder' in window && 'VideoFrame' in window) {
+        const target = new ArrayBufferTarget();
+        const muxer = new Muxer({
+          target,
+          video: {
+            codec: 'avc',
+            width: w,
+            height: h,
+          },
+          fastStart: 'in-memory',
+        });
+
+        const encoder = new (window as any).VideoEncoder({
+          output: (chunk: any, meta: any) => muxer.addVideoChunk(chunk, meta),
+          error: (err: any) => console.error('VideoEncoder error:', err),
+        });
+
+        encoder.configure({
+          codec: 'avc1.42001f',
+          width: w,
+          height: h,
+          bitrate: 5_000_000,
+          framerate: fps,
+        });
+
+        let frameIndex = 0;
+        for (let s = 0; s < scenes.length; s++) {
+          setActiveSceneIdx(s);
+          for (let f = 0; f < framesPerScene; f++) {
+            const pct = (f / framesPerScene) * 100;
+            setSceneProgress(pct);
+            drawCinemaFrame(ctx, canvas, scenes[s], pct, s, scenes.length);
+
+            const timestampUs = Math.round((frameIndex * 1_000_000) / fps);
+            const videoFrame = new (window as any).VideoFrame(canvas, {
+              timestamp: timestampUs,
+              duration: Math.round(1_000_000 / fps),
+            });
+            encoder.encode(videoFrame, { keyFrame: frameIndex % 30 === 0 });
+            videoFrame.close();
+
+            frameIndex++;
+            if (frameIndex % 5 === 0 || frameIndex === totalFrames) {
+              setRecordingProgressPct(Math.round((frameIndex / totalFrames) * 100));
+              await new Promise((r) => setTimeout(r, 8));
+            }
+          }
+        }
+
+        await encoder.flush();
+        muxer.finalize();
+
+        const mp4Blob = new Blob([target.buffer], { type: 'video/mp4' });
+        const url = URL.createObjectURL(mp4Blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        URL.revokeObjectURL(url);
+        return;
+      }
+
+      // Fallback Path: Native MediaRecorder with MP4 MIME priority
+      const stream = canvas.captureStream(fps);
+      const mp4MimeCandidates = [
+        'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
+        'video/mp4;codecs=avc1',
+        'video/mp4;codecs=h264',
+        'video/mp4',
+        'video/webm;codecs=h264',
+        'video/webm',
+      ];
+      const chosenMime =
+        mp4MimeCandidates.find((m) => MediaRecorder.isTypeSupported(m)) || '';
+      const recorder = new MediaRecorder(
+        stream,
+        chosenMime ? { mimeType: chosenMime, videoBitsPerSecond: 4500000 } : undefined
+      );
 
       const chunks: BlobPart[] = [];
       recorder.ondataavailable = (e) => {
@@ -724,10 +807,6 @@ export function AiMediaProductionStudio({
       });
 
       recorder.start(100);
-
-      const scenes = productionData.videoStoryboard.scenes;
-      const framesPerScene = 45; // 1.5s per scene at 30fps for fast 7.5s HD export
-      const totalFrames = scenes.length * framesPerScene;
 
       for (let s = 0; s < scenes.length; s++) {
         setActiveSceneIdx(s);
@@ -744,15 +823,15 @@ export function AiMediaProductionStudio({
       recorder.stop();
       await donePromise;
 
-      const blob = new Blob(chunks, { type: mimeType });
+      const blob = new Blob(chunks, { type: 'video/mp4' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${companyName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${purposeId.toLowerCase()}.webm`;
+      a.download = fileName;
       a.click();
       URL.revokeObjectURL(url);
     } catch (e) {
-      console.error('WebM recording error:', e);
+      console.error('MP4 recording error:', e);
     } finally {
       setIsRecordingWebm(false);
       setRecordingProgressPct(0);
@@ -806,8 +885,8 @@ export function AiMediaProductionStudio({
           </h2>
           <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
             {t(
-              'Enter your company capabilities, certifications, and text prompt below. Our multi-model studio analyzes your Business DNA, generates 4 photorealistic camera angles via Free FLUX/SDXL models, and renders a 5-scene commercial video with AI voiceover and downloadable .WEBM & .PNG masters.',
-              'أدخل تخصص مصنعك وشهادات الجودة والوصف النصي أدناه؛ سيقوم الاستوديو بتحليل هوية الشركة وتوليد ٤ لقطات فوتوغرافية بزوايا كاميرا احترافية عبر نماذج FLUX المجانية، وإنتاج فيديو إعلاني من ٥ مشاهد بالتعليق الصوتي وتحميل مباشر بصيغة .WEBM و .PNG.'
+              'Enter your company capabilities, certifications, and text prompt below. Our multi-model studio analyzes your Business DNA, generates 4 photorealistic camera angles via Free FLUX/SDXL models, and renders a 5-scene commercial video with AI voiceover and downloadable .MP4 & .PNG masters.',
+              'أدخل تخصص مصنعك وشهادات الجودة والوصف النصي أدناه؛ سيقوم الاستوديو بتحليل هوية الشركة وتوليد ٤ لقطات فوتوغرافية بزوايا كاميرا احترافية عبر نماذج FLUX المجانية، وإنتاج فيديو إعلاني من ٥ مشاهد بالتعليق الصوتي وتحميل مباشر بصيغة .MP4 و .PNG.'
             )}
           </p>
         </div>
@@ -1271,7 +1350,7 @@ export function AiMediaProductionStudio({
           </div>
         )}
 
-      {/* WORKSPACE B: 5-SCENE AI VIDEO PRODUCER & WEBM RECORDER */}
+      {/* WORKSPACE B: 5-SCENE AI VIDEO PRODUCER & MP4 RECORDER */}
       {(workspaceTab === 'BOTH' || workspaceTab === 'VIDEO') &&
         productionData?.videoStoryboard && (
           <div className="space-y-4 pt-2 border-t border-white/15">
@@ -1280,14 +1359,14 @@ export function AiMediaProductionStudio({
                 <h3 className="text-lg font-extrabold flex items-center gap-2">
                   <Film className="w-5 h-5 text-purple-400" />
                   {t(
-                    '2. 5-Scene AI Commercial Video Producer, Voiceover & HD .WEBM Recorder',
-                    '٢. استوديو إنتاج الفيديو السينمائي (٥ مشاهد بالتعليق الصوتي وتحميل ملف فيديو .WEBM)'
+                    '2. 5-Scene AI Commercial Video Producer, Voiceover & HD .MP4 Recorder',
+                    '٢. استوديو إنتاج الفيديو السينمائي (٥ مشاهد بالتعليق الصوتي وتحميل ملف فيديو .MP4)'
                   )}
                 </h3>
                 <p className="text-xs text-slate-300">
                   {t(
-                    'Plays a 5-scene broadcast commercial combining live AI keyframes, Ken Burns camera motion, bilingual AI voiceover, and real-time .WEBM video export.',
-                    'يعرض فيديو إعلانياً من ٥ مشاهد يدمج لقطات الذكاء الاصطناعي وحركة الكاميرا السينمائية والتعليق الصوتي مع إمكانية تسجيل وتحميل ملف فيديو حقيقي (.WEBM).'
+                    'Plays a 5-scene broadcast commercial combining live AI keyframes, Ken Burns camera motion, bilingual AI voiceover, and H.264 .MP4 video export.',
+                    'يعرض فيديو إعلانياً من ٥ مشاهد يدمج لقطات الذكاء الاصطناعي وحركة الكاميرا السينمائية والتعليق الصوتي مع إمكانية تسجيل وتحميل ملف فيديو حقيقي (.MP4).'
                   )}
                 </p>
               </div>
@@ -1345,10 +1424,10 @@ export function AiMediaProductionStudio({
                   <Download className="w-4 h-4" />
                   {isRecordingWebm
                     ? t(
-                        `Recording HD WebM (${recordingProgressPct}%)...`,
-                        `جاري تسجيل ملف الفيديو (${recordingProgressPct}%)...`
+                        `Encoding HD MP4 (${recordingProgressPct}%)...`,
+                        `جاري تصدير ملف الفيديو MP4 (${recordingProgressPct}%)...`
                       )
-                    : t('Render & Download HD Video (.WEBM)', 'تصدير وتحميل الفيديو (.WEBM)')}
+                    : t('Render & Download HD Video (.MP4)', 'تصدير وتحميل الفيديو (.MP4)')}
                 </Button>
               </div>
             </div>
