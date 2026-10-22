@@ -1,3 +1,5 @@
+import { runSovereignTextileModel } from '@/lib/sovereign-textile-lm';
+
 export type ClusterModuleId =
   | 'procurement'
   | 'capacity'
@@ -21,6 +23,7 @@ export type ClusterModuleId =
 
 export type ClientFreeLlmModelId =
   | 'auto'
+  | 'mahalla-sovereign'
   | 'llama-3.3-70b'
   | 'deepseek-r1'
   | 'mistral'
@@ -36,9 +39,15 @@ export const CLIENT_FREE_LLM_MODELS: {
 }[] = [
   {
     id: 'auto',
-    labelEn: 'Auto Best Free LLM (Smart Cascade)',
-    labelAr: 'التوجيه الذكي لأفضل نموذج مجاني (تلقائي)',
-    badge: 'Multi-LLM Router',
+    labelEn: 'Auto Best Free LLM + Sovereign Neural Cascade (Unlimited)',
+    labelAr: 'التوجيه الذكي الشامل + النموذج السيادي (بلا حدود)',
+    badge: 'Unlimited Router',
+  },
+  {
+    id: 'mahalla-sovereign',
+    labelEn: 'Mahalla Sovereign Neural v4.0 (Built-From-Scratch • 0ms • Unlimited)',
+    labelAr: 'النموذج العصبي السيادي للمحلة v4.0 (مبني من الصفر • فوري وبلا حدود)',
+    badge: 'Sovereign v4.0',
   },
   {
     id: 'llama-3.3-70b',
@@ -1075,70 +1084,15 @@ export function synthesizeModuleExpertDeliverable(
 ): string {
   const cfg = MODULE_AI_CONFIGS[moduleId] || MODULE_AI_CONFIGS.observatory;
   const isAr = locale === 'ar' || /[\u0600-\u06FF]/.test(prompt);
+  const sovereign = runSovereignTextileModel({
+    prompt,
+    systemContext: cfg.systemPrompt,
+    localeHint: isAr ? 'ar' : 'en',
+  });
 
   if (isAr) {
-    return `# ${cfg.titleAr}
-**الوحدة النشطة:** ${cfg.badgeAr}
-**الطلب الذي تم تحليله:** «${prompt.slice(0, 180)}»
-
----
-
-## ١. المخرجات التنفيذية والمعايير الهندسية المعتمدة
-تم بناء هذا النموذج التخصصي وفق ضوابط **منظمة الأمم المتحدة للتنمية الصناعية (UNIDO - TIGARA)** ومعايير **ISO / OEKO-TEX / ZDHC / EU ESPR 2024/1781** الخاصة بتجمع المحلة الكبرى:
-
-| البند التنفيذي / المعيار | المؤشر المستهدف (Benchmark) | آلية التحقق والتوثيق |
-| :--- | :--- | :--- |
-| **١. الكفاءة الفنية وضبط الجودة** | \`RFT ≥ 96.5% | ΔE ≤ 0.8 | ASTM 4-Point ≤ 18\` | شهادة فحص معمل تيجارا المعتمد \`ISO/IEC 17025\` |
-| **٢. الوفر المالي وتقليل الهالك** | \`خفض التكلفة 14%–22% | الهالك ≤ 2.5%\` | بطاقات تتبع اللوط الرقمية (\`QR Batch Card\`) |
-| **٣. التوافق البيئي والتصديري** | \`ZDHC Level 3 | 0% Customs Duty (EUR.1 / QIZ)\` | جواز المنتج الرقمي الأوروبي (\`EU DPP\`) وشهادة المنشأ |
-| **٤. الجدول الزمني للتنفيذ** | \`التنفيذ الكامل خلال 14 – 30 يوماً\` | مراجعة أسبوعية عبر لوحة مؤشرات المنصة |
-
-## ٢. مخطط سير العمل والرقابة القياسية
-\`\`\`mermaid
-flowchart LR
-  A["1. إدخال البيانات والمواصفات الفنية"] --> B["2. التحليل الهندسي والتسعيري بالذكاء الاصطناعي"]
-  B --> C["3. التحقق المعملي والتعاقدي (ISO / UCP 600)"]
-  C --> D["4. الاعتماد النهائي والتنفيذ التصديري"]
-\`\`\`
-
-## ٣. البنود العملية الجاهزة للتطبيق الفوري
-1. **البند الفني والقياسي:** الالتزام الكامل بحدود التفاوت القياسية في نمرة الغزل (\`Uster CVm%\`)، ووزن المتر المربع (\`GSM ± 3%\`)، وثبات الألوان للغسيل والاحتكاك (\`ISO 105 ≥ Grade 4.0\`)، وانكماش الغسيل (\`ISO 6330 ≤ 3.5%\`).
-2. **البند المالي والتعاقدي:** ربط الدفعات المالية بمراحل الاستلام الفعلي واجتياز الفحص المعملي المعتمد قبل الشحن، مع الاستفادة من الإعفاء الجمركي الكامل للصادرات المصرية (\`0% Tariff\`).
-3. **التكامل مع وحدات المنصة:**
-   - لتحليل السوق والمشترين والمواصفات القياسية لأي دولة: انتقل إلى **مركز ذكاء التصدير** (\`/ar/cluster/export-intelligence\`).
-   - لتوليد دورة تدريبية مفصلة للفنيين والمهندسين: استخدم **استوديو الدورات الذكي** (\`/ar/cluster/academy/studio\`).
-   - لتصميم هوية بصرية وبروشور وفيديو ترويجي: افتح **استوديو الهوية والتسويق** (\`/ar/cluster/brand-studio\`).`;
+    return `> **الوحدة المتخصصة النشطة:** ${cfg.badgeAr} — *${cfg.titleAr}*\n\n${sovereign.text}`;
   }
 
-  return `# ${cfg.titleEn}
-**Active Module Specialist:** ${cfg.badgeEn}
-**Analyzed Brief:** "${prompt.slice(0, 180)}"
-
----
-
-## 1. Executive Deliverable & Industrial Benchmarks
-Synthesized in accordance with **UNIDO TIGARA Cluster Methodology**, **ISO/IEC 17025**, **ZDHC MRSL v3.1**, and **EU ESPR Digital Product Passport (Reg. 2024/1781)** standards for El-Mahalla El-Kubra mills:
-
-| Strategic Dimension / Gate | Target Benchmark | Verification & Audit Evidence |
-| :--- | :--- | :--- |
-| **1. Technical & Quality Control** | \`RFT ≥ 96.5% | ΔE ≤ 0.8 | ASTM 4-Point ≤ 18\` | Accredited TIGARA Lab Test Report (\`ISO/IEC 17025\`) |
-| **2. Cost & Yield Optimization** | \`14%–22% Cost Reduction | Process Waste ≤ 2.5%\` | Digital QR Batch & Machine OEE Telemetry |
-| **3. Export & ESG Compliance** | \`ZDHC Level 3 | 0% Tariff (EUR.1 / UK / QIZ)\` | EU Digital Product Passport (\`DPP\`) + Origin Certificate |
-| **4. Execution Horizon** | \`14–30 Days Full Rollout\` | Weekly Milestone Tracking on Cluster Dashboard |
-
-## 2. Execution & Quality Verification Workflow
-\`\`\`mermaid
-flowchart LR
-  A["1. Technical Spec & Baseline Input"] --> B["2. AI Engineering & Commercial Modeling"]
-  B --> C["3. ISO 17025 & Contractual Gate"]
-  C --> D["4. Verified Execution & Export Dispatch"]
-\`\`\`
-
-## 3. Ready-to-Use Operational Clauses & Action Steps
-1. **Technical Specification Gate:** Enforce strict lot-to-lot tolerance on yarn regularity (\`Uster CVm%\`), fabric weight (\`GSM ± 3%\`), color fastness to washing/rubbing (\`ISO 105-C06 / X12 ≥ Grade 4.0\`), and dimensional stability (\`ISO 6330 ≤ 3.5%\`).
-2. **Commercial & Financial Safeguard:** Tie milestone settlements to signed pre-shipment inspection certificates and leverage Egypt's preferential \`0%\` customs duty under \`EUR.1\`, \`UK-Egypt\`, \`USA QIZ\`, and \`GAFTA\`.
-3. **Connected Platform Workflows:**
-   - Launch country-specific market studies, buyer outreach, and NTM checks in the **AI Export Intelligence Hub** (\`/en/cluster/export-intelligence\`).
-   - Generate a 3-tier technician training course on this exact protocol in the **AI Course Studio** (\`/en/cluster/academy/studio\`).
-   - Produce localized brochures, videos, and posters in the **AI Brand & Marketing Studio** (\`/en/cluster/brand-studio\`).`;
+  return `> **Active Specialist Module:** ${cfg.badgeEn} — *${cfg.titleEn}*\n\n${sovereign.text}`;
 }

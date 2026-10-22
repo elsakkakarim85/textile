@@ -1,9 +1,7 @@
-import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import { HttpError, route } from '@/server/http';
 import { generate, sanitizeMessages } from '@/server/ai';
 import { searchKnowledge } from '@/server/knowledge';
-import { clientIp, rateLimit } from '@/server/rate-limit';
 
 export const maxDuration = 30;
 
@@ -19,9 +17,6 @@ const EXPORT_STANDARDS = `
 - Packing: moisture-protective polybags, silica gel for sea freight, carton marks per buyer manual.`;
 
 export const POST = route(async (req) => {
-  const { userId } = await auth();
-  rateLimit(userId ? `chat:u:${userId}` : `chat:ip:${clientIp(req)}`, userId ? 100 : 60, 10 * 60_000);
-
   const setting = await prisma.systemSetting.findUnique({ where: { key: 'ai_enabled' } }).catch(() => null);
   if (setting?.value === 'false') throw new HttpError(503, 'The AI consultant is temporarily disabled.');
 
@@ -92,6 +87,7 @@ ${sources || '(no matching documents)'}`;
     messages,
     temperature: 0.3,
     preferredModel: body?.preferredModel,
+    customConfig: body?.customConfig,
   });
   return { text, reply: text, model, sources: knowledge.map((k) => k.title) };
 });

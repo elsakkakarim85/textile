@@ -35,6 +35,11 @@ import {
   type ClusterModuleId,
   type ClientFreeLlmModelId,
 } from '@/server/modernization/module-ai-prompts';
+import {
+  renderSovereignVisualToCanvas,
+  type SovereignVisualMode,
+} from '@/lib/sovereign-visual-model';
+import { runSovereignTextileModel } from '@/lib/sovereign-textile-lm';
 
 interface Props {
   locale: string;
@@ -142,8 +147,50 @@ export function UniversalModuleAiCopilot({
   const [expanded, setExpanded] = useState(true);
   const [showVisualStudio, setShowVisualStudio] = useState(false);
   const [visualVariantIdx, setVisualVariantIdx] = useState(0);
+  const [sovereignVisualMode, setSovereignVisualMode] = useState<
+    SovereignVisualMode | 'studio-photo'
+  >('weave-physics');
+  const [showCustomAiSettings, setShowCustomAiSettings] = useState(false);
+  const [customProvider, setCustomProvider] = useState<
+    'auto' | 'sovereign' | 'groq' | 'gemini' | 'openrouter' | 'huggingface' | 'ollama'
+  >('auto');
+  const [customApiKey, setCustomApiKey] = useState('');
+  const [customBaseUrl, setCustomBaseUrl] = useState('http://localhost:11434/v1');
+  const [customModelName, setCustomModelName] = useState('');
   const visualCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const loadedBackdropRef = useRef<Record<string, HTMLImageElement>>({});
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('mahalla_custom_ai_config');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.provider) setCustomProvider(parsed.provider);
+        if (parsed.apiKey) setCustomApiKey(parsed.apiKey);
+        if (parsed.baseUrl) setCustomBaseUrl(parsed.baseUrl);
+        if (parsed.modelName) setCustomModelName(parsed.modelName);
+      }
+    } catch {
+      // Ignore storage error
+    }
+  }, []);
+
+  const saveCustomAiSettings = () => {
+    try {
+      localStorage.setItem(
+        'mahalla_custom_ai_config',
+        JSON.stringify({
+          provider: customProvider,
+          apiKey: customApiKey,
+          baseUrl: customBaseUrl,
+          modelName: customModelName,
+        })
+      );
+      setShowCustomAiSettings(false);
+    } catch {
+      // Ignore storage error
+    }
+  };
 
   // Sync active module specialist whenever route changes
   useEffect(() => {
@@ -170,6 +217,25 @@ export function UniversalModuleAiCopilot({
 
     setLoading(true);
     setCustomPrompt(finalPrompt);
+    const t0 = Date.now();
+
+    // Instant client-side execution if user selected Built-From-Scratch Sovereign Engine
+    if (preferredModel === 'mahalla-sovereign' || customProvider === 'sovereign') {
+      const sov = runSovereignTextileModel({
+        prompt: finalPrompt,
+        systemContext: cfg.systemPrompt,
+        localeHint: locale,
+      });
+      setReply(
+        isAr
+          ? `> **الوحدة المتخصصة النشطة:** ${cfg.badgeAr} — *${cfg.titleAr}*\n\n${sov.text}`
+          : `> **Active Specialist Module:** ${cfg.badgeEn} — *${cfg.titleEn}*\n\n${sov.text}`
+      );
+      setModelUsed(sov.model);
+      setLatencyMs(Math.max(4, Date.now() - t0));
+      setLoading(false);
+      return;
+    }
 
     try {
       const res = await fetch('/api/cluster/ai-copilot', {
@@ -180,6 +246,15 @@ export function UniversalModuleAiCopilot({
           prompt: finalPrompt,
           contextSummary: contextSummary || `Active Route: ${pathname}`,
           preferredModel,
+          customConfig:
+            customProvider !== 'auto'
+              ? {
+                  provider: customProvider,
+                  apiKey: customApiKey || undefined,
+                  baseUrl: customBaseUrl || undefined,
+                  modelName: customModelName || undefined,
+                }
+              : undefined,
           locale,
         }),
       });
@@ -188,9 +263,25 @@ export function UniversalModuleAiCopilot({
         setReply(data.reply);
         setModelUsed(data.modelUsed || preferredModel);
         setLatencyMs(data.latencyMs || 420);
+      } else {
+        const sov = runSovereignTextileModel({
+          prompt: finalPrompt,
+          systemContext: cfg.systemPrompt,
+          localeHint: locale,
+        });
+        setReply(sov.text);
+        setModelUsed(sov.model);
+        setLatencyMs(Date.now() - t0);
       }
     } catch {
-      // Handled gracefully
+      const sov = runSovereignTextileModel({
+        prompt: finalPrompt,
+        systemContext: cfg.systemPrompt,
+        localeHint: locale,
+      });
+      setReply(sov.text);
+      setModelUsed(sov.model);
+      setLatencyMs(Date.now() - t0);
     } finally {
       setLoading(false);
     }
@@ -200,6 +291,20 @@ export function UniversalModuleAiCopilot({
     (variantIndex: number) => {
       const canvas = visualCanvasRef.current;
       if (!canvas) return;
+
+      if (sovereignVisualMode !== 'studio-photo') {
+        renderSovereignVisualToCanvas({
+          canvas,
+          prompt:
+            customPrompt.trim() ||
+            (isAr ? cfg.quickActions[0].promptAr : cfg.quickActions[0].promptEn),
+          moduleBadge: isAr ? cfg.badgeAr : cfg.badgeEn,
+          locale,
+          mode: sovereignVisualMode,
+        });
+        return;
+      }
+
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
@@ -376,7 +481,7 @@ export function UniversalModuleAiCopilot({
         h - 16
       );
     },
-    [cfg, customPrompt, isAr]
+    [cfg, customPrompt, isAr, locale, sovereignVisualMode]
   );
 
   useEffect(() => {
@@ -384,7 +489,7 @@ export function UniversalModuleAiCopilot({
     const theme = MODULE_STUDIO_BACKDROPS[visualVariantIdx % MODULE_STUDIO_BACKDROPS.length];
     renderVisualCanvas(visualVariantIdx);
 
-    if (!loadedBackdropRef.current[theme.url]) {
+    if (sovereignVisualMode === 'studio-photo' && !loadedBackdropRef.current[theme.url]) {
       const img = new Image();
       img.crossOrigin = 'anonymous';
       img.src = theme.url;
@@ -393,7 +498,7 @@ export function UniversalModuleAiCopilot({
         renderVisualCanvas(visualVariantIdx);
       };
     }
-  }, [showVisualStudio, visualVariantIdx, renderVisualCanvas]);
+  }, [showVisualStudio, visualVariantIdx, sovereignVisualMode, renderVisualCanvas]);
 
   const handleGenerateFreeVisual = () => {
     setShowVisualStudio(true);
@@ -511,6 +616,16 @@ export function UniversalModuleAiCopilot({
 
             <button
               type="button"
+              onClick={() => setShowCustomAiSettings((prev) => !prev)}
+              className="inline-flex items-center gap-1 rounded-xl border border-amber-400/40 bg-amber-500/15 px-2.5 py-1 text-xs font-bold text-amber-200 hover:bg-amber-500/25 transition cursor-pointer"
+              title={t('Configure Unlimited Local Ollama / Custom LLM Key', 'إعدادات النماذج غير المحدودة والمحلية')}
+            >
+              <Zap className="h-3.5 w-3.5 text-amber-300" />
+              {t('Unlimited / Custom LLM', 'ربط نموذج غير محدود')}
+            </button>
+
+            <button
+              type="button"
               onClick={() => setExpanded((prev) => !prev)}
               className="inline-flex items-center gap-1 rounded-xl border border-white/15 bg-white/10 px-2.5 py-1 text-xs font-semibold hover:bg-white/20 transition cursor-pointer"
             >
@@ -528,6 +643,100 @@ export function UniversalModuleAiCopilot({
             </button>
           </div>
         </div>
+
+        {/* Unlimited Custom / Local LLM & Sovereign Engine Drawer */}
+        {showCustomAiSettings && (
+          <div className="px-6 py-4 bg-slate-950/95 border-b border-emerald-500/30 space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="text-xs font-extrabold text-emerald-300">
+                {t(
+                  'Unlimited AI Architecture: Built-From-Scratch Sovereign Engine + Local Ollama + Cloud BYOK',
+                  'منظومة الذكاء الاصطناعي غير المحدودة: النموذج السيادي المبني من الصفر + Ollama المحلي + مفاتيح السحابة'
+                )}
+              </div>
+              <span className="text-[11px] text-slate-400">
+                {t('Saved locally in your browser • Zero rate limits', 'يحفظ محلياً في متصفحك • بدون أي حدود استخدام')}
+              </span>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <div>
+                <label className="block text-[11px] font-bold text-slate-300 mb-1">
+                  {t('Primary Execution Engine', 'محرك التشغيل الأساسي')}
+                </label>
+                <select
+                  value={customProvider}
+                  onChange={(e) => setCustomProvider(e.target.value as any)}
+                  className="w-full rounded-lg border border-white/20 bg-slate-900 px-2.5 py-2 text-xs font-bold text-white"
+                >
+                  <option value="auto">
+                    {t('Auto Multi-LLM + Sovereign Cascade', 'تلقائي (سحابي مجاني + النموذج السيادي)')}
+                  </option>
+                  <option value="sovereign">
+                    {t('Mahalla Sovereign v4.0 (Built-From-Scratch • 0ms)', 'النموذج السيادي للمحلة v4.0 (مبني من الصفر • فوري)')}
+                  </option>
+                  <option value="ollama">
+                    {t('Local Ollama / vLLM / LM Studio (Unlimited GPU)', 'نموذج محلي Ollama / vLLM (بلا حدود)')}
+                  </option>
+                  <option value="groq">{t('Groq LPU (Llama 3.3 70B / DeepSeek)', 'Groq LPU السريع')}</option>
+                  <option value="gemini">{t('Google Gemini 2.5 Flash', 'Google Gemini 2.5 Flash')}</option>
+                  <option value="openrouter">{t('OpenRouter Free / Custom', 'OpenRouter')}</option>
+                  <option value="huggingface">{t('HuggingFace Inference API', 'HuggingFace API')}</option>
+                </select>
+              </div>
+
+              {customProvider === 'ollama' ? (
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-300 mb-1">
+                    {t('Local OpenAI-Compatible Base URL', 'رابط الخادم المحلي (Ollama / vLLM)')}
+                  </label>
+                  <input
+                    type="text"
+                    value={customBaseUrl}
+                    onChange={(e) => setCustomBaseUrl(e.target.value)}
+                    placeholder="http://localhost:11434/v1"
+                    className="w-full rounded-lg border border-white/20 bg-slate-900 px-2.5 py-2 text-xs text-white"
+                  />
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-300 mb-1">
+                    {t('Optional API Key (Groq / Gemini / OpenRouter / HF)', 'مفتاح API اختياري (للاتصال المباشر غير المحدود)')}
+                  </label>
+                  <input
+                    type="password"
+                    value={customApiKey}
+                    onChange={(e) => setCustomApiKey(e.target.value)}
+                    placeholder={t('Leave blank for built-in free & sovereign AI', 'اتركه فارغاً لاستخدام المحرك المجاني والسيادي')}
+                    className="w-full rounded-lg border border-white/20 bg-slate-900 px-2.5 py-2 text-xs text-white"
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-300 mb-1">
+                  {t('Custom Model ID (Optional)', 'اسم النموذج المخصص (اختياري)')}
+                </label>
+                <input
+                  type="text"
+                  value={customModelName}
+                  onChange={(e) => setCustomModelName(e.target.value)}
+                  placeholder="llama-3.3-70b-versatile / gemini-2.5-flash"
+                  className="w-full rounded-lg border border-white/20 bg-slate-900 px-2.5 py-2 text-xs text-white"
+                />
+              </div>
+
+              <div className="flex items-end gap-2">
+                <button
+                  type="button"
+                  onClick={saveCustomAiSettings}
+                  className="w-full rounded-lg bg-emerald-500 hover:bg-emerald-400 px-3 py-2 text-xs font-extrabold text-slate-950 transition cursor-pointer"
+                >
+                  {t('Apply & Save Engine Config', 'حفظ وتفعيل إعدادات المحرك')}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {expanded && (
           <div className="p-6 space-y-5">
@@ -669,19 +878,59 @@ export function UniversalModuleAiCopilot({
                   <div className="flex flex-wrap items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => setVisualVariantIdx((v) => v + 1)}
-                      className="inline-flex items-center gap-1 rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 px-2.5 py-1 text-[11px] font-bold text-white transition cursor-pointer"
+                      onClick={() => setSovereignVisualMode('weave-physics')}
+                      className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-[11px] font-bold transition cursor-pointer ${
+                        sovereignVisualMode === 'weave-physics'
+                          ? 'bg-emerald-500 text-slate-950 border-emerald-400'
+                          : 'border-white/20 bg-white/10 text-white hover:bg-white/20'
+                      }`}
                     >
-                      <RefreshCw className="h-3 w-3 text-emerald-300" />
-                      {t('Switch Camera Angle', 'تبديل زاوية الكاميرا')}
+                      {t('1. 3D Micro-Weave Simulation', '١. محاكاة النسيج المجهري 3D')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSovereignVisualMode('isometric-factory')}
+                      className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-[11px] font-bold transition cursor-pointer ${
+                        sovereignVisualMode === 'isometric-factory'
+                          ? 'bg-emerald-500 text-slate-950 border-emerald-400'
+                          : 'border-white/20 bg-white/10 text-white hover:bg-white/20'
+                      }`}
+                    >
+                      {t('2. 3D Smart Mill Twin', '٢. التوأم الرقمي للمصنع 3D')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSovereignVisualMode('cad-techpack')}
+                      className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-[11px] font-bold transition cursor-pointer ${
+                        sovereignVisualMode === 'cad-techpack'
+                          ? 'bg-emerald-500 text-slate-950 border-emerald-400'
+                          : 'border-white/20 bg-white/10 text-white hover:bg-white/20'
+                      }`}
+                    >
+                      {t('3. CAD Tech-Pack & Pantone', '٣. مخطط CAD والألوان')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSovereignVisualMode('studio-photo');
+                        setVisualVariantIdx((v) => v + 1);
+                      }}
+                      className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-[11px] font-bold transition cursor-pointer ${
+                        sovereignVisualMode === 'studio-photo'
+                          ? 'bg-emerald-500 text-slate-950 border-emerald-400'
+                          : 'border-white/20 bg-white/10 text-white hover:bg-white/20'
+                      }`}
+                    >
+                      <RefreshCw className="h-3 w-3" />
+                      {t('4. Studio Photo + HUD', '٤. تصوير استوديو + مؤشرات')}
                     </button>
                     <button
                       type="button"
                       onClick={handleDownloadVisualPng}
-                      className="inline-flex items-center gap-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 px-2.5 py-1 text-[11px] font-extrabold text-slate-950 transition cursor-pointer"
+                      className="inline-flex items-center gap-1 rounded-lg bg-amber-400 hover:bg-amber-300 px-2.5 py-1 text-[11px] font-extrabold text-slate-950 transition cursor-pointer"
                     >
                       <Download className="h-3 w-3" />
-                      {t('Download HD .PNG', 'تحميل الصورة .PNG')}
+                      {t('Download HD .PNG', 'تحميل .PNG')}
                     </button>
                     <Link
                       href={`/${locale}/cluster/media-studio?prompt=${encodeURIComponent(

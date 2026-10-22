@@ -32,6 +32,7 @@ const MediaGenerateSchema = z.object({
   preferredLlm: z
     .enum([
       'auto',
+      'mahalla-sovereign',
       'llama-3.3-70b',
       'deepseek-r1',
       'mistral',

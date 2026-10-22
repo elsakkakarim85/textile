@@ -14,6 +14,7 @@ const CopilotRequestSchema = z.object({
   preferredModel: z
     .enum([
       'auto',
+      'mahalla-sovereign',
       'llama-3.3-70b',
       'deepseek-r1',
       'mistral',
@@ -21,6 +22,16 @@ const CopilotRequestSchema = z.object({
       'openai-free',
       'gemini-2.5-flash',
     ])
+    .optional(),
+  customConfig: z
+    .object({
+      provider: z
+        .enum(['auto', 'sovereign', 'groq', 'gemini', 'openrouter', 'huggingface', 'ollama'])
+        .optional(),
+      apiKey: z.string().max(500).optional(),
+      baseUrl: z.string().max(500).optional(),
+      modelName: z.string().max(150).optional(),
+    })
     .optional(),
   locale: z.string().max(10).optional(),
 });
@@ -47,9 +58,10 @@ Respond in ${
     messages: [{ role: 'user', content: body.prompt }],
     temperature: 0.35,
     preferredModel: (body.preferredModel || 'auto') as FreeLlmModelId,
+    customConfig: body.customConfig,
   });
 
-  const usedFallback = res.model.includes('mahalla-industrial-consultant');
+  const usedFallback = res.model.includes('mahalla-sovereign');
   const replyText = usedFallback
     ? synthesizeModuleExpertDeliverable(modKey, body.prompt, locale)
     : res.text;

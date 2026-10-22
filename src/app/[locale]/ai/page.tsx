@@ -37,6 +37,7 @@ import {
   type ClusterModuleId,
   type ClientFreeLlmModelId,
 } from '@/server/modernization/module-ai-prompts';
+import { runSovereignTextileModel } from '@/lib/sovereign-textile-lm';
 
 function Mermaid({ chart }: { chart: string }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -227,6 +228,19 @@ export default function AIBrainPage() {
     },
   ];
 
+  const getSavedCustomConfig = () => {
+    try {
+      const raw = localStorage.getItem('mahalla_custom_ai_config');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.provider && parsed.provider !== 'auto') return parsed;
+      }
+    } catch {
+      // ignore
+    }
+    return undefined;
+  };
+
   const sendPrompt = async (promptText: string) => {
     const clean = promptText.trim();
     if (!clean || isLoading) return;
@@ -237,11 +251,31 @@ export default function AIBrainPage() {
     setInput('');
     setIsLoading(true);
 
+    if (preferredModel === 'mahalla-sovereign') {
+      const sov = runSovereignTextileModel({ prompt: clean, localeHint: locale });
+      setMessages([
+        ...nextMessages,
+        {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: sov.text,
+          topicHint: clean.slice(0, 120),
+          modelUsed: sov.model,
+        },
+      ]);
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: nextMessages, preferredModel }),
+        body: JSON.stringify({
+          messages: nextMessages,
+          preferredModel,
+          customConfig: getSavedCustomConfig(),
+        }),
       });
       const data = await res.json();
       const replyText = data?.text || data?.reply;
@@ -256,9 +290,31 @@ export default function AIBrainPage() {
             modelUsed: data?.model || preferredModel,
           },
         ]);
+      } else {
+        const sov = runSovereignTextileModel({ prompt: clean, localeHint: locale });
+        setMessages([
+          ...nextMessages,
+          {
+            id: (Date.now() + 1).toString(),
+            role: 'assistant',
+            content: sov.text,
+            topicHint: clean.slice(0, 120),
+            modelUsed: sov.model,
+          },
+        ]);
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
+      const sov = runSovereignTextileModel({ prompt: clean, localeHint: locale });
+      setMessages([
+        ...nextMessages,
+        {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: sov.text,
+          topicHint: clean.slice(0, 120),
+          modelUsed: sov.model,
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -274,6 +330,7 @@ export default function AIBrainPage() {
           moduleId,
           prompt: promptText,
           preferredModel,
+          customConfig: getSavedCustomConfig(),
           locale,
         }),
       });
