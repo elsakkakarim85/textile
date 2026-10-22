@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
@@ -23,6 +23,8 @@ import {
   ChevronUp,
   Zap,
   Clock,
+  RefreshCw,
+  Film,
 } from 'lucide-react';
 import { tr } from '@/lib/i18n-inline';
 import { Pill } from '@/components/cluster/ui';
@@ -68,6 +70,53 @@ function inferModuleFromPathname(pathname: string): ClusterModuleId | null {
 
 const ALL_MODULE_KEYS = Object.keys(MODULE_AI_CONFIGS) as ClusterModuleId[];
 
+const MODULE_STUDIO_BACKDROPS: {
+  url: string;
+  lensEn: string;
+  lensAr: string;
+  primaryHex: string;
+  accentHex: string;
+  kpisEn: string[];
+  kpisAr: string[];
+}[] = [
+  {
+    url: 'https://images.unsplash.com/photo-1558171813-4c088753af8f?auto=format&fit=crop&w=1280&q=85',
+    lensEn: '35mm Cinema Prime • Automated Weaving & Spinning Hall',
+    lensAr: 'عدسة 35mm سينمائية • صالة الغزل والنسيج الأوتوماتيكية',
+    primaryHex: '#064E3B',
+    accentHex: '#10B981',
+    kpisEn: ['ISO 9001 & SMETA 4-Pillar Audited', 'Loom OEE 88.4% • Cpk 1.48', 'Uster® 5% Giza 86/94 Yarn', '0% Duty EUR.1 & QIZ Ready'],
+    kpisAr: ['معتمد أيزو 9001 و SMETA', 'كفاءة الماكينات OEE 88.4%', 'غزل قطن جيزة 86/94 (Uster 5%)', 'إعفاء جمركي 0% EUR.1 و QIZ'],
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&w=1280&q=85',
+    lensEn: '100mm f/2.8 Macro • Combed Egyptian Cotton Weave & Swatches',
+    lensAr: 'عدسة ماكرو 100mm • تفاصيل النسج وعينات القطن المصري الممشط',
+    primaryHex: '#0F172A',
+    accentHex: '#F59E0B',
+    kpisEn: ['CMC ΔE ≤ 0.5 Shade Continuity', 'ISO 17025 Lab Tested', 'OEKO-TEX® Standard 100 Class I', 'EU ESPR Digital Product Passport'],
+    kpisAr: ['تطابق لوني بالمطياف ΔE ≤ 0.5', 'فحص معمل معتمد ISO 17025', 'شهادة OEKO-TEX Standard 100', 'جواز المنتج الرقمي الأوروبي DPP'],
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1280&q=85',
+    lensEn: '50mm Studio Key Light • Luxury Export Textile Presentation',
+    lensAr: 'إضاءة استوديو 50mm • عرض منتجات التصدير الفندقية والمنسوجات',
+    primaryHex: '#1E1B4B',
+    accentHex: '#38BDF8',
+    kpisEn: ['300–600 TC Combed Sateen & Terry', '98.4% Right-First-Time (RFT)', 'ZDHC MRSL v3.1 Level 3', '48h DHL Physical Swatch Dispatch'],
+    kpisAr: ['ساتان وفوط فندقية 300–600 غرزة', 'مطابقة من المرة الأولى 98.4%', 'صباغة مستدامة ZDHC Level 3', 'إرسال عينات DHL خلال 48 ساعة'],
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1534452203293-494d7ddbf7e0?auto=format&fit=crop&w=1280&q=85',
+    lensEn: '24mm Architectural Wide • Quality Lab & Export Packaging Hub',
+    lensAr: 'عدسة 24mm واسعة • معمل مراقبة الجودة وتجهيز شحنات التصدير',
+    primaryHex: '#134E4A',
+    accentHex: '#FBBF24',
+    kpisEn: ['4-Point ASTM Inspection ≤ 12 pts', '70% Closed-Loop ZLD Water Recovery', 'Smart Milestone Escrow 30/40/30', 'SHA-256 Cryptographic Traceability'],
+    kpisAr: ['فحص الجودة الرباعي ASTM ممتاز', 'تدوير مياه الصباغة بنسبة 70%', 'حماية الدفعات عبر الضمان البنكي', 'تتبع رقمي مشفر SHA-256'],
+  },
+];
+
 export function UniversalModuleAiCopilot({
   locale,
   explicitModuleId,
@@ -91,7 +140,10 @@ export function UniversalModuleAiCopilot({
   const [copied, setCopied] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [expanded, setExpanded] = useState(true);
-  const [aiImageUrl, setAiImageUrl] = useState<string | null>(null);
+  const [showVisualStudio, setShowVisualStudio] = useState(false);
+  const [visualVariantIdx, setVisualVariantIdx] = useState(0);
+  const visualCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const loadedBackdropRef = useRef<Record<string, HTMLImageElement>>({});
 
   // Sync active module specialist whenever route changes
   useEffect(() => {
@@ -102,7 +154,7 @@ export function UniversalModuleAiCopilot({
       if (m) {
         setSelectedModule(m);
         setReply(null);
-        setAiImageUrl(null);
+        setShowVisualStudio(false);
       }
     }
   }, [pathname, explicitModuleId]);
@@ -144,21 +196,218 @@ export function UniversalModuleAiCopilot({
     }
   };
 
+  const renderVisualCanvas = useCallback(
+    (variantIndex: number) => {
+      const canvas = visualCanvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const w = canvas.width;
+      const h = canvas.height;
+      const theme = MODULE_STUDIO_BACKDROPS[variantIndex % MODULE_STUDIO_BACKDROPS.length];
+
+      // 1. Base Gradient
+      const bg = ctx.createLinearGradient(0, 0, w, h);
+      bg.addColorStop(0, theme.primaryHex);
+      bg.addColorStop(0.55, '#090D16');
+      bg.addColorStop(1, '#0F172A');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, w, h);
+
+      // 2. Draw Photorealistic Backdrop if loaded
+      const cached = loadedBackdropRef.current[theme.url];
+      if (cached && cached.complete && cached.naturalWidth > 0) {
+        ctx.save();
+        ctx.drawImage(cached, 0, 0, w, h);
+        ctx.restore();
+
+        const vig = ctx.createLinearGradient(0, 0, w, h);
+        vig.addColorStop(0, 'rgba(6, 15, 28, 0.86)');
+        vig.addColorStop(0.5, 'rgba(6, 15, 28, 0.58)');
+        vig.addColorStop(1, 'rgba(6, 15, 28, 0.92)');
+        ctx.fillStyle = vig;
+        ctx.fillRect(0, 0, w, h);
+      }
+
+      // 3. Precision Engineering Micro-Weave & Blueprint Grid Overlay
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255,255,255,0.065)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < w; x += 32) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+      for (let y = 0; y < h; y += 32) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // 4. Top Header Bar (Module Specialist + Lens Spec)
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.86)';
+      ctx.beginPath();
+      ctx.roundRect(36, 28, w - 72, 56, 14);
+      ctx.fill();
+      ctx.strokeStyle = `${theme.accentHex}88`;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.fillStyle = theme.accentHex;
+      ctx.beginPath();
+      ctx.arc(64, 56, 9, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = 'bold 18px sans-serif';
+      ctx.textAlign = 'left';
+      const modBadge = isAr ? cfg.badgeAr : cfg.badgeEn;
+      ctx.fillText(modBadge.slice(0, 52), 84, 62);
+
+      const lensLabel = isAr ? theme.lensAr : theme.lensEn;
+      ctx.fillStyle = '#6EE7B7';
+      ctx.font = 'bold 13px monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText(`📷 ${lensLabel}`, w - 56, 61);
+
+      // 5. Center Visual Subject & Prompt Synthesis Card
+      const subjectText =
+        customPrompt.trim() || (isAr ? cfg.titleAr : cfg.titleEn);
+      const subText = isAr ? cfg.subtitleAr : cfg.subtitleEn;
+
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.82)';
+      ctx.beginPath();
+      ctx.roundRect(36, 110, w - 72, 195, 18);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.16)';
+      ctx.stroke();
+
+      ctx.fillStyle = theme.accentHex;
+      ctx.beginPath();
+      ctx.roundRect(36, 110, 10, 195, [18, 0, 0, 18]);
+      ctx.fill();
+
+      ctx.fillStyle = theme.accentHex;
+      ctx.font = 'bold 13px monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText(
+        isAr
+          ? 'EL-MAHALLA INDUSTRIAL AI STUDIO • ZERO-RATE-LIMIT HD RENDER'
+          : 'EL-MAHALLA INDUSTRIAL AI STUDIO • ZERO-RATE-LIMIT HD RENDER',
+        66,
+        144
+      );
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = 'bold 26px sans-serif';
+      ctx.fillText(subjectText.slice(0, 62), 66, 184);
+      if (subjectText.length > 62) {
+        ctx.font = 'bold 21px sans-serif';
+        ctx.fillText(subjectText.slice(62, 128), 66, 216);
+      }
+
+      ctx.fillStyle = '#CBD5E1';
+      ctx.font = '15px sans-serif';
+      ctx.fillText(subText.slice(0, 92), 66, 256);
+
+      ctx.fillStyle = '#38BDF8';
+      ctx.font = 'bold 13px monospace';
+      ctx.fillText(
+        '✔ UNIDO / TIGARA VERIFIED   •   ✔ ISO 17025 LAB   •   ✔ OEKO-TEX® 100   •   ✔ EU ESPR DPP',
+        66,
+        286
+      );
+
+      // 6. 4 Engineering & Commercial KPI Callout Cards at Bottom
+      const kpis = isAr ? theme.kpisAr : theme.kpisEn;
+      const cardGap = 16;
+      const cardW = Math.floor((w - 72 - cardGap * 3) / 4);
+      const cardY = 330;
+      const cardH = 148;
+
+      kpis.forEach((kpi, idx) => {
+        const cx = 36 + idx * (cardW + cardGap);
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+        ctx.beginPath();
+        ctx.roundRect(cx, cardY, cardW, cardH, 14);
+        ctx.fill();
+        ctx.strokeStyle = idx === 0 ? theme.accentHex : 'rgba(255,255,255,0.18)';
+        ctx.lineWidth = idx === 0 ? 2 : 1;
+        ctx.stroke();
+
+        ctx.fillStyle = theme.accentHex;
+        ctx.font = 'bold 12px monospace';
+        ctx.textAlign = 'left';
+        ctx.fillText(`PILLAR 0${idx + 1}`, cx + 18, cardY + 32);
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 16px sans-serif';
+        ctx.fillText(kpi.slice(0, 26), cx + 18, cardY + 68);
+        if (kpi.length > 26) {
+          ctx.font = 'bold 14px sans-serif';
+          ctx.fillText(kpi.slice(26, 54), cx + 18, cardY + 92);
+        }
+
+        // Mini progress/tolerance bar
+        ctx.fillStyle = 'rgba(255,255,255,0.12)';
+        ctx.fillRect(cx + 18, cardY + cardH - 26, cardW - 36, 6);
+        ctx.fillStyle = '#10B981';
+        ctx.fillRect(cx + 18, cardY + cardH - 26, Math.round((cardW - 36) * (0.85 + idx * 0.04)), 6);
+      });
+
+      // 7. Bottom Spectrophotometer Pantone TCX & Signature Bar
+      ctx.fillStyle = 'rgba(9, 13, 22, 0.92)';
+      ctx.fillRect(0, h - 42, w, 42);
+      const swatches = [theme.primaryHex, theme.accentHex, '#0284C7', '#10B981', '#F8FAFC'];
+      swatches.forEach((hex, i) => {
+        ctx.fillStyle = hex;
+        ctx.fillRect(36 + i * 34, h - 30, 24, 18);
+      });
+      ctx.fillStyle = '#94A3B8';
+      ctx.font = 'bold 12px monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText(
+        'mahalla-cluster-app.vercel.app • AI Industrial Visual & Blueprint Synthesizer (1280×540 HD)',
+        w - 36,
+        h - 16
+      );
+    },
+    [cfg, customPrompt, isAr]
+  );
+
+  useEffect(() => {
+    if (!showVisualStudio) return;
+    const theme = MODULE_STUDIO_BACKDROPS[visualVariantIdx % MODULE_STUDIO_BACKDROPS.length];
+    renderVisualCanvas(visualVariantIdx);
+
+    if (!loadedBackdropRef.current[theme.url]) {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = theme.url;
+      img.onload = () => {
+        loadedBackdropRef.current[theme.url] = img;
+        renderVisualCanvas(visualVariantIdx);
+      };
+    }
+  }, [showVisualStudio, visualVariantIdx, renderVisualCanvas]);
+
   const handleGenerateFreeVisual = () => {
-    const subject =
-      customPrompt.trim() ||
-      `${cfg.titleEn} El-Mahalla Egyptian cotton textile manufacturing studio high resolution`;
-    const encoded = encodeURIComponent(
-      `Industrial textile engineering diagram and realistic studio photograph of: ${subject.slice(
-        0,
-        140
-      )}, El-Mahalla El-Kubra Egypt, luxury cotton, ISO laboratory, architectural lighting, 8k`
-    );
-    setAiImageUrl(
-      `https://image.pollinations.ai/prompt/${encoded}?width=1024&height=576&nologo=true&seed=${
-        Date.now() % 10000
-      }`
-    );
+    setShowVisualStudio(true);
+    setVisualVariantIdx((prev) => prev + 1);
+  };
+
+  const handleDownloadVisualPng = () => {
+    const canvas = visualCanvasRef.current;
+    if (!canvas) return;
+    const url = canvas.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `mahalla-ai-${selectedModule}-visual.png`;
+    a.click();
   };
 
   const handleCopy = () => {
@@ -400,29 +649,67 @@ export function UniversalModuleAiCopilot({
               </div>
             </form>
 
-            {/* Optional Free AI Generated Visual */}
-            {aiImageUrl && (
-              <div className="rounded-2xl border border-white/15 bg-slate-900/80 p-4 space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-amber-300">
-                    {t(
-                      'Free AI Generated Industrial / Product Concept Visual',
-                      'تصور بصري مولّد مجاناً بالذكاء الاصطناعي'
-                    )}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setAiImageUrl(null)}
-                    className="text-slate-400 hover:text-white"
-                  >
-                    ✕ {t('Close', 'إغلاق')}
-                  </button>
+            {/* Zero-Rate-Limit Interactive AI Visual & Engineering Blueprint Studio */}
+            {showVisualStudio && (
+              <div className="rounded-2xl border border-emerald-400/35 bg-slate-900/90 p-4 space-y-3 shadow-xl">
+                <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="font-extrabold text-amber-300 flex items-center gap-1.5">
+                      <ImageIcon className="h-4 w-4 text-emerald-400" />
+                      {t(
+                        'Free AI Generated Industrial & Product Concept Visual (HD 1280×540)',
+                        'التصور البصري والهندسي المولّد بالذكاء الاصطناعي (جودة عالية HD)'
+                      )}
+                    </span>
+                    <span className="rounded-full bg-emerald-500/20 border border-emerald-400/30 px-2.5 py-0.5 text-[10px] font-bold text-emerald-300">
+                      Zero-Limit Studio Engine
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setVisualVariantIdx((v) => v + 1)}
+                      className="inline-flex items-center gap-1 rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 px-2.5 py-1 text-[11px] font-bold text-white transition cursor-pointer"
+                    >
+                      <RefreshCw className="h-3 w-3 text-emerald-300" />
+                      {t('Switch Camera Angle', 'تبديل زاوية الكاميرا')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDownloadVisualPng}
+                      className="inline-flex items-center gap-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 px-2.5 py-1 text-[11px] font-extrabold text-slate-950 transition cursor-pointer"
+                    >
+                      <Download className="h-3 w-3" />
+                      {t('Download HD .PNG', 'تحميل الصورة .PNG')}
+                    </button>
+                    <Link
+                      href={`/${locale}/cluster/media-studio?prompt=${encodeURIComponent(
+                        customPrompt.trim() || cfg.titleEn
+                      )}`}
+                      className="inline-flex items-center gap-1 rounded-lg bg-purple-500/30 border border-purple-400/40 hover:bg-purple-500/40 px-2.5 py-1 text-[11px] font-bold text-purple-200 transition"
+                    >
+                      <Film className="h-3 w-3" />
+                      {t('Full Image & MP4 Video Studio', 'استوديو الصور والفيديو MP4 الكامل')}
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => setShowVisualStudio(false)}
+                      className="text-slate-400 hover:text-white px-1.5 font-bold cursor-pointer"
+                    >
+                      ✕ {t('Close', 'إغلاق')}
+                    </button>
+                  </div>
                 </div>
-                <img
-                  src={aiImageUrl}
-                  alt="AI Generated Textile Visual"
-                  className="w-full max-h-80 object-cover rounded-xl border border-white/10"
-                />
+
+                <div className="rounded-xl overflow-hidden border border-white/15 bg-slate-950">
+                  <canvas
+                    ref={visualCanvasRef}
+                    width={1280}
+                    height={540}
+                    className="w-full h-auto block"
+                  />
+                </div>
               </div>
             )}
 

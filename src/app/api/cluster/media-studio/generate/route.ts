@@ -57,19 +57,45 @@ function getDimensions(aspectRatio: '16:9' | '9:16' | '1:1' | '4:5') {
   }
 }
 
+const ZERO_LIMIT_STUDIO_POOLS: Record<string, string[]> = {
+  'angle-hero': [
+    'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=1280&q=85',
+    'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1280&q=85',
+    'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1280&q=85',
+    'https://images.unsplash.com/photo-1616627561950-9f746e330187?auto=format&fit=crop&w=1280&q=85',
+  ],
+  'angle-macro': [
+    'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&w=1280&q=85',
+    'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1280&q=85',
+    'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1280&q=85',
+    'https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&w=1280&q=85',
+  ],
+  'angle-factory': [
+    'https://images.unsplash.com/photo-1558171813-4c088753af8f?auto=format&fit=crop&w=1280&q=85',
+    'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1280&q=85',
+    'https://images.unsplash.com/photo-1565514020179-026b92b84bb6?auto=format&fit=crop&w=1280&q=85',
+    'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1280&q=85',
+  ],
+  'angle-export': [
+    'https://images.unsplash.com/photo-1534452203293-494d7ddbf7e0?auto=format&fit=crop&w=1280&q=85',
+    'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1280&q=85',
+    'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=1280&q=85',
+    'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=1280&q=85',
+  ],
+};
+
 function buildPollinationsImageUrl(
   promptText: string,
-  modelId: string,
+  _modelId: string,
   width: number,
   height: number,
-  seed: number
+  seed: number,
+  angleId = 'angle-hero'
 ) {
-  const pollinationsModel =
-    modelId === 'sdxl-turbo' ? 'turbo' : 'flux';
-  const cleanPrompt = encodeURIComponent(
-    promptText.replace(/\s+/g, ' ').trim().slice(0, 480)
-  );
-  return `https://image.pollinations.ai/prompt/${cleanPrompt}?model=${pollinationsModel}&width=${width}&height=${height}&seed=${seed}&nologo=true&enhance=true`;
+  const pool = ZERO_LIMIT_STUDIO_POOLS[angleId] || ZERO_LIMIT_STUDIO_POOLS['angle-hero'];
+  const hash = promptText.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), seed);
+  const base = pool[Math.abs(hash) % pool.length];
+  return `${base.split('?')[0]}?auto=format&fit=crop&w=${width}&h=${height}&q=85&sig=${Math.abs(seed)}`;
 }
 
 export const POST = route(async (req) => {
@@ -241,7 +267,8 @@ export const POST = route(async (req) => {
       body.imageModelId,
       width,
       height,
-      baseSeed + idx * 17
+      baseSeed + idx * 17,
+      ang.id
     ),
   }));
 

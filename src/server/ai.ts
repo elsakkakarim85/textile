@@ -221,7 +221,11 @@ async function tryZeroKeyFreeLlm(opts: {
       if (!res.ok) continue;
       const data = await res.json();
       const text = data?.choices?.[0]?.message?.content?.trim();
-      if (text && text.length > 20) {
+      if (
+        text &&
+        text.length > 20 &&
+        !/at its limit|free service is full|rate limit|too many requests/i.test(text)
+      ) {
         const displayModel =
           opts.preferredModel && opts.preferredModel !== 'auto'
             ? `free-llm:${opts.preferredModel} (${modelSlug})`
