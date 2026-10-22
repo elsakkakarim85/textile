@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { tr } from '@/lib/i18n-inline';
 import { PageHeader, Pill } from '@/components/cluster/ui';
 import { GoogleCreativeLabIntegration } from '@/components/cluster/modern/GoogleCreativeLabIntegration';
+import { AiMediaProductionStudio } from '@/components/cluster/modern/AiMediaProductionStudio';
 import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 import { Sparkles, Megaphone, Globe2, Gauge, Cpu } from 'lucide-react';
 
@@ -125,6 +126,9 @@ export default async function GoogleLabsHubPage({
         defaultTool={validTool}
         contextModule="hub"
       />
+
+      {/* Integrated AI Image & Multi-Scene HD Video Production Studio */}
+      <AiMediaProductionStudio locale={locale} defaultPurpose="B2B_BUYER_PITCH" />
     </div>
   );
 }

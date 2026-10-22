@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 import { GoogleCreativeLabIntegration } from '@/components/cluster/modern/GoogleCreativeLabIntegration';
+import { AiMediaProductionStudio } from '@/components/cluster/modern/AiMediaProductionStudio';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import mermaid from 'mermaid';
@@ -887,6 +888,12 @@ export default function AIBrainPage() {
           )}
         </div>
       )}
+
+      {/* AI Image & Multi-Scene HD Video Production Studio */}
+      <AiMediaProductionStudio
+        locale={locale}
+        defaultPurpose="FACTORY_TOUR_OEE"
+      />
 
       {/* Google Opal, Stitch, Pomelli & Mixboard Free AI Ecosystem Hub */}
       <GoogleCreativeLabIntegration

@@ -388,6 +388,17 @@ export default function Navbar({ locale }: { locale: string }) {
           accent: 'amber',
         },
         {
+          href: `/${locale}/cluster/media-studio`,
+          label: t('AI Image & Video Production Studio', 'استوديو إنتاج الصور والفيديوهات الذكي'),
+          desc: t(
+            'Generate 4-angle FLUX images & 5-scene HD WebM videos from company DNA & purpose',
+            'توليد صور فوتوغرافية بـ 4 زوايا وفيديوهات HD من 5 مشاهد بتحليل بيانات الشركة'
+          ),
+          icon: Sparkles,
+          badge: 'FLUX + Veo',
+          accent: 'emerald',
+        },
+        {
           href: `/${locale}/cluster/google-labs`,
           label: t('Google Pomelli, Stitch, Opal & Mixboard', 'استوديو جوجل: Pomelli • Stitch • Opal • Mixboard'),
           desc: t(

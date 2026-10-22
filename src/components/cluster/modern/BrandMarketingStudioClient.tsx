@@ -41,6 +41,7 @@ import {
 } from 'lucide-react';
 import { ExpertManualButton, openExpertManual } from '@/components/cluster/ExpertManualModal';
 import { GoogleCreativeLabIntegration } from '@/components/cluster/modern/GoogleCreativeLabIntegration';
+import { AiMediaProductionStudio } from '@/components/cluster/modern/AiMediaProductionStudio';
 
 interface Props {
   locale: string;
@@ -2398,8 +2399,14 @@ export function BrandMarketingStudioClient({
         </Card>
       )}
 
-      {/* TAB 7 OR PERSISTENT FOOTER: Google Labs Ecosystem (Pomelli, Mixboard, Stitch, Opal) */}
-      <div className="pt-2">
+      {/* TAB 7 OR PERSISTENT FOOTER: AI Image & Video Production Studio + Google Labs Ecosystem */}
+      <div className="pt-2 space-y-8">
+        <AiMediaProductionStudio
+          locale={locale}
+          defaultPurpose="B2B_BUYER_PITCH"
+          defaultCompanyName={isAr ? kit.brandNameAr : kit.brandNameEn}
+          defaultPrompt={isAr ? kit.topicAr : kit.topicEn}
+        />
         <GoogleCreativeLabIntegration
           locale={locale}
           defaultTool="pomelli"

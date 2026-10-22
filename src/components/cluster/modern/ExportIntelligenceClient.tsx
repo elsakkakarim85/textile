@@ -38,6 +38,7 @@ import { tr } from '@/lib/i18n-inline';
 import { Pill } from '@/components/cluster/ui';
 import { ExpertManualButton, openExpertManual } from '@/components/cluster/ExpertManualModal';
 import { GoogleCreativeLabIntegration } from '@/components/cluster/modern/GoogleCreativeLabIntegration';
+import { AiMediaProductionStudio } from '@/components/cluster/modern/AiMediaProductionStudio';
 import {
   EXPORT_INTELLIGENCE_PRESETS,
   synthesizeExportIntelligence,
@@ -2308,6 +2309,12 @@ Authorized Exporter Signatory: ${senderName}`;
           </div>
         </div>
       )}
+
+      {/* AI Image & Video Production Studio for International Buyers & Trade Fairs */}
+      <AiMediaProductionStudio
+        locale={locale}
+        defaultPurpose="B2B_BUYER_PITCH"
+      />
 
       {/* Google Pomelli, Opal, Stitch & Mixboard Export Campaign & Tariff Workflow Integration */}
       <GoogleCreativeLabIntegration
