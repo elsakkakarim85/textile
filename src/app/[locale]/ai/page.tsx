@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 import { GoogleCreativeLabIntegration } from '@/components/cluster/modern/GoogleCreativeLabIntegration';
 import { AiMediaProductionStudio } from '@/components/cluster/modern/AiMediaProductionStudio';
+import { SovereignNeuralLabPanel } from '@/components/cluster/modern/SovereignNeuralLabPanel';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import mermaid from 'mermaid';
@@ -130,7 +131,7 @@ export default function AIBrainPage() {
   const isAr = locale === 'ar';
   const t = (en: string, ar: string) => tr(locale, en, ar);
 
-  const [activeTab, setActiveTab] = useState<'chat' | 'agents' | 'arena'>('chat');
+  const [activeTab, setActiveTab] = useState<'chat' | 'agents' | 'arena' | 'sovereign'>('chat');
 
   // Tab 1: Chat State
   const [messages, setMessages] = useState<
@@ -499,6 +500,21 @@ export default function AIBrainPage() {
           >
             <Columns2 className="w-4 h-4" />
             {t('3. Multi-LLM Side-by-Side Benchmark Arena', '٣. ساحة المقارنة المزدوجة بين النماذج المجانية')}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('sovereign')}
+            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-extrabold transition cursor-pointer ${
+              activeTab === 'sovereign'
+                ? 'bg-emerald-600 text-white shadow'
+                : 'bg-emerald-500/15 border border-emerald-500/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/25'
+            }`}
+          >
+            <Cpu className="w-4 h-4" />
+            {t(
+              '4. Sovereign Neural Lab v4.0 (Built-From-Scratch • Unlimited)',
+              '٤. المختبر العصبي السيادي v4.0 (مبني من الصفر • بلا حدود)'
+            )}
           </button>
         </div>
 
@@ -945,6 +961,9 @@ export default function AIBrainPage() {
           )}
         </div>
       )}
+
+      {/* TAB 4: Built-From-Scratch Sovereign Neural Engine v4.0 Lab & Custom Trainer */}
+      {activeTab === 'sovereign' && <SovereignNeuralLabPanel locale={locale} />}
 
       {/* AI Image & Multi-Scene HD Video Production Studio */}
       <AiMediaProductionStudio
