@@ -40,7 +40,13 @@ export type GoogleIntegrationContext =
   | 'ai'
   | 'maturity'
   | 'facilities'
-  | 'marketplace';
+  | 'marketplace'
+  | 'sustainability'
+  | 'academy'
+  | 'dpp'
+  | 'consortia'
+  | 'procurement'
+  | 'hub';
 
 interface PomelliPreset {
   id: string;
@@ -534,6 +540,48 @@ const OPAL_WORKFLOWS: OpalWorkflowPreset[] = [
       },
     ],
   },
+  {
+    id: 'opal-academy-sop',
+    titleEn: 'Opal Pipeline 4: Skill Gap / Defect → UNIDO & ISO Standard Match → Bilingual SOP & Certification Quiz',
+    titleAr: 'سلسلة Opal ٤: فجوة المهارات / العيب الفني ← مطابقة معايير UNIDO و ISO ← درس عمل قياسي واختبار شهادة',
+    moduleId: 'academy',
+    defaultInput:
+      'Target Role: Reactive Dyeing Operators & Lab Technicians | Skill Gap: Reduce shade batch-to-batch variation from ΔE 1.3 to ΔE ≤ 0.5 using Datacolor Spectrophotometer & salt/alkali dosing curve.',
+    nodes: [
+      {
+        step: 1,
+        titleEn: 'Node 1: Competency Gap & Target Role Intake',
+        titleAr: 'العقدة ١: تحديد المسمى الوظيفي وفجوة الجدارات الفنية (ILUO)',
+        type: 'INPUT_SCHEMA',
+        detailEn: 'Captures target operator role, machine type, and measurable quality KPI target.',
+        detailAr: 'تحديد فئة المتدربين ونوع الماكينات ومؤشر الجودة المستهدف تحسينه.',
+      },
+      {
+        step: 2,
+        titleEn: 'Node 2: International Standard & Tolerance Matrix (ISO / AATCC / ZDHC)',
+        titleAr: 'العقدة ٢: ربط المعايير القياسية الدولية وحدود التفاوت المسموحة',
+        type: 'MATH_ENGINE',
+        detailEn: 'Maps course modules to ISO 105-C06, CMC(2:1) ΔE ≤ 0.5, and ZDHC MRSL v3.1.',
+        detailAr: 'ربط المحتوى التدريبي باختبارات ثبات اللون ISO 105 ومعادلة الفروق اللونية CMC.',
+      },
+      {
+        step: 3,
+        titleEn: 'Node 3: Free LLM 3-Tier Curriculum & One-Point Lesson Synthesizer',
+        titleAr: 'العقدة ٣: توليد منهج تدريبي متدرج (مبتدئ ← متقدم) وبطاقة عمل قياسية',
+        type: 'LLM_CHAIN',
+        detailEn: 'Synthesizes step-by-step operator instructions, troubleshooting table, and audio script.',
+        detailAr: 'بناء خطوات التشغيل القياسية وجدول تشخيص الأعطال ونص الشرح الصوتي.',
+      },
+      {
+        step: 4,
+        titleEn: 'Node 4: Verifiable MC-* Assessment Quiz & Printable Shop-Floor SOP',
+        titleAr: 'العقدة ٤: إصدار اختبار التقييم المعتمد وبطاقة SOP جاهزة للطباعة',
+        type: 'OUTPUT_ARTIFACT',
+        detailEn: 'Outputs graded competency exam questions and `.opal.json` training mini-app.',
+        detailAr: 'إصدار أسئلة الاختبار العملي مع تطبيق التدريب التفاعلي بصيغة .opal.json.',
+      },
+    ],
+  },
 ];
 
 export function GoogleCreativeLabIntegration({
@@ -552,39 +600,53 @@ export function GoogleCreativeLabIntegration({
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   // 1. Pomelli State
-  const [selectedPomelliId, setSelectedPomelliId] = useState<string>(POMELLI_PRESETS[0].id);
-  const [customUrl, setCustomUrl] = useState<string>(POMELLI_PRESETS[0].url);
+  const initialPomelli =
+    contextModule === 'sustainability' || contextModule === 'dpp'
+      ? POMELLI_PRESETS[1]
+      : contextModule === 'lean' || contextModule === 'procurement'
+      ? POMELLI_PRESETS[2]
+      : POMELLI_PRESETS[0];
+  const [selectedPomelliId, setSelectedPomelliId] = useState<string>(initialPomelli.id);
+  const [customUrl, setCustomUrl] = useState<string>(initialPomelli.url);
   const [pomelliAiOutput, setPomelliAiOutput] = useState<string | null>(null);
   const [pomelliLoading, setPomelliLoading] = useState(false);
 
   // 2. Mixboard State
-  const [selectedMixboardId, setSelectedMixboardId] = useState<string>(MIXBOARD_PRESETS[0].id);
+  const initialMixboardId =
+    contextModule === 'sustainability'
+      ? 'eco-spa-terry'
+      : contextModule === 'lean' || contextModule === 'procurement'
+      ? 'technical-workwear'
+      : MIXBOARD_PRESETS[0].id;
+  const [selectedMixboardId, setSelectedMixboardId] = useState<string>(initialMixboardId);
   const [remixCommand, setRemixCommand] = useState<string>('');
   const [remixNote, setRemixNote] = useState<string | null>(null);
 
   // 3. Stitch State
   const [selectedStitchId, setSelectedStitchId] = useState<string>(
-    contextModule === 'lean'
-      ? 'shopfloor-andon-ui'
-      : contextModule === 'maturity'
+    contextModule === 'dpp' || contextModule === 'sustainability'
+      ? 'dpp-qr-mobile'
+      : contextModule === 'lean' || contextModule === 'maturity'
       ? 'shopfloor-andon-ui'
       : 'b2b-buyer-portal'
   );
-  const [stitchViewport, setStitchViewport] = useState<'desktop' | 'mobile'>('desktop');
+  const [stitchViewport, setStitchViewport] = useState<'desktop' | 'mobile'>(
+    contextModule === 'dpp' || contextModule === 'sustainability' ? 'mobile' : 'desktop'
+  );
   const [customVibeInput, setCustomVibeInput] = useState<string>('');
 
   // 4. Opal State
-  const [selectedOpalId, setSelectedOpalId] = useState<string>(
-    contextModule === 'lean'
+  const initialOpalId =
+    contextModule === 'sustainability' || contextModule === 'dpp'
+      ? 'opal-esg-cbam'
+      : contextModule === 'academy'
+      ? 'opal-academy-sop'
+      : contextModule === 'lean' || contextModule === 'maturity' || contextModule === 'ai'
       ? 'opal-lean-kaizen'
-      : contextModule === 'ai'
-      ? 'opal-lean-kaizen'
-      : 'opal-brand-export'
-  );
+      : 'opal-brand-export';
+  const [selectedOpalId, setSelectedOpalId] = useState<string>(initialOpalId);
   const [opalInput, setOpalInput] = useState<string>(
-    OPAL_WORKFLOWS.find((w) =>
-      contextModule === 'lean' ? w.id === 'opal-lean-kaizen' : w.id === 'opal-brand-export'
-    )?.defaultInput || OPAL_WORKFLOWS[0].defaultInput
+    OPAL_WORKFLOWS.find((w) => w.id === initialOpalId)?.defaultInput || OPAL_WORKFLOWS[0].defaultInput
   );
   const [opalRunningStep, setOpalRunningStep] = useState<number>(0);
   const [opalOutput, setOpalOutput] = useState<string | null>(null);

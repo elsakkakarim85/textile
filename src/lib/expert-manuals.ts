@@ -3924,6 +3924,7 @@ export function resolveManualByPathname(pathname: string): ExpertManualEntry {
   if (clean.startsWith('/cluster/lean-manufacturing')) return EXPERT_MANUALS['lean-manufacturing'];
   if (clean.startsWith('/cluster/export-intelligence')) return EXPERT_MANUALS['export-intelligence'];
   if (clean.startsWith('/cluster/brand-studio')) return EXPERT_MANUALS['brand-studio'];
+  if (clean.startsWith('/cluster/google-labs')) return EXPERT_MANUALS['google-pomelli'];
   if (clean.startsWith('/cluster/academy/studio')) return EXPERT_MANUALS['academy-studio'];
   if (clean.startsWith('/cluster/academy')) return EXPERT_MANUALS['academy'];
   if (clean.startsWith('/cluster/procurement')) return EXPERT_MANUALS['procurement'];

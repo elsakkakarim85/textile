@@ -5,6 +5,7 @@ import { safeQuery } from '@/server/cluster';
 import { tr, fmtMoney, fmtNumber, daysUntil } from '@/lib/i18n-inline';
 import { PageHeader, StatCard, Pill, ProgressBar, EmptyState, DbOfflineBanner } from '@/components/cluster/ui';
 import { ProcurementPoolCreateForm } from '@/components/cluster/collab/ProcurementPoolCreateForm';
+import { GoogleCreativeLabIntegration } from '@/components/cluster/modern/GoogleCreativeLabIntegration';
 import { ShoppingCart, Users, TrendingDown, Layers, Calendar, ArrowRight } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
@@ -230,6 +231,15 @@ export default async function ProcurementListPage({
             />
           </div>
         )}
+      </div>
+
+      {/* Google Opal Bulk Cost-Savings Workflow & Mixboard Technical Spec Studio */}
+      <div className="mt-10">
+        <GoogleCreativeLabIntegration
+          locale={locale}
+          defaultTool="opal"
+          contextModule="procurement"
+        />
       </div>
     </div>
   );

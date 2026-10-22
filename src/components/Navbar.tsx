@@ -388,6 +388,17 @@ export default function Navbar({ locale }: { locale: string }) {
           accent: 'amber',
         },
         {
+          href: `/${locale}/cluster/google-labs`,
+          label: t('Google Pomelli, Stitch, Opal & Mixboard', 'استوديو جوجل: Pomelli • Stitch • Opal • Mixboard'),
+          desc: t(
+            'Free Google Labs Business DNA campaigns, swatch moodboards, UI prototyper & Opal AI mini-apps',
+            'استخراج الحمض النووي التسويقي، لوحات الألوان، تصميم الواجهات، وتطبيقات Opal الذكية'
+          ),
+          icon: Sparkles,
+          badge: 'Google Labs',
+          accent: 'blue',
+        },
+        {
           href: `/${locale}/dashboard/knowledge`,
           label: t('Industrial RAG Knowledge Base', 'قاعدة المعرفة الهندسية والقياسية (RAG)'),
           desc: t(

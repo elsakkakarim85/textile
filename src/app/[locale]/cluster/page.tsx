@@ -11,6 +11,7 @@ import { PageHeader, StatCard, DbOfflineBanner } from '@/components/cluster/ui';
 import { InstantBrandStudioBar } from '@/components/cluster/modern/InstantBrandStudioBar';
 import { InstantExportIntelligenceBar } from '@/components/cluster/modern/InstantExportIntelligenceBar';
 import { InstantLeanStudioBar } from '@/components/cluster/modern/InstantLeanStudioBar';
+import { GoogleCreativeLabIntegration } from '@/components/cluster/modern/GoogleCreativeLabIntegration';
 import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 
 export const dynamic = 'force-dynamic';
@@ -82,6 +83,7 @@ export default async function ClusterHubPage({ params }: { params: Promise<{ loc
         { href: 'academy', icon: GraduationCap, en: 'Cluster Academy', ar: 'أكاديمية التجمع', descEn: 'Practical courses for workers and managers with verifiable certificates.', descAr: 'دورات عملية للعمال والمديرين بشهادات قابلة للتحقق.', stat: c.courses },
         { href: 'academy/studio', icon: Sparkles, en: 'AI Course Studio', ar: 'منشئ الدورات الذكي', descEn: 'Generate Beginner-to-Advanced multimedia courses from your factory needs & authorized UNIDO/ZDHC/ISO standards.', descAr: 'إنشاء دورات متعددة الوسائط (مبتدئ ← متقدم) حسب احتياجات مصنعك وبمراجع دولية معتمدة.' },
         { href: 'brand-studio', icon: Megaphone, en: 'AI Brand & Marketing Studio', ar: 'استوديو الهوية والتسويق الذكي', descEn: 'Build textile brands, automate omnichannel campaigns, and generate promo videos, photos, brochures, flyers & posters.', descAr: 'إنشاء العلامات التجارية، أتمتة الخطط التسويقية، وتوليد الفيديوهات والصور والبروشورات والفلايرز والبوسترات.' },
+        { href: 'google-labs', icon: Sparkles, en: 'Google Pomelli, Stitch, Opal & Mixboard', ar: 'استوديو جوجل (Pomelli • Stitch • Opal • Mixboard)', descEn: 'Extract Business DNA & B2B ads with Pomelli, build Pantone TCX moodboards in Mixboard, prototype UIs in Stitch, and run 4-node AI mini-apps in Opal.', descAr: 'استخراج الهوية التسويقية بـ Pomelli، لوحات الأقمشة بـ Mixboard، تصميم واجهات الأندون والمشترين بـ Stitch، وتطبيقات Opal الذكية.' },
         { href: 'sustainability', icon: Leaf, en: 'Sustainability & CBAM', ar: 'الاستدامة و CBAM', descEn: 'Track energy, water, chemicals and CO₂e; get EU-market ready.', descAr: 'تتبع الطاقة والمياه والكيماويات والانبعاثات واستعد للسوق الأوروبي.' },
         { href: 'funding', icon: Landmark, en: 'Funding & Grants', ar: 'التمويل والمنح', descEn: 'Grants, green loans and technical assistance matched to your gaps.', descAr: 'منح وقروض خضراء ودعم فني مطابق لاحتياجاتك.', stat: c.programs },
       ],
@@ -165,7 +167,7 @@ export default async function ClusterHubPage({ params }: { params: Promise<{ loc
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {g.mods.map((m) => {
                 const Icon = m.icon;
-                const manualId = m.href === 'academy/studio' ? 'academy-studio' : m.href;
+                const manualId = m.href === 'academy/studio' ? 'academy-studio' : m.href === 'google-labs' ? 'google-pomelli' : m.href;
                 return (
                   <Link key={m.href} href={`${base}/${m.href}`} className={`group relative rounded-xl border bg-gradient-to-br ${g.tone} to-transparent p-5 transition-all hover:shadow-md hover:-translate-y-0.5`}>
                     <div className="flex items-start justify-between gap-2">
@@ -188,6 +190,15 @@ export default async function ClusterHubPage({ params }: { params: Promise<{ loc
             </div>
           </section>
         ))}
+      </div>
+
+      {/* Embedded Google Labs Suite (Pomelli, Mixboard, Stitch, Opal) */}
+      <div className="mt-12">
+        <GoogleCreativeLabIntegration
+          locale={locale}
+          defaultTool="pomelli"
+          contextModule="hub"
+        />
       </div>
     </div>
   );

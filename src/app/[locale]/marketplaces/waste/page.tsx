@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { tr } from '@/lib/i18n-inline';
 import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
+import { GoogleCreativeLabIntegration } from '@/components/cluster/modern/GoogleCreativeLabIntegration';
 
 export default function WasteMarketplacePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = use(params);
@@ -188,6 +189,13 @@ export default function WasteMarketplacePage({ params }: { params: Promise<{ loc
           })}
         </div>
       )}
+
+      {/* Google Opal Circular Carbon Auditor & Mixboard GRS Upcycled Moodboard */}
+      <GoogleCreativeLabIntegration
+        locale={locale}
+        defaultTool="opal"
+        contextModule="sustainability"
+      />
     </div>
   );
 }

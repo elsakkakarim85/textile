@@ -5,6 +5,7 @@ import { tr, fmtNumber } from '@/lib/i18n-inline';
 import { PageHeader, StatCard, DbOfflineBanner, Pill } from '@/components/cluster/ui';
 import { SustainabilityChart } from '@/components/cluster/modern/SustainabilityChart';
 import SustainabilityEntryForm from '@/components/cluster/modern/SustainabilityEntryForm';
+import { GoogleCreativeLabIntegration } from '@/components/cluster/modern/GoogleCreativeLabIntegration';
 import { Leaf, Droplets, Recycle, TrendingDown, CheckCircle2, Sun, Sparkles, GraduationCap } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import Link from 'next/link';
@@ -216,6 +217,15 @@ export default async function SustainabilityPage({ params }: { params: Promise<{
           </div>
         </div>
       )}
+
+      {/* Google Opal CBAM/ESPR Auditor Mini-App & Google Stitch DPP Mobile UI Prototyper */}
+      <div className="mt-10">
+        <GoogleCreativeLabIntegration
+          locale={locale}
+          defaultTool="opal"
+          contextModule="sustainability"
+        />
+      </div>
     </div>
   );
 }

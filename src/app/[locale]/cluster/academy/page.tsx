@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { CertificateVerifierBar, type IssuedCertItem } from '@/components/cluster/modern/CertificateVerifierBar';
 import { InstantTopicCourseBar } from '@/components/cluster/modern/InstantTopicCourseBar';
+import { GoogleCreativeLabIntegration } from '@/components/cluster/modern/GoogleCreativeLabIntegration';
 
 export const dynamic = 'force-dynamic';
 
@@ -392,6 +393,13 @@ export default async function AcademyPage({
           </div>
         )}
       </div>
+
+      {/* Google Opal SOP & Certification Mini-App Builder + Mixboard & Stitch Training Tools */}
+      <GoogleCreativeLabIntegration
+        locale={locale}
+        defaultTool="opal"
+        contextModule="academy"
+      />
     </div>
   );
 }

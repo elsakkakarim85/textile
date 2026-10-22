@@ -7,6 +7,7 @@ import { tr } from '@/lib/i18n-inline';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
+import { GoogleCreativeLabIntegration } from '@/components/cluster/modern/GoogleCreativeLabIntegration';
 import {
   FileText,
   Send,
@@ -524,6 +525,13 @@ export default function MatchmakingPage() {
           </div>
         </div>
       )}
+
+      {/* Google Opal Landed-Cost Quoter & Google Pomelli B2B Supplier Pitch Studio */}
+      <GoogleCreativeLabIntegration
+        locale={locale}
+        defaultTool="opal"
+        contextModule="marketplace"
+      />
     </div>
   );
 }

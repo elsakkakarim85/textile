@@ -3,6 +3,7 @@ import { safeQuery } from '@/server/cluster';
 import { tr } from '@/lib/i18n-inline';
 import { PageHeader, EmptyState, DbOfflineBanner, Pill } from '@/components/cluster/ui';
 import { ConsortiumForm } from '@/components/cluster/collab/ConsortiumForm';
+import { GoogleCreativeLabIntegration } from '@/components/cluster/modern/GoogleCreativeLabIntegration';
 import { Network, Target, Users, ArrowRight } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import Link from 'next/link';
@@ -108,6 +109,15 @@ export default async function ConsortiaPage({ params }: { params: Promise<{ loca
             />
           </div>
         )}
+      </div>
+
+      {/* Google Pomelli Joint-Brand Export Campaign & Google Opal Consortium Quoter */}
+      <div className="mt-10">
+        <GoogleCreativeLabIntegration
+          locale={locale}
+          defaultTool="pomelli"
+          contextModule="consortia"
+        />
       </div>
     </div>
   );

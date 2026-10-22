@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { tr } from '@/lib/i18n-inline';
 import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
+import { GoogleCreativeLabIntegration } from '@/components/cluster/modern/GoogleCreativeLabIntegration';
 
 export default function ResourcesMarketplacePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = use(params);
@@ -182,6 +183,13 @@ export default function ResourcesMarketplacePage({ params }: { params: Promise<{
           })}
         </div>
       )}
+
+      {/* Google Mixboard Yarn/Dyestuff Swatch Studio & Google Opal Landed-Cost Calculator */}
+      <GoogleCreativeLabIntegration
+        locale={locale}
+        defaultTool="mixboard"
+        contextModule="marketplace"
+      />
     </div>
   );
 }
