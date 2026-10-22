@@ -620,9 +620,12 @@ export function runSovereignTextileModel(opts: {
   prompt: string;
   systemContext?: string;
   localeHint?: string;
+  locale?: string;
+  moduleKey?: string;
 }): { text: string; model: string; telemetry: ExtractedTextileTelemetry } {
   const telemetry = extractTextileTelemetry(opts.prompt);
-  const isAr = opts.localeHint ? opts.localeHint === 'ar' : telemetry.isArabic;
+  const hint = opts.localeHint || opts.locale;
+  const isAr = hint ? hint === 'ar' : telemetry.isArabic;
   const sys = opts.systemContext || '';
 
   const verifiedFactoriesBlock =
@@ -1085,3 +1088,6 @@ ${
 }`,
   };
 }
+
+export const runSovereignTextileLm = runSovereignTextileModel;
+
