@@ -31,6 +31,7 @@ import {
 import { tr, fmtNumber } from '@/lib/i18n-inline';
 import { Pill } from '@/components/cluster/ui';
 import { ExpertManualButton, openExpertManual } from '@/components/cluster/ExpertManualModal';
+import { GoogleCreativeLabIntegration } from '@/components/cluster/modern/GoogleCreativeLabIntegration';
 import {
   synthesizeLeanBlueprint,
   LEAN_DEPARTMENTS,
@@ -2779,6 +2780,13 @@ ${isAr ? a3.followUpStandardAr : a3.followUpStandardEn}
           </div>
         )}
       </div>
+
+      {/* Google Opal Industrial Mini-App & Google Stitch Andon/OEE UI Prototyper */}
+      <GoogleCreativeLabIntegration
+        locale={locale}
+        defaultTool="opal"
+        contextModule="lean"
+      />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { currentUserId, findUserFactory, safeQuery } from '@/server/cluster';
 import { tr, fmtDate } from '@/lib/i18n-inline';
 import { PageHeader, Pill } from '@/components/cluster/ui';
 import MaturityWizard from '@/components/cluster/modern/MaturityWizard';
+import { GoogleCreativeLabIntegration } from '@/components/cluster/modern/GoogleCreativeLabIntegration';
 import { Gauge, ArrowRight, History } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
@@ -73,6 +74,13 @@ export default async function MaturityAssessmentPage({ params }: { params: Promi
       )}
 
       <MaturityWizard locale={locale} />
+
+      {/* Google Stitch UI/UX Prototyper & Google Opal Industry 4.0 Mini-App Builder */}
+      <GoogleCreativeLabIntegration
+        locale={locale}
+        defaultTool="stitch"
+        contextModule="maturity"
+      />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { tr } from '@/lib/i18n-inline';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
+import { GoogleCreativeLabIntegration } from '@/components/cluster/modern/GoogleCreativeLabIntegration';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import mermaid from 'mermaid';
@@ -886,6 +887,13 @@ export default function AIBrainPage() {
           )}
         </div>
       )}
+
+      {/* Google Opal, Stitch, Pomelli & Mixboard Free AI Ecosystem Hub */}
+      <GoogleCreativeLabIntegration
+        locale={locale}
+        defaultTool="opal"
+        contextModule="ai"
+      />
     </div>
   );
 }

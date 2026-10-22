@@ -5,6 +5,7 @@ import { safeQuery } from '@/server/cluster';
 import { tr, fmtMoney } from '@/lib/i18n-inline';
 import { PageHeader, EmptyState, DbOfflineBanner, Pill } from '@/components/cluster/ui';
 import { FacilityBookForm } from '@/components/cluster/collab/FacilityBookForm';
+import { GoogleCreativeLabIntegration } from '@/components/cluster/modern/GoogleCreativeLabIntegration';
 import { FlaskConical, MapPin, UserSquare2, ShieldCheck } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
@@ -167,6 +168,15 @@ export default async function FacilitiesPage({
             />
           </div>
         )}
+      </div>
+
+      {/* Google Mixboard CAD/Swatch Moodboarding & Google Labs Suite for Shared Studios */}
+      <div className="mt-10">
+        <GoogleCreativeLabIntegration
+          locale={locale}
+          defaultTool="mixboard"
+          contextModule="facilities"
+        />
       </div>
     </div>
   );

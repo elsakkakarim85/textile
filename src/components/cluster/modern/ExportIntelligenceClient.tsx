@@ -37,6 +37,7 @@ import {
 import { tr } from '@/lib/i18n-inline';
 import { Pill } from '@/components/cluster/ui';
 import { ExpertManualButton, openExpertManual } from '@/components/cluster/ExpertManualModal';
+import { GoogleCreativeLabIntegration } from '@/components/cluster/modern/GoogleCreativeLabIntegration';
 import {
   EXPORT_INTELLIGENCE_PRESETS,
   synthesizeExportIntelligence,
@@ -2307,6 +2308,13 @@ Authorized Exporter Signatory: ${senderName}`;
           </div>
         </div>
       )}
+
+      {/* Google Pomelli, Opal, Stitch & Mixboard Export Campaign & Tariff Workflow Integration */}
+      <GoogleCreativeLabIntegration
+        locale={locale}
+        defaultTool="pomelli"
+        contextModule="export"
+      />
     </div>
   );
 }

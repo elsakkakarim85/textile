@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { tr } from '@/lib/i18n-inline';
 import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
+import { GoogleCreativeLabIntegration } from '@/components/cluster/modern/GoogleCreativeLabIntegration';
 
 export default function ProductsMarketplacePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = use(params);
@@ -199,6 +200,13 @@ export default function ProductsMarketplacePage({ params }: { params: Promise<{ 
           })}
         </div>
       )}
+
+      {/* Google Mixboard Swatch Moodboard, Stitch B2B Portal & Pomelli Export Ad Studio */}
+      <GoogleCreativeLabIntegration
+        locale={locale}
+        defaultTool="mixboard"
+        contextModule="marketplace"
+      />
     </div>
   );
 }

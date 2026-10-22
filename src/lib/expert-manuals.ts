@@ -3728,6 +3728,189 @@ export const EXPERT_MANUALS: Record<string, ExpertManualEntry> = {
     proTipEn: 'Re-run the Maturity Assessment every quarter after completing Lean or ESG upgrades to track your score climb!',
     proTipAr: 'أعد إجراء تقييم النضج الرقمي كل ربع سنة بعد تنفيذ تحسينات اللين أو الاستدامة لمتابعة تقدم مصنعك!',
   },
+
+  // ============================================================================
+  // 14. GOOGLE LABS FREE AI SUITE (POMELLI, MIXBOARD, STITCH, OPAL)
+  // ============================================================================
+  'google-pomelli': {
+    id: 'google-pomelli',
+    category: 'ai_academy',
+    badgeEn: 'Google Labs Pomelli Manual',
+    badgeAr: 'دليل Google Pomelli للهوية والإعلانات',
+    titleEn: 'Google Pomelli — Business DNA Extractor & On-Brand B2B/B2C Ad Studio',
+    titleAr: 'أداة Google Pomelli — استخراج البصمة التسويقية (Business DNA) وتوليد الإعلانات',
+    subtitleEn: 'Extract your mill’s visual DNA (colors, fonts, tone) and generate on-brand social & trade-fair ad creatives',
+    subtitleAr: 'استخرج الهوية البصرية والنبرة التسويقية لمصنعك وولّد حملات إعلانية متوافقة تلقائياً مع علامتك التجارية',
+    whatIsThisEn:
+      'An integrated Google Labs Pomelli (`labs.google/pomelli`) Business DNA & On-Brand Campaign Engine embedded inside the Brand Studio and Export Intelligence modules.',
+    whatIsThisAr:
+      'محرك متكامل مع أداة Google Pomelli المجانية من مختبرات جوجل، يقوم ببناء ملف البصمة التسويقية للمصنع (Business DNA) وتوليد إعلانات وحملات تصديرية مطابقة لهوية المصنع.',
+    howItWorksEn:
+      'Analyzes your factory URL or product profile to synthesize a structured `Business DNA` profile (Primary/Secondary Hex Palette, Heading/Body Typography, Brand Archetype, Voice Pillars, and Proof Badges) and renders live on-brand B2B LinkedIn, Instagram/Facebook, Heimtextil Booth, and WhatsApp Catalog ad creatives + 1-click export to Google Pomelli.',
+    howItWorksAr:
+      'يحلل رابط موقع المصنع أو ملفه التعريفي لاستخراج البصمة البصرية (الألوان، الخطوط، نبرة الصوت، ونقاط القوة التصديرية) ويصمم بطاقات إعلانية حية لمنصات LinkedIn و Instagram ومعرض Heimtextil وكتالوج واتساب مع التصدير المباشر إلى Google Pomelli.',
+    formulaOrArchitecture:
+      'Factory URL / Profile → Business DNA JSON (Colors + Typography + Voice + USPs) → Multi-Channel On-Brand Ad Renderer + Pomelli Deep-Link',
+    whyToUseEn: [
+      'Eliminates off-brand, inconsistent social media posts and trade-show banners across your export team.',
+      'Generates ready-to-use Business DNA JSON profiles and ad prompts for Google Pomelli in 1 click.',
+    ],
+    whyToUseAr: [
+      'القضاء على العشوائية البصرية في إعلانات المصنع وضمان توحيد الهوية في جميع المنصات والمعارض الدولية.',
+      'توليد ملف Business DNA القياسي وبطاقات الإعلانات الجاهزة للنشر أو الفتح في Google Pomelli بضغطة زر.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Select a Mahalla Factory Preset or Enter Your Website URL',
+        titleAr: '١. اختر قالب مصنع جاهز أو أدخل رابط موقع مصنعك',
+        detailEn: 'Click "Extract Business DNA & Generate Pomelli Ads" to synthesize your palette, typography, and tone.',
+        detailAr: 'اضغط "استخراج Business DNA وتوليد إعلانات Pomelli" لبناء الهوية البصرية والرسائل التسويقية.',
+      },
+      {
+        titleEn: '2. Preview Live Ad Cards & Launch Google Pomelli',
+        titleAr: '٢. عاين البطاقات الإعلانية الحية وافتح Google Pomelli',
+        detailEn: 'Copy the Pomelli Business DNA prompt or download the JSON manifest and click "Open Google Pomelli".',
+        detailAr: 'انسخ موجه Pomelli أو حمّل ملف الهوية واضغط "فتح Google Pomelli" للمتابعة المجانية.',
+      },
+    ],
+    proTipEn: 'Feed your verified EU Digital Product Passport (DPP) URL into Pomelli so it automatically pulls your OEKO-TEX, GOTS, and CO2e metrics into every ad headline!',
+    proTipAr: 'أدخل رابط جواز المنتج الرقمي الأوروبي (DPP) الخاص بمصنعك في Pomelli ليقوم بتضمين شهادات أيكوتكس والبصمة الكربونية تلقائياً في عناوين إعلاناتك!',
+  },
+
+  'google-mixboard': {
+    id: 'google-mixboard',
+    category: 'ai_academy',
+    badgeEn: 'Google Mixboard Manual',
+    badgeAr: 'دليل Google Mixboard للوحات الإلهام',
+    titleEn: 'Google Mixboard — AI Textile Collection, Swatch & Weave Moodboard Canvas',
+    titleAr: 'لوحة Google Mixboard — تصميم لوحات الإلهام والعينات النسيجية والمجموعات الموسمية',
+    subtitleEn: 'Blend textile swatches, Pantone palettes, weave structures & AI visual concepts on an interactive board',
+    subtitleAr: 'ادمج عينات الأقمشة، باليتات الألوان، التراكيب النسجية، والمفاهيم البصرية بالذكاء الاصطناعي في لوحة تفاعلية',
+    whatIsThisEn:
+      'An interactive visual concepting and textile moodboard workspace modeled on Google Labs Mixboard (`mixboard.withgoogle.com`), tailored for spinning, weaving, dyeing, and home-textile designers.',
+    whatIsThisAr:
+      'مساحة عمل بصرية تفاعلية لتصميم لوحات الإلهام النسيجية (Moodboards) على غرار أداة Google Mixboard، مخصصة لمصممي الغزل والنسيج والمفروشات والملابس بالمحلة الكبرى.',
+    howItWorksEn:
+      'Combines 5 synchronized design layers on a single board: (1) Seasonal Pantone/Hex Color Swatches, (2) Micro-Weave Structure Specs (Sateen 4/1, Jacquard Terry, Compact Jersey), (3) Interior/Hospitality Visual Concept Cards, (4) Natural-Language Board Remix Commands, and (5) Auto-Generated Collection Story & Buyer Spec Sheet.',
+    howItWorksAr:
+      'تجمع 5 طبقات تصميمية متزامنة: باليتات الألوان القياسية، مخططات التراكيب النسجية الدقيقة، بطاقات التصور البصري للفنادق والمفروشات، أوامر الدمج والتعديل باللغة الطبيعية، وقصة المجموعة للمشترين.',
+    formulaOrArchitecture:
+      'Interactive Swatch Tiles + Weave Structure Matrix + Natural-Language Remix Prompt + Imagen 4 / Mixboard Export',
+    whyToUseEn: [
+      'Turns raw fabric specs (e.g., 300 TC Giza 86 Sateen or 550 GSM Terry) into a luxury visual moodboard that wins European hospitality and retail buyers.',
+      'Lets you remix colors, textures, and room settings using natural language prompts.',
+    ],
+    whyToUseAr: [
+      'تحويل المواصفات الفنية الجافة للأقمشة إلى لوحة إلهام بصرية فاخرة تقنع مشتري الفنادق وسلاسل التجزئة الأوروبية.',
+      'إمكانية تعديل الألوان والخامات وأجواء العرض باستخدام أوامر نصية بسيطة.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Pick a Collection Board Preset or Type a Natural-Language Remix Command',
+        titleAr: '١. اختر لوحة مجموعة نسيجية جاهزة أو اكتب أمر تعديل باللغة الطبيعية',
+        detailEn: 'Choose from Heimtextil Hospitality, Mediterranean Spa Terry, Royal Damask, or GRS Eco-Denim.',
+        detailAr: 'اختر من قوالب مفروشات الفنادق، فوط السبا، الدماسك الفاخر، أو الدنيم المستدام.',
+      },
+      {
+        titleEn: '2. Customize Swatches & Export the Moodboard Brief',
+        titleAr: '٢. خصص عينات الألوان وحمّل ملف لوحة الإلهام الكامل',
+        detailEn: 'Copy the Imagen 4 / Mixboard visual prompts or download the complete Markdown/HTML Moodboard.',
+        detailAr: 'انسخ أوامر التوليد البصري أو حمّل وثيقة لوحة الإلهام لإرسالها للمشتري أو استوديو CAD.',
+      },
+    ],
+    proTipEn: 'Attach a Mixboard Collection Moodboard alongside your technical quotation when bidding on hospitality or retail RFQs!',
+    proTipAr: 'أرفق لوحة إلهام Mixboard مع عرض السعر الفني عند التقديم على مناقصات الفنادق وسلاسل التجزئة لرفع فرص فوزك بالعقد!',
+  },
+
+  'google-stitch': {
+    id: 'google-stitch',
+    category: 'ai_academy',
+    badgeEn: 'Google Stitch UI Manual',
+    badgeAr: 'دليل Google Stitch لتصميم الواجهات',
+    titleEn: 'Google Stitch — AI-Native UI/UX, B2B Buyer Portal & Shop-Floor App Prototyper',
+    titleAr: 'أداة Google Stitch — تصميم واجهات بوابات المشترين وتطبيقات المصنع الرقمية بالذكاء الاصطناعي',
+    subtitleEn: 'Vibe-design B2B swatch ordering portals, EU DPP mobile scanners & shop-floor Andon dashboards with code export',
+    subtitleAr: 'صمّم واجهات بوابات التصدير، تطبيقات فحص جواز المنتج الأوروبي، وشاشات الأندون بالمصنع مع تصدير الكود',
+    whatIsThisEn:
+      'An integrated Google Stitch (`stitch.withgoogle.com`) UI/UX prototyping studio that generates high-fidelity web & mobile interface previews, Vibe-Design prompts, and production React/Tailwind code for textile mills.',
+    whatIsThisAr:
+      'استوديو متكامل مع أداة Google Stitch المجانية لتصميم النماذج الأولية لواجهات المواقع والتطبيقات الصناعية والتجارية مع معاينة حية وتصدير كود React/Tailwind جاهز للتشغيل.',
+    howItWorksEn:
+      'Provides 4 specialized industrial UI blueprints (B2B Buyer Swatch & RFQ Portal, EU DPP Mobile QR Verification App, Shop-Floor Loom OEE & Andon Tablet UI, and Luxury Egyptian Cotton DTC Storefront) with a live interactive wireframe preview, Vibe-Design prompt generator, and 1-click handoff to `stitch.withgoogle.com`.',
+    howItWorksAr:
+      'يوفر 4 نماذج واجهات صناعية وتجارية جاهزة (بوابة المشترين الدوليين، تطبيق فحص جواز المنتج DPP، شاشة تابلت مراقبة الأنوال والأندون، ومتجر إلكتروني للمفروشات الفاخرة) مع معاينة تفاعلية حية وتصدير الكود وفتح Google Stitch مباشرة.',
+    formulaOrArchitecture:
+      'Vibe-Design Prompt → Live Interactive UI Canvas Preview → Production React/Tailwind Code + stitch.withgoogle.com Handoff',
+    whyToUseEn: [
+      'Accelerates Industry 4.0 digital transformation by letting factory engineers prototype shop-floor and buyer apps in seconds without hiring a UI agency.',
+      'Exports clean Tailwind CSS + React component code and optimized Stitch prompts.',
+    ],
+    whyToUseAr: [
+      'تسريع التحول الرقمي (Industry 4.0) بتمكين المصنع من تصميم واجهات بوابات التصدير وشاشات العنابر في ثوانٍ مجاناً.',
+      'تصدير كود برمجي نظيف (React + Tailwind) وموجهات جاهزة للصق مباشرة في Google Stitch.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Select an Industrial UI Blueprint or Describe Your App Idea',
+        titleAr: '١. اختر نموذج واجهة جاهز أو صف فكرة التطبيق المطلوب',
+        detailEn: 'Switch between Desktop Web Portal and Mobile/Tablet viewports in the live preview canvas.',
+        detailAr: 'بدّل بين وضع شاشة الكمبيوتر أو الموبايل/التابلت لمعاينة الواجهة التفاعلية مباشرة.',
+      },
+      {
+        titleEn: '2. Copy the Vibe-Design Prompt or React Code & Open Google Stitch',
+        titleAr: '٢. انسخ موجه التصميم أو كود React وافتح Google Stitch',
+        detailEn: 'Click "Copy Prompt & Launch Google Stitch (stitch.withgoogle.com)" to iterate further with voice/AI.',
+        detailAr: 'اضغط "نسخ الموجه وفتح Google Stitch" لمتابعة التعديل الصوتي والبصري المجاني.',
+      },
+    ],
+    proTipEn: 'Use Google Stitch when applying for digital transformation grants in the Funding Hub to attach a visual UI prototype of your proposed ERP/B2B portal!',
+    proTipAr: 'استخدم Google Stitch عند التقديم على منح التحول الرقمي لإرفاق نموذج بصري لواجهة النظام المقترح مما يضاعف فرصة قبول المنحة!',
+  },
+
+  'google-opal': {
+    id: 'google-opal',
+    category: 'ai_academy',
+    badgeEn: 'Google Opal Workflow Manual',
+    badgeAr: 'دليل Google Opal لبناء التطبيقات الذكية',
+    titleEn: 'Google Opal — No-Code Multi-Step AI Mini-App & Industrial Workflow Builder',
+    titleAr: 'أداة Google Opal — بناء التطبيقات الذكية المصغرة وسلاسل العمل الآلية بدون برمجة',
+    subtitleEn: 'Chain telemetry inputs, engineering calculators & Free LLMs into reusable multi-step industrial mini-apps',
+    subtitleAr: 'اربط المدخلات الهندسية والحاسبات ونماذج الذكاء الاصطناعي في تطبيقات مصغرة متعددة الخطوات بدون كود',
+    whatIsThisEn:
+      'An integrated Google Opal (`opal.withgoogle.com` / Gemini Skills) multi-step AI workflow builder and live mini-app runner embedded across the AI Command Center, Lean Hub, Export Intelligence, and Brand Studio.',
+    whatIsThisAr:
+      'محرك بناء وتشغيل التطبيقات الذكية المصغرة متعددة الخطوات على غرار أداة Google Opal ومهارات Gemini، يتيح أتمتة المهام الصناعية والتصديرية المعقدة بدون كتابة كود.',
+    howItWorksEn:
+      'Chains a 4-stage visual node pipeline (`Node 1: Shop-Floor/Market Input → Node 2: Deterministic Formula/Tariff Engine → Node 3: Free Multi-LLM Reasoning → Node 4: Structured SOP/Quote/Campaign Output`), executes the entire chain live in-app, and exports a portable `.opal.json` workflow file.',
+    howItWorksAr:
+      'يربط سلسلة مكونة من 4 عقد ذكية (١. بيانات الإدخال ← ٢. المحرك الحسابي الهندسي ← ٣. تحليل الذكاء الاصطناعي المجاني ← ٤. المخرج النهائي الموثق) وينفذ السلسلة كاملة أمامك لحظياً مع إمكانية تصدير ملف سير العمل (.opal.json).',
+    formulaOrArchitecture:
+      'Node 1 (Input Schema) → Node 2 (Math/Rule Engine) → Node 3 (LLM Prompt Chain) → Node 4 (Actionable Artifact + .opal.json)',
+    whyToUseEn: [
+      'Automates repetitive multi-step tasks (e.g., turning a loom downtime log into an OEE calculation + 5-Whys Root Cause + Kaizen A3 sheet + operator training quiz in one click).',
+      'Exportable `.opal.json` definitions can be archived in Google Drive or converted into Gemini Skills.',
+    ],
+    whyToUseAr: [
+      'أتمتة المهام المركبة في خطوة واحدة (مثل تحويل عطل النول إلى حساب OEE + تحليل الأسباب الجذرية + خطة كايزن A3 + قائمة فحص للفني).',
+      'إمكانية حفظ وتصدير ملف سير العمل (.opal.json) لاستخدامه في Google Opal أو مهارات Gemini.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Choose a Multi-Step Opal Mini-App Template or Customize the 4 Nodes',
+        titleAr: '١. اختر تطبيق Opal مصغر جاهز أو خصص عقد السلسلة الأربع',
+        detailEn: 'Enter your batch/factory parameters in Node 1 and click "Run 4-Step Opal Pipeline Live".',
+        detailAr: 'أدخل بيانات التشغيلة أو السوق في العقدة الأولى واضغط "تشغيل سلسلة Opal الذكية".',
+      },
+      {
+        titleEn: '2. Inspect Step-by-Step Node Outputs & Export (.opal.json)',
+        titleAr: '٢. راجع مخرجات كل خطوة وحمّل ملف التطبيق (.opal.json)',
+        detailEn: 'Download the generated report or click "Export Opal Workflow JSON" / "Open Google Opal".',
+        detailAr: 'حمّل التقرير الهندسي الناتج أو صدّر ملف سير العمل بصيغة JSON لفتحه في Google Opal.',
+      },
+    ],
+    proTipEn: 'Combine Opal workflows with the contextual AI Copilot to build standardized SOP generators for every department in your mill!',
+    proTipAr: 'استخدم سلاسل Google Opal لبناء مولدات إجراءات تشغيل قياسية (SOP) موحدة لكافة أقسام الغزل والنسيج والصباغة بمصنعك!',
+  },
 };
 
 /**

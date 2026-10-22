@@ -40,6 +40,7 @@ import {
   HelpCircle,
 } from 'lucide-react';
 import { ExpertManualButton, openExpertManual } from '@/components/cluster/ExpertManualModal';
+import { GoogleCreativeLabIntegration } from '@/components/cluster/modern/GoogleCreativeLabIntegration';
 
 interface Props {
   locale: string;
@@ -79,7 +80,7 @@ export function BrandMarketingStudioClient({
 
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<
-    'IDENTITY' | 'STRATEGY' | 'AUTOMATION' | 'MEDIA' | 'PRINT' | 'CMO_AI'
+    'IDENTITY' | 'STRATEGY' | 'AUTOMATION' | 'MEDIA' | 'PRINT' | 'CMO_AI' | 'GOOGLE_LABS'
   >('IDENTITY');
 
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -925,6 +926,13 @@ export function BrandMarketingStudioClient({
             en: '6. AI CMO Copywriter',
             ar: '٦. المساعد التسويقي الذكي',
             manualId: 'brand-cmo-ai',
+          },
+          {
+            id: 'GOOGLE_LABS',
+            icon: Sparkles,
+            en: '7. Google Pomelli • Mixboard • Stitch • Opal',
+            ar: '٧. منظومة جوجل (Pomelli • Mixboard • Stitch • Opal)',
+            manualId: 'google-pomelli',
           },
         ].map((tab) => {
           const Icon = tab.icon;
@@ -2389,6 +2397,15 @@ export function BrandMarketingStudioClient({
           </div>
         </Card>
       )}
+
+      {/* TAB 7 OR PERSISTENT FOOTER: Google Labs Ecosystem (Pomelli, Mixboard, Stitch, Opal) */}
+      <div className="pt-2">
+        <GoogleCreativeLabIntegration
+          locale={locale}
+          defaultTool="pomelli"
+          contextModule="brand"
+        />
+      </div>
     </div>
   );
 }
