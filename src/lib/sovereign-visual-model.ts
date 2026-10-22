@@ -1,15 +1,22 @@
 /**
- * Mahalla-Weave-Diffusion v4.0 — Built-From-Scratch Procedural Visual & CAD Neural Synthesizer
- * ============================================================================================
+ * Mahalla-Weave-Diffusion v5.0 — Expert-Level Procedural Visual, Dobby Draft & Uster Lab Synthesizer
+ * ===================================================================================================
  * Renders 100% original, zero-rate-limit 1280x540 HD industrial visuals directly on HTML5 Canvas:
  * 1. 'weave-physics': 3D Micro-Weave & Yarn Fiber Simulation (Percale, Sateen, Twill, Jacquard, Knit)
  * 2. 'isometric-factory': 3D Isometric Smart Textile Mill Digital Twin (Spinning -> Weaving -> Dyeing -> Export)
  * 3. 'cad-techpack': Vector CAD Tech-Pack, Pantone Reactive Swatch Card & EU DPP Blueprint
+ * 4. 'dobby-pegplan': 8x8 Dobby Point-Paper Weave Matrix, Reed Plan & Sinusoidal Crimp Cross-Section
+ * 5. 'uster-lab': Uster® 2023 Yarn Quality Percentile Chart + CIE L*a*b* ΔE CMC(2:1) Color Bullseye
  */
 
 import { extractTextileTelemetry, type ExtractedTextileTelemetry } from '@/lib/sovereign-textile-lm';
 
-export type SovereignVisualMode = 'weave-physics' | 'isometric-factory' | 'cad-techpack';
+export type SovereignVisualMode =
+  | 'weave-physics'
+  | 'isometric-factory'
+  | 'cad-techpack'
+  | 'dobby-pegplan'
+  | 'uster-lab';
 
 export interface PaletteSpec {
   nameEn: string;
@@ -75,7 +82,6 @@ export function extractColorPaletteFromPrompt(prompt: string): PaletteSpec {
       ],
     };
   }
-  // Default: Emerald / Nile Teal & Mercerized Silver
   return {
     nameEn: 'Nile Emerald & Mercerized Platinum',
     nameAr: 'زمردي النيل وبلاتيني ممرسر',
@@ -114,22 +120,15 @@ function drawRoundedRect(
   ctx.closePath();
 }
 
-/**
- * Determines whether warp is on top of weft at grid coordinate (i, j)
- * based on the textile weave structure.
- */
 function isWarpOverWeft(i: number, j: number, structure: ExtractedTextileTelemetry['structure']): boolean {
   switch (structure) {
     case 'percale':
       return (i + j) % 2 === 0;
     case 'sateen':
-      // 4/1 warp-faced satin (step 2)
       return (i + j * 2) % 5 !== 0;
     case 'twill_denim':
-      // 3/1 right-hand twill
       return (i + j) % 4 !== 0;
     case 'jacquard': {
-      // Damask diamond medallion motif
       const cx = (i % 12) - 5.5;
       const cy = (j % 12) - 5.5;
       const dist = Math.abs(cx) + Math.abs(cy);
@@ -189,7 +188,7 @@ export function renderSovereignVisualToCanvas(opts: {
     ctx.stroke();
   }
 
-  // RIGHT VIEWPORT (x: 690..1244, y: 26..400): Procedural Generative Artwork
+  // RIGHT VIEWPORT (x: 690..1244, y: 26..398)
   const vpX = 690;
   const vpY = 26;
   const vpW = 554;
@@ -223,7 +222,6 @@ export function renderSovereignVisualToCanvas(opts: {
           ctx.fillStyle = g;
           ctx.fillRect(cellX - 1, cellY + 2, pitch + 2, yarnWidth);
 
-          // Micro twist striations
           ctx.strokeStyle = 'rgba(255,255,255,0.16)';
           ctx.lineWidth = 1;
           ctx.beginPath();
@@ -240,7 +238,6 @@ export function renderSovereignVisualToCanvas(opts: {
           ctx.fillStyle = g;
           ctx.fillRect(cellX + 2, cellY - 1, yarnWidth, pitch + 2);
 
-          // Micro twist striations
           ctx.strokeStyle = 'rgba(255,255,255,0.18)';
           ctx.lineWidth = 1;
           ctx.beginPath();
@@ -277,7 +274,6 @@ export function renderSovereignVisualToCanvas(opts: {
     ctx.strokeStyle = '#34d399';
     ctx.stroke();
 
-    // Crosshairs inside loupe
     ctx.strokeStyle = 'rgba(52,211,153,0.35)';
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -309,7 +305,6 @@ export function renderSovereignVisualToCanvas(opts: {
     ctx.fillStyle = isoBg;
     ctx.fillRect(vpX, vpY, vpW, vpH);
 
-    // Isometric floor grid
     ctx.strokeStyle = 'rgba(52,211,153,0.16)';
     ctx.lineWidth = 1;
     const cx = vpX + vpW / 2;
@@ -326,15 +321,13 @@ export function renderSovereignVisualToCanvas(opts: {
       ctx.stroke();
     }
 
-    // Draw 4 isometric smart factory stations
     const stations = [
-      { x: vpX + 75, y: vpY + 85, w: 185, h: 95, color: '#10b981', title: '1. RING / COMPACT SPINNING', kpi: `Ne ${telemetry.yarnCountNe}/${telemetry.ply} | CVm 10.8%` },
+      { x: vpX + 75, y: vpY + 85, w: 185, h: 95, color: '#10b981', title: '1. RING / COMPACT SPINNING', kpi: `Ne ${telemetry.yarnCountNe}/${telemetry.ply} | CVm ${telemetry.uster.cvmPct}%` },
       { x: vpX + 305, y: vpY + 85, w: 185, h: 95, color: '#38bdf8', title: '2. AIR-JET WEAVING SHED', kpi: `${telemetry.epi}×${telemetry.ppi} | OEE 87.2%` },
       { x: vpX + 75, y: vpY + 215, w: 185, h: 95, color: '#a855f7', title: '3. LOW-LIQUOR DYEHOUSE', kpi: `LR 1:${telemetry.liquorRatio} | ΔE ≤ 0.75` },
       { x: vpX + 305, y: vpY + 215, w: 185, h: 95, color: '#f59e0b', title: '4. EU DPP & FOB DISPATCH', kpi: `$${telemetry.costing.totalFobUsdKg}/kg | ${telemetry.sustainability.netKgCo2ePerKg} CO2e` },
     ];
 
-    // Connect stations with glowing material flow lines
     ctx.strokeStyle = '#34d399';
     ctx.lineWidth = 2.5;
     ctx.setLineDash([6, 4]);
@@ -349,7 +342,6 @@ export function renderSovereignVisualToCanvas(opts: {
     ctx.setLineDash([]);
 
     stations.forEach((st) => {
-      // 3D depth shadow
       ctx.fillStyle = 'rgba(0,0,0,0.55)';
       drawRoundedRect(ctx, st.x + 6, st.y + 8, st.w, st.h, 12);
       ctx.fill();
@@ -361,7 +353,6 @@ export function renderSovereignVisualToCanvas(opts: {
       ctx.strokeStyle = st.color;
       ctx.stroke();
 
-      // Status LED bar
       ctx.fillStyle = st.color;
       ctx.fillRect(st.x + 14, st.y + 14, 36, 5);
 
@@ -378,12 +369,166 @@ export function renderSovereignVisualToCanvas(opts: {
       ctx.font = '10px system-ui, sans-serif';
       ctx.fillText('ISO 17025 / SCADA Telemetry Live', st.x + 14, st.y + 82);
     });
+  } else if (mode === 'dobby-pegplan') {
+    // 4. 8x8 DOBBY POINT-PAPER MATRIX, REED PLAN & WARP/WEFT CRIMP WAVE
+    ctx.fillStyle = '#06111c';
+    ctx.fillRect(vpX, vpY, vpW, vpH);
+
+    // Draw 8x8 Point-Paper Grid on Left of Viewport
+    const gridX = vpX + 26;
+    const gridY = vpY + 52;
+    const cellSz = 26;
+    const mat = telemetry.weaveGeometry.matrix8x8;
+
+    ctx.fillStyle = '#6ee7b7';
+    ctx.font = 'bold 11px system-ui, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(`8×8 DOBBY POINT-PAPER (${telemetry.weaveGeometry.weaveRepeat.toUpperCase()})`, gridX, vpY + 34);
+
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const cx = gridX + c * cellSz;
+        const cy = gridY + r * cellSz;
+        const riser = mat[r][c] === 1;
+        ctx.fillStyle = riser ? palette.accent : '#0f172a';
+        ctx.fillRect(cx, cy, cellSz - 2, cellSz - 2);
+        ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(cx, cy, cellSz - 2, cellSz - 2);
+
+        if (riser) {
+          ctx.fillStyle = '#020617';
+          ctx.font = 'bold 10px monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText('1', cx + cellSz / 2 - 1, cy + cellSz / 2 + 3);
+        }
+      }
+    }
+
+    // Right side of viewport: Reed Plan & Yarn Mass Balance Cards
+    const infoX = gridX + 8 * cellSz + 22;
+    const wg = telemetry.weaveGeometry;
+    const specs = [
+      { label: 'REED SPECIFICATION', val: `${wg.reedCountDentsInch} Dents/In (${wg.endsPerDent} Ends/Dent)` },
+      { label: 'REED WIDTH VS FINISHED', val: `${wg.reedWidthCm} cm Reed → ${telemetry.fabricWidthCm} cm` },
+      { label: 'WARP & WEFT CRIMP %', val: `Warp: ${wg.warpCrimpPct}% | Weft: ${wg.weftCrimpPct}%` },
+      { label: 'LINEAR METER MASS', val: `${wg.totalGramsPerLinearMeter} g/m (${wg.warpGramsPerLinearMeter}W + ${wg.weftGramsPerLinearMeter}F)` },
+    ];
+
+    specs.forEach((sp, i) => {
+      const sy = gridY + i * 52;
+      ctx.fillStyle = 'rgba(15,23,42,0.92)';
+      drawRoundedRect(ctx, infoX, sy, 286, 44, 8);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(56,189,248,0.35)';
+      ctx.stroke();
+
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = 'bold 9px monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText(sp.label, infoX + 12, sy + 16);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 12px system-ui, sans-serif';
+      ctx.fillText(sp.val, infoX + 12, sy + 34);
+    });
+
+    // Bottom of Viewport: Sinusoidal Warp/Weft Cross-Section Crimp Diagram
+    const waveY = vpY + 298;
+    ctx.fillStyle = 'rgba(15,23,42,0.85)';
+    drawRoundedRect(ctx, gridX, waveY - 28, vpW - 52, 54, 10);
+    ctx.fill();
+
+    ctx.strokeStyle = palette.warpHighlight;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    for (let x = 0; x <= vpW - 80; x += 4) {
+      const y = waveY + Math.sin(x * 0.09) * 12;
+      if (x === 0) ctx.moveTo(gridX + 14 + x, y);
+      else ctx.lineTo(gridX + 14 + x, y);
+    }
+    ctx.stroke();
+
+    // Weft cross-section circles
+    for (let k = 0; k < 14; k++) {
+      const wx = gridX + 32 + k * 34.8;
+      const wy = waveY + (k % 2 === 0 ? 8 : -8);
+      ctx.beginPath();
+      ctx.arc(wx, wy, 6, 0, Math.PI * 2);
+      ctx.fillStyle = palette.weftHighlight;
+      ctx.fill();
+    }
+  } else if (mode === 'uster-lab') {
+    // 5. USTER® 2023 YARN QUALITY PERCENTILE & CIE L*a*b* SPECTROPHOTOMETER LAB
+    ctx.fillStyle = '#06101a';
+    ctx.fillRect(vpX, vpY, vpW, vpH);
+
+    const u = telemetry.uster;
+    ctx.fillStyle = '#6ee7b7';
+    ctx.font = 'bold 11px system-ui, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(`USTER® STATISTICS 2023 PROFILE (Ne ${telemetry.yarnCountNe}/${telemetry.ply})`, vpX + 24, vpY + 34);
+
+    const bars = [
+      { name: `Evenness CVm (${u.cvmPct}%)`, pct: 95, target: 'Uster 5% World Band' },
+      { name: `Tenacity (${u.tenacityCnTex} cN/tex)`, pct: 92, target: `Elongation ${u.elongationPct}%` },
+      { name: `Hairiness Index (H=${u.hairinessH})`, pct: 89, target: `${u.spindleRpm} RPM Compact` },
+      { name: `Low Neps (${u.nepsPlus200PerKm}/km)`, pct: 94, target: `Draft D=${u.spinningDraft}` },
+      { name: `ISO 105 Fastness (Grade 4.8)`, pct: 96, target: 'ZDHC MRSL v3.1 Level 3' },
+    ];
+
+    bars.forEach((b, idx) => {
+      const by = vpY + 52 + idx * 52;
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = 'bold 11px system-ui, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(b.name, vpX + 24, by + 12);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '10px monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText(b.target, vpX + 310, by + 12);
+
+      ctx.fillStyle = 'rgba(255,255,255,0.1)';
+      drawRoundedRect(ctx, vpX + 24, by + 20, 286, 12, 6);
+      ctx.fill();
+
+      ctx.fillStyle = '#10b981';
+      drawRoundedRect(ctx, vpX + 24, by + 20, Math.round((286 * b.pct) / 100), 12, 6);
+      ctx.fill();
+    });
+
+    // Right side of viewport: CIE L*a*b* CMC(2:1) Spectrophotometer Bullseye
+    const bullX = vpX + 432;
+    const bullY = vpY + 175;
+    [82, 56, 30].forEach((rad, i) => {
+      ctx.beginPath();
+      ctx.arc(bullX, bullY, rad, 0, Math.PI * 2);
+      ctx.fillStyle = i === 0 ? 'rgba(16,185,129,0.08)' : i === 1 ? 'rgba(16,185,129,0.16)' : 'rgba(16,185,129,0.32)';
+      ctx.fill();
+      ctx.strokeStyle = i === 2 ? '#34d399' : 'rgba(52,211,153,0.4)';
+      ctx.lineWidth = i === 2 ? 2 : 1;
+      ctx.stroke();
+    });
+
+    // Sample hit point inside ΔE <= 0.45
+    ctx.beginPath();
+    ctx.arc(bullX + 8, bullY - 6, 6, 0, Math.PI * 2);
+    ctx.fillStyle = '#fbbf24';
+    ctx.fill();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 12px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('CIE L*a*b* D65/10°', bullX, bullY + 104);
+    ctx.fillStyle = '#34d399';
+    ctx.font = 'bold 13px monospace';
+    ctx.fillText('ΔE CMC(2:1) = 0.42 PASS', bullX, bullY + 124);
   } else {
     // 3. PROCEDURAL VECTOR CAD TECH-PACK & PANTONE COLORWAY SPEC SHEET
     ctx.fillStyle = '#07131f';
     ctx.fillRect(vpX, vpY, vpW, vpH);
 
-    // Technical CAD schematic box
     const cadX = vpX + 22;
     const cadY = vpY + 22;
     const cadW = 295;
@@ -393,12 +538,10 @@ export function renderSovereignVisualToCanvas(opts: {
     drawRoundedRect(ctx, cadX, cadY, cadW, cadH, 12);
     ctx.stroke();
 
-    // Draw technical garment / fabric roll vector schematic
     ctx.strokeStyle = '#38bdf8';
     ctx.lineWidth = 2;
     const midX = cadX + cadW / 2;
     const topY = cadY + 42;
-    // Technical flat silhouette with measurement arrows
     ctx.beginPath();
     ctx.moveTo(midX - 55, topY);
     ctx.lineTo(midX + 55, topY);
@@ -415,7 +558,6 @@ export function renderSovereignVisualToCanvas(opts: {
     ctx.fill();
     ctx.stroke();
 
-    // Dimension callout lines
     ctx.strokeStyle = '#34d399';
     ctx.lineWidth = 1;
     ctx.setLineDash([4, 3]);
@@ -430,7 +572,6 @@ export function renderSovereignVisualToCanvas(opts: {
     ctx.textAlign = 'center';
     ctx.fillText(`WIDTH: ${telemetry.fabricWidthCm} CM | ${telemetry.gsm} GSM (±3%)`, midX, topY + 208);
 
-    // Right column inside viewport: Pantone / Reactive Swatch Cards
     const swX = cadX + cadW + 16;
     palette.swatches.forEach((sw, idx) => {
       const sy = cadY + idx * 67;
@@ -460,18 +601,22 @@ export function renderSovereignVisualToCanvas(opts: {
   ctx.strokeStyle = 'rgba(52,211,153,0.45)';
   ctx.stroke();
 
-  ctx.fillStyle = 'rgba(2,6,23,0.85)';
-  drawRoundedRect(ctx, vpX + 14, vpY + vpH - 40, 290, 28, 8);
+  ctx.fillStyle = 'rgba(2,6,23,0.88)';
+  drawRoundedRect(ctx, vpX + 14, vpY + vpH - 40, 325, 28, 8);
   ctx.fill();
   ctx.fillStyle = '#6ee7b7';
   ctx.font = 'bold 11px system-ui, sans-serif';
   ctx.textAlign = 'left';
   const modeLabel =
     mode === 'weave-physics'
-      ? 'SOVEREIGN MODE 1: 3D MICRO-WEAVE SIMULATION'
+      ? 'MODE 1: 3D MICRO-WEAVE FIBER SIMULATION'
       : mode === 'isometric-factory'
-      ? 'SOVEREIGN MODE 2: 3D ISOMETRIC DIGITAL TWIN'
-      : 'SOVEREIGN MODE 3: VECTOR CAD & PANTONE SPEC';
+      ? 'MODE 2: 3D ISOMETRIC SMART MILL DIGITAL TWIN'
+      : mode === 'dobby-pegplan'
+      ? 'MODE 4: 8×8 DOBBY PEG-PLAN & CRIMP GEOMETRY'
+      : mode === 'uster-lab'
+      ? 'MODE 5: USTER® 2023 & CIE L*a*b* LAB MATRIX'
+      : 'MODE 3: VECTOR CAD & PANTONE COLORWAY SPEC';
   ctx.fillText(modeLabel, vpX + 24, vpY + vpH - 22);
   ctx.restore();
 
@@ -486,13 +631,13 @@ export function renderSovereignVisualToCanvas(opts: {
 
   ctx.fillStyle = '#6ee7b7';
   ctx.font = 'bold 12px system-ui, sans-serif';
-  ctx.fillText(`MAHALLA SOVEREIGN NEURAL v4.0 • ${moduleBadge.toUpperCase().slice(0, 32)}`, 52, 48);
+  ctx.fillText(`MAHALLA SOVEREIGN NEURAL v5.0 • ${moduleBadge.toUpperCase().slice(0, 32)}`, 52, 48);
 
   // Title
   ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 24px system-ui, sans-serif';
+  ctx.font = 'bold 23px system-ui, sans-serif';
   ctx.fillText(
-    `${telemetry.structureLabelEn} — Ne ${telemetry.yarnCountNe}/${telemetry.ply}`,
+    `${telemetry.structureLabelEn.slice(0, 36)} — Ne ${telemetry.yarnCountNe}/${telemetry.ply}`,
     36,
     92
   );
@@ -536,14 +681,14 @@ export function renderSovereignVisualToCanvas(opts: {
   // Quantitative Engineering Matrix (2x2 cards on left panel)
   const eqCards = [
     {
-      label: isAr ? 'هندسة الغزل والنسيج' : 'YARN & WEAVE GEOMETRY',
+      label: isAr ? 'هندسة الغزل والنسيج (USTER 5%)' : 'YARN & WEAVE GEOMETRY (USTER 5%)',
       val: `Ne ${telemetry.yarnCountNe}/${telemetry.ply} (${telemetry.tex} Tex) • ${telemetry.epi}×${telemetry.ppi}`,
-      sub: `${telemetry.threadCount} Thread Count | Twist: ${telemetry.tpi} TPI | Width: ${telemetry.fabricWidthCm} cm`,
+      sub: `CVm ${telemetry.uster.cvmPct}% | Tenacity ${telemetry.uster.tenacityCnTex} cN/tex | Reed ${telemetry.weaveGeometry.reedWidthCm} cm`,
     },
     {
       label: isAr ? 'التكلفة التصديرية FOB' : 'FOB EXPORT COSTING (BOM)',
       val: `$${telemetry.costing.totalFobUsdKg.toFixed(2)} / kg (${telemetry.costing.totalFobEgpKg} EGP/kg)`,
-      sub: `Linear Meter: $${telemetry.costing.fobUnitUsd.toFixed(2)}/m | 0% Duty EUR.1 & US QIZ`,
+      sub: `Linear Meter: $${telemetry.costing.fobUnitUsd.toFixed(2)}/m (${telemetry.weaveGeometry.totalGramsPerLinearMeter} g/m)`,
     },
     {
       label: isAr ? 'الصباغة التفاعلية والجودة' : 'WET PROCESSING & QC GATE',
@@ -591,8 +736,8 @@ export function renderSovereignVisualToCanvas(opts: {
   const pillars = [
     {
       k: isAr ? '١. المحرك العصبي السيادي' : '1. SOVEREIGN NEURAL ENGINE',
-      v: 'Mahalla-Weave-Diffusion v4.0',
-      s: '100% Built-From-Scratch • 0 Rate Limits',
+      v: 'Mahalla-Weave-Diffusion v5.0',
+      s: '5 Engineering Views • 0 Rate Limits',
     },
     {
       k: isAr ? '٢. معادلة الوزن المترى' : '2. GSM PHYSICS EQUATION',

@@ -13,8 +13,12 @@ import {
   Layers,
   Database,
   Eye,
+  FileJson,
+  FileText,
+  Grid,
 } from 'lucide-react';
 import { tr } from '@/lib/i18n-inline';
+import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 import {
   extractTextileTelemetry,
   runSovereignTextileModel,
@@ -40,13 +44,21 @@ export function SovereignNeuralLabPanel({ locale }: Props) {
   const [visualMode, setVisualMode] = useState<SovereignVisualMode>('weave-physics');
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+  // Parametric Engineering Sliders
+  const [sliderNe, setSliderNe] = useState(60);
+  const [sliderPly, setSliderPly] = useState(1);
+  const [sliderWidth, setSliderWidth] = useState(280);
+  const [sliderLr, setSliderLr] = useState(6.0);
+  const [sliderStructure, setSliderStructure] = useState('sateen');
+  const [sliderFiber, setSliderFiber] = useState('Giza 94');
+
   // Unlimited Custom / Local LLM Config State
   const [customProvider, setCustomProvider] = useState<
     'auto' | 'sovereign' | 'ollama' | 'groq' | 'gemini' | 'openrouter' | 'huggingface'
   >('sovereign');
   const [customApiKey, setCustomApiKey] = useState('');
   const [customBaseUrl, setCustomBaseUrl] = useState('http://localhost:11434/v1');
-  const [customModelName, setCustomModelName] = useState('llama3.3');
+  const [customModelName, setCustomModelName] = useState('mahalla-sovereign-v5');
   const [customFactoryRules, setCustomFactoryRules] = useState('');
   const [savedBanner, setSavedBanner] = useState(false);
 
@@ -66,6 +78,27 @@ export function SovereignNeuralLabPanel({ locale }: Props) {
     }
   }, []);
 
+  const applyParametricSynthesis = (
+    nextStruct = sliderStructure,
+    nextFiber = sliderFiber,
+    nextNe = sliderNe,
+    nextPly = sliderPly,
+    nextWidth = sliderWidth,
+    nextLr = sliderLr
+  ) => {
+    setSliderStructure(nextStruct);
+    setSliderFiber(nextFiber);
+    setSliderNe(nextNe);
+    setSliderPly(nextPly);
+    setSliderWidth(nextWidth);
+    setSliderLr(nextLr);
+
+    const synthesizedPrompt = isAr
+      ? `تصنيع وتصدير قماش ${nextStruct} من ${nextFiber} نمرة Ne ${nextNe}/${nextPly} بعرض ${nextWidth} سم وصباغة تفاعلية بنسبة حمام 1:${nextLr} مع حساب مواصفات Uster 2023 وتكلفة FOB والإعفاء الجمركي EUR.1 / QIZ`
+      : `Engineered ${nextFiber} ${nextStruct} fabric Ne ${nextNe}/${nextPly}, ${nextWidth} cm width, low-liquor 1:${nextLr} reactive dyeing with Uster 2023 benchmarks, reed/crimp geometry, and FOB to EU EUR.1 / US QIZ landed cost`;
+    setPrompt(synthesizedPrompt);
+  };
+
   const telemetry = extractTextileTelemetry(prompt);
   const sovereignOutput = runSovereignTextileModel({
     prompt: customFactoryRules ? `${prompt}\n[Factory Custom Rules: ${customFactoryRules}]` : prompt,
@@ -77,7 +110,7 @@ export function SovereignNeuralLabPanel({ locale }: Props) {
     renderSovereignVisualToCanvas({
       canvas: canvasRef.current,
       prompt,
-      moduleBadge: isAr ? 'المختبر العصبي السيادي v4.0' : 'SOVEREIGN NEURAL LAB v4.0',
+      moduleBadge: isAr ? 'المختبر العصبي السيادي v5.0' : 'SOVEREIGN NEURAL LAB v5.0',
       locale,
       mode: visualMode,
     });
@@ -111,6 +144,47 @@ export function SovereignNeuralLabPanel({ locale }: Props) {
     a.click();
   };
 
+  const handleDownloadDppJson = () => {
+    const payload = {
+      dppStandard: 'EU-ESPR-2024-1781-v5.0',
+      generatedBy: 'Mahalla-Sovereign-LM v5.0 (Built-From-Scratch Quantitative Engine)',
+      timestamp: new Date().toISOString(),
+      clusterOrigin: 'El-Mahalla El-Kubra Industrial Textile Cluster, Egypt',
+      specification: {
+        fiber: telemetry.fiberLabelEn,
+        construction: telemetry.structureLabelEn,
+        yarnCount: `Ne ${telemetry.yarnCountNe}/${telemetry.ply}`,
+        linearDensityTex: telemetry.tex,
+        twistTpi: telemetry.tpi,
+        settEpiByPpi: `${telemetry.epi} x ${telemetry.ppi}`,
+        threadCount: telemetry.threadCount,
+        arealWeightGsm: telemetry.gsm,
+        fabricWidthCm: telemetry.fabricWidthCm,
+      },
+      uster2023Profile: telemetry.uster,
+      weaveAndReedGeometry: telemetry.weaveGeometry,
+      fobCostingBom: telemetry.costing,
+      sustainabilityAndCarbon: telemetry.sustainability,
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `mahalla-eu-dpp-ne${telemetry.yarnCountNe}-${telemetry.structure}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadMarkdown = () => {
+    const blob = new Blob([sovereignOutput.text], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `mahalla-sovereign-report-ne${telemetry.yarnCountNe}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const presetScenarios = [
     {
       label: t('Giza 94 Luxury Sateen Ne 60/1 (EU EUR.1)', 'ساتان جيزة 94 نمرة 60/1 (تصدير أوروبا EUR.1)'),
@@ -125,53 +199,246 @@ export function SovereignNeuralLabPanel({ locale }: Props) {
         : 'Provide a low-liquor 1:6 reactive dyeing recipe for 550 GSM hospitality terry towels Ne 20/2 Giza 86 cotton achieving ΔE ≤ 0.75 and ZDHC Level 3',
     },
     {
-      label: t('Indigo Workwear Twill / Denim Ne 16/1 (OEE)', 'جبردين ودنيم نيلي Ne 16/1 (كفاءة أنوال الهواء OEE)'),
+      label: t('Indigo Workwear Twill / Denim Ne 16/1 (Uster & OEE)', 'جبردين ودنيم نيلي Ne 16/1 (معايير Uster وكفاءة OEE)'),
       text: isAr
-        ? 'ما هي معايير ضبط الرطوبة النسبية وشد السداء وتقليل زمن تغيير المطواة SMED لأنوال الهواء عند نسج جبردين نيلي Ne 16/1 بوزن 285 GSM؟'
-        : 'Air-jet weaving OEE, warp tension calibration, and SMED beam changeover for indigo workwear twill Ne 16/1 at 285 GSM and 165 cm width',
+        ? 'ما هي معايير Uster 2023 وضبط الرطوبة النسبية وشد السداء وتقليل زمن تغيير المطواة SMED لأنوال الهواء عند نسج جبردين نيلي Ne 16/1 بوزن 285 GSM؟'
+        : 'Air-jet weaving OEE, Uster 2023 yarn benchmarks, warp tension calibration, and SMED beam changeover for indigo workwear twill Ne 16/1 at 285 GSM and 165 cm width',
     },
     {
-      label: t('45-Operator Sewing Line Balancing (SAM)', 'توازن خط خياطة 45 مشغلاً (حساب SAM)'),
+      label: t('Green CAPEX, NPV/IRR & EBRD 15% Grant', 'دراسة جدوى التحديث الأخضر ومنحة EBRD 15%'),
       text: isAr
-        ? 'كيف نحسب الزمن القياسي 11.4 SAM ونحقق توازن خط خياطة بـ 45 مشغلاً لتصنيع قمصان بولو بيكيه قطن جيزة نمرة Ne 24/1 بكفاءة 85%؟'
-        : 'Calculate 11.4 SAM and balance a 45-operator sewing line for Giza cotton pique polo shirts Ne 24/1 at 85% efficiency and DHU ≤ 1.2%',
+        ? 'احسب العائد الاستثماري NPV ومعدل العائد الداخلي IRR وفترة الاسترداد ومنحة EBRD GEFF بنسبة 15% لتحديث مصبغة وحلقة غزل قطن جيزة 86'
+        : 'Calculate CAPEX, 5-year NPV, IRR, payback period, and EBRD GEFF 15% green cashback grant for modernizing a Giza 86 dyeing and weaving mill',
     },
   ];
 
   return (
     <div className="space-y-6">
       {/* Top Architecture Banner */}
-      <div className="rounded-3xl border-2 border-emerald-500/40 bg-gradient-to-br from-slate-950 via-emerald-950/90 to-slate-900 p-6 text-white shadow-xl space-y-4">
+      <div className="rounded-3xl border-2 border-emerald-500/40 bg-gradient-to-br from-slate-950 via-emerald-950/90 to-slate-900 p-6 text-white shadow-xl space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="space-y-1">
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 px-3 py-1 text-xs font-extrabold text-emerald-300">
-              <Cpu className="h-3.5 w-3.5" />
-              {t(
-                'BUILT-FROM-SCRATCH SOVEREIGN TEXTILE AI • ZERO EXTERNAL LIMITS • 0ms LATENCY',
-                'النموذج العصبي السيادي المبني من الصفر • بدون أي قيود أو حدود استخدام • استجابة فورية 0ms'
-              )}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 px-3 py-1 text-xs font-extrabold text-emerald-300">
+                <Cpu className="h-3.5 w-3.5" />
+                {t(
+                  'BUILT-FROM-SCRATCH SOVEREIGN TEXTILE AI v5.0 • ZERO EXTERNAL LIMITS • <2ms LATENCY',
+                  'النموذج العصبي السيادي المبني من الصفر v5.0 • بدون أي قيود أو حدود استخدام • استجابة فورية'
+                )}
+              </div>
+              <ExpertManualButton manualId="sovereign-neural-lab" locale={locale} variant="pill" />
             </div>
             <h2 className="text-xl sm:text-2xl font-extrabold">
               {t(
-                'Mahalla-Sovereign-LM v4.0 + Weave-Diffusion v4.0 Neural Workbench',
-                'مختبر المحرك العصبي السيادي للمحلة (Mahalla-Sovereign-LM v4.0 + Weave-Diffusion v4.0)'
+                'Mahalla-Sovereign-LM v5.0 + Weave-Diffusion v5.0 Parametric Engineering Workbench',
+                'مختبر المحرك العصبي السيادي للمحلة (Mahalla-Sovereign-LM v5.0 + Weave-Diffusion v5.0)'
               )}
             </h2>
             <p className="text-xs sm:text-sm text-slate-300 max-w-4xl">
               {t(
-                'This engine runs natively inside our codebase with zero external API quotas. It tokenizes Arabic & English textile prompts, solves yarn/weave/dyeing/costing equations in <2ms, and procedurally renders 3D micro-weaves, isometric factory twins, and CAD tech-packs.',
-                'يعمل هذا المحرك مباشرة من داخل المنصة بدون أي اعتماد خارجي أو حدود استخدام. يقوم بتحليل النصوص العربية والإنجليزية، وحل معادلات الغزل والنسيج والصباغة والتكاليف في أقل من 2 مللي ثانية، ورسم النسيج المجهري ثلاثي الأبعاد والتوأم الرقمي للمصنع.'
+                'Features Uster® 2023 5% yarn quality modeling, 8×8 Dobby peg-plan & reed/crimp geometry, isothermal dyeing stoichiometry, CAPEX/NPV/IRR financial modeling, and 5 procedural HD engineering visual modes.',
+                'يتضمن نمذجة جودة الغزول وفق Uster® 2023، ومصفوفة الدوبي 8×8 وحسابات المشط والتشريب، وكيمياء الصباغة، ودراسات الجدوى المالية NPV/IRR، و5 أنماط رسم هندسي ثلاثي الأبعاد.'
               )}
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-xl border border-emerald-400/40 bg-emerald-500/20 px-3 py-1.5 text-xs font-mono font-bold text-emerald-200">
-              ⚡ Latency: &lt; 2 ms (Local Neural Execution)
+            <button
+              type="button"
+              onClick={handleDownloadDppJson}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-400/50 bg-emerald-500/20 hover:bg-emerald-500/30 px-3 py-1.5 text-xs font-extrabold text-emerald-200 transition cursor-pointer"
+            >
+              <FileJson className="h-3.5 w-3.5" />
+              {t('Export EU DPP (.JSON)', 'تصدير جواز المنتج (.JSON)')}
+            </button>
+            <button
+              type="button"
+              onClick={handleDownloadMarkdown}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-sky-400/50 bg-sky-500/20 hover:bg-sky-500/30 px-3 py-1.5 text-xs font-extrabold text-sky-200 transition cursor-pointer"
+            >
+              <FileText className="h-3.5 w-3.5" />
+              {t('Download Report (.MD)', 'تحميل الدراسة (.MD)')}
+            </button>
+          </div>
+        </div>
+
+        {/* Interactive Parametric Engineering Synthesizer Controls */}
+        <div className="rounded-2xl border border-white/15 bg-slate-900/85 p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-extrabold text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
+              <Sliders className="h-3.5 w-3.5" />
+              {t(
+                'Interactive Parametric CAD & Physics Synthesizer (Slide to recompute live in 0ms)',
+                'لوحة التحكم البارامترية في فيزياء الغزل والنسيج والصباغة (حرّك المؤشرات للتحديث اللحظي)'
+              )}
             </span>
-            <span className="rounded-xl border border-amber-400/40 bg-amber-500/20 px-3 py-1.5 text-xs font-mono font-bold text-amber-200">
-              ∞ Quota: Unlimited Forever
+            <span className="text-[11px] font-mono text-slate-400">
+              {t(
+                `Draft D=${telemetry.uster.spinningDraft} • Spindle ${telemetry.uster.spindleRpm} RPM • Reed ${telemetry.weaveGeometry.reedCountDentsInch} dents/in`,
+                `السحب D=${telemetry.uster.spinningDraft} • سرعة المردن ${telemetry.uster.spindleRpm} RPM • المشط ${telemetry.weaveGeometry.reedCountDentsInch} باب/بوصة`
+              )}
             </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div>
+              <label className="block text-[11px] font-bold text-slate-300 mb-1">
+                {t('Weave / Knit Structure', 'التركيب النسجي')}
+              </label>
+              <select
+                value={sliderStructure}
+                onChange={(e) =>
+                  applyParametricSynthesis(
+                    e.target.value,
+                    sliderFiber,
+                    sliderNe,
+                    sliderPly,
+                    sliderWidth,
+                    sliderLr
+                  )
+                }
+                className="w-full rounded-lg border border-white/20 bg-slate-950 px-2.5 py-1.5 text-xs font-bold text-white"
+              >
+                <option value="sateen">4/1 Luxury Sateen</option>
+                <option value="percale">1/1 Plain Percale</option>
+                <option value="twill denim">3/1 Z-Twill / Denim</option>
+                <option value="jacquard">Damask Jacquard</option>
+                <option value="terry towel">3-Pick Terry Towel</option>
+                <option value="single jersey">28GG Single Jersey</option>
+                <option value="interlock">24GG Interlock</option>
+                <option value="pique">Honeycomb Pique</option>
+                <option value="fleece">3-End Brushed Fleece</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-300 mb-1">
+                {t('Fiber Grade', 'صنف الخامة والألياف')}
+              </label>
+              <select
+                value={sliderFiber}
+                onChange={(e) =>
+                  applyParametricSynthesis(
+                    sliderStructure,
+                    e.target.value,
+                    sliderNe,
+                    sliderPly,
+                    sliderWidth,
+                    sliderLr
+                  )
+                }
+                className="w-full rounded-lg border border-white/20 bg-slate-950 px-2.5 py-1.5 text-xs font-bold text-white"
+              >
+                <option value="Giza 94">Giza 94 ELS Compact</option>
+                <option value="Giza 86">Giza 86 Long-Staple</option>
+                <option value="Organic GOTS">GOTS Organic Cotton</option>
+                <option value="Recycled rPET Blend">80/20 Cotton / GRS rPET</option>
+                <option value="Linen Cotton">55/45 Flax Linen / Giza</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-300 mb-1">
+                {t(`Yarn Count: Ne ${sliderNe}`, `نمرة الغزل: Ne ${sliderNe}`)}
+              </label>
+              <input
+                type="range"
+                min={12}
+                max={120}
+                step={2}
+                value={sliderNe}
+                onChange={(e) =>
+                  applyParametricSynthesis(
+                    sliderStructure,
+                    sliderFiber,
+                    Number(e.target.value),
+                    sliderPly,
+                    sliderWidth,
+                    sliderLr
+                  )
+                }
+                className="w-full accent-emerald-400 cursor-pointer"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-300 mb-1">
+                {t('Yarn Ply', 'عدد الزوي (Ply)')}
+              </label>
+              <div className="grid grid-cols-2 gap-1.5">
+                {[1, 2].map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() =>
+                      applyParametricSynthesis(
+                        sliderStructure,
+                        sliderFiber,
+                        sliderNe,
+                        p,
+                        sliderWidth,
+                        sliderLr
+                      )
+                    }
+                    className={`rounded-lg py-1.5 text-xs font-extrabold transition cursor-pointer ${
+                      sliderPly === p
+                        ? 'bg-emerald-500 text-slate-950'
+                        : 'bg-slate-950 border border-white/15 text-slate-300'
+                    }`}
+                  >
+                    {p === 1 ? 'Single (/1)' : '2-Ply (/2)'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-300 mb-1">
+                {t(`Width: ${sliderWidth} cm`, `العرض: ${sliderWidth} سم`)}
+              </label>
+              <input
+                type="range"
+                min={110}
+                max={340}
+                step={5}
+                value={sliderWidth}
+                onChange={(e) =>
+                  applyParametricSynthesis(
+                    sliderStructure,
+                    sliderFiber,
+                    sliderNe,
+                    sliderPly,
+                    Number(e.target.value),
+                    sliderLr
+                  )
+                }
+                className="w-full accent-emerald-400 cursor-pointer"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-300 mb-1">
+                {t(`Liquor Ratio: 1:${sliderLr}`, `نسبة الحمام: 1:${sliderLr}`)}
+              </label>
+              <input
+                type="range"
+                min={4.5}
+                max={10}
+                step={0.5}
+                value={sliderLr}
+                onChange={(e) =>
+                  applyParametricSynthesis(
+                    sliderStructure,
+                    sliderFiber,
+                    sliderNe,
+                    sliderPly,
+                    sliderWidth,
+                    Number(e.target.value)
+                  )
+                }
+                className="w-full accent-emerald-400 cursor-pointer"
+              />
+            </div>
           </div>
         </div>
 
@@ -197,8 +464,8 @@ export function SovereignNeuralLabPanel({ locale }: Props) {
         <div className="space-y-1.5">
           <label className="block text-xs font-bold text-emerald-300">
             {t(
-              'Live Neural Tokenizer & Synthesis Input (Edit any number, yarn count Ne, GSM, width, liquor ratio, or color — updates in real time!):',
-              'مدخلات المحرك العصبي الفوري (عدّل أي رقم أو نمرة غزل Ne أو وزن GSM أو نسبة حمام أو لون — يتم التحديث لحظياً!):'
+              'Live Neural Tokenizer & Synthesis Input (Edit any specification or question in English or Arabic):',
+              'مدخلات المحرك العصبي الفوري (عدّل أي مواصفة أو اطرح أي سؤال بالعربية أو الإنجليزية):'
             )}
           </label>
           <textarea
@@ -213,37 +480,37 @@ export function SovereignNeuralLabPanel({ locale }: Props) {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
           <div className="rounded-xl border border-white/15 bg-slate-900/90 p-3">
             <div className="text-[10px] font-bold uppercase text-emerald-400">
-              {t('Detected Intent', 'النية الهندسية')}
-            </div>
-            <div className="text-xs font-extrabold text-white mt-0.5 truncate">
-              {telemetry.intent.replace(/_/g, ' ').toUpperCase()}
-            </div>
-            <div className="text-[11px] text-slate-400 mt-0.5">
-              {isAr ? telemetry.structureLabelAr : telemetry.structureLabelEn}
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-white/15 bg-slate-900/90 p-3">
-            <div className="text-[10px] font-bold uppercase text-emerald-400">
-              {t('Yarn Physics', 'فيزياء الغزل')}
+              {t('Uster® 2023 Profile', 'مؤشر Uster® 2023')}
             </div>
             <div className="text-sm font-extrabold text-white mt-0.5">
-              Ne {telemetry.yarnCountNe}/{telemetry.ply} ({telemetry.tex} Tex)
+              CVm {telemetry.uster.cvmPct}% • {telemetry.uster.tenacityCnTex} cN/tex
             </div>
             <div className="text-[11px] text-slate-400 mt-0.5">
-              Twist: {telemetry.tpi} TPI • Uster 5%
+              Ne {telemetry.yarnCountNe}/{telemetry.ply} ({telemetry.tex} Tex)
             </div>
           </div>
 
           <div className="rounded-xl border border-white/15 bg-slate-900/90 p-3">
             <div className="text-[10px] font-bold uppercase text-emerald-400">
-              {t('Weave Sett & GSM', 'كثافة النسج والوزن')}
+              {t('Reed & Crimp Plan', 'المشط والتشريب')}
+            </div>
+            <div className="text-sm font-extrabold text-white mt-0.5">
+              {telemetry.weaveGeometry.reedCountDentsInch} dents/in ({telemetry.weaveGeometry.endsPerDent}/dent)
+            </div>
+            <div className="text-[11px] text-slate-400 mt-0.5">
+              Reed Width: {telemetry.weaveGeometry.reedWidthCm} cm
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-white/15 bg-slate-900/90 p-3">
+            <div className="text-[10px] font-bold uppercase text-emerald-400">
+              {t('Sett & Mass/Meter', 'الكثافة ووزن المتر')}
             </div>
             <div className="text-sm font-extrabold text-white mt-0.5">
               {telemetry.epi}×{telemetry.ppi} ({telemetry.gsm} GSM)
             </div>
             <div className="text-[11px] text-slate-400 mt-0.5">
-              {telemetry.threadCount} TC • Kc = {telemetry.coverFactor}
+              {telemetry.weaveGeometry.totalGramsPerLinearMeter} g / linear meter
             </div>
           </div>
 
@@ -285,7 +552,7 @@ export function SovereignNeuralLabPanel({ locale }: Props) {
         </div>
       </div>
 
-      {/* Built-From-Scratch Procedural Visual & CAD Synthesizer */}
+      {/* Built-From-Scratch Procedural Visual & CAD Synthesizer (5 Modes) */}
       <div className="rounded-3xl border-2 border-emerald-500/30 bg-slate-950 p-5 text-white shadow-xl space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -293,60 +560,82 @@ export function SovereignNeuralLabPanel({ locale }: Props) {
             <div>
               <h3 className="text-base font-extrabold">
                 {t(
-                  'Mahalla-Weave-Diffusion v4.0 — Real-Time Procedural 3D Weave, Factory Twin & CAD Renderer',
-                  'محرك التوليد البصري السيادي (Mahalla-Weave-Diffusion v4.0) — محاكاة النسيج والمصنع ثلاثي الأبعاد'
+                  'Mahalla-Weave-Diffusion v5.0 — 5-Mode Procedural Weave, Smart Mill, CAD, Dobby Draft & Uster Lab',
+                  'محرك التوليد البصري والهندسي السيادي (Mahalla-Weave-Diffusion v5.0) — ٥ أنماط هندسية'
                 )}
               </h3>
               <p className="text-xs text-slate-400">
                 {t(
                   '100% procedurally synthesized on HTML5 Canvas from your prompt parameters — zero external image servers, zero rate limits.',
-                  'مرسوم برمجياً بالكامل من معادلات الغزل والنسيج والألوان المستخلصة من نصك بدون أي خوادم صور خارجية.'
+                  'مرسوم برمجياً بالكامل من معادلات الغزل والنسيج والدوبى ومعمل Uster المستخلصة من نصك بدون أي قيود.'
                 )}
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5">
             <button
               type="button"
               onClick={() => setVisualMode('weave-physics')}
-              className={`rounded-xl px-3 py-1.5 text-xs font-extrabold transition cursor-pointer ${
+              className={`rounded-xl px-2.5 py-1.5 text-xs font-extrabold transition cursor-pointer ${
                 visualMode === 'weave-physics'
                   ? 'bg-emerald-500 text-slate-950'
                   : 'bg-white/10 text-white hover:bg-white/20'
               }`}
             >
-              {t('1. 3D Micro-Weave Simulation', '١. محاكاة النسيج المجهري 3D')}
+              {t('1. 3D Micro-Weave', '١. النسيج المجهري 3D')}
             </button>
             <button
               type="button"
               onClick={() => setVisualMode('isometric-factory')}
-              className={`rounded-xl px-3 py-1.5 text-xs font-extrabold transition cursor-pointer ${
+              className={`rounded-xl px-2.5 py-1.5 text-xs font-extrabold transition cursor-pointer ${
                 visualMode === 'isometric-factory'
                   ? 'bg-emerald-500 text-slate-950'
                   : 'bg-white/10 text-white hover:bg-white/20'
               }`}
             >
-              {t('2. 3D Isometric Mill Twin', '٢. التوأم الرقمي للمصنع 3D')}
+              {t('2. 3D Smart Mill Twin', '٢. التوأم الرقمي للمصنع')}
             </button>
             <button
               type="button"
               onClick={() => setVisualMode('cad-techpack')}
-              className={`rounded-xl px-3 py-1.5 text-xs font-extrabold transition cursor-pointer ${
+              className={`rounded-xl px-2.5 py-1.5 text-xs font-extrabold transition cursor-pointer ${
                 visualMode === 'cad-techpack'
                   ? 'bg-emerald-500 text-slate-950'
                   : 'bg-white/10 text-white hover:bg-white/20'
               }`}
             >
-              {t('3. Vector CAD & Pantone Spec', '٣. مخطط CAD وبطاقات الألوان')}
+              {t('3. Vector CAD & Pantone', '٣. مخطط CAD والألوان')}
+            </button>
+            <button
+              type="button"
+              onClick={() => setVisualMode('dobby-pegplan')}
+              className={`rounded-xl px-2.5 py-1.5 text-xs font-extrabold transition cursor-pointer ${
+                visualMode === 'dobby-pegplan'
+                  ? 'bg-emerald-500 text-slate-950'
+                  : 'bg-white/10 text-white hover:bg-white/20'
+              }`}
+            >
+              {t('4. 8×8 Dobby Peg-Plan & Crimp', '٤. مصفوفة الدوبي والمشط')}
+            </button>
+            <button
+              type="button"
+              onClick={() => setVisualMode('uster-lab')}
+              className={`rounded-xl px-2.5 py-1.5 text-xs font-extrabold transition cursor-pointer ${
+                visualMode === 'uster-lab'
+                  ? 'bg-emerald-500 text-slate-950'
+                  : 'bg-white/10 text-white hover:bg-white/20'
+              }`}
+            >
+              {t('5. Uster® 2023 & CIE L*a*b*', '٥. معمل Uster والمطياف')}
             </button>
             <button
               type="button"
               onClick={handleDownloadCanvas}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 px-3.5 py-1.5 text-xs font-extrabold text-slate-950 transition cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 px-3 py-1.5 text-xs font-extrabold text-slate-950 transition cursor-pointer"
             >
               <Download className="h-3.5 w-3.5" />
-              {t('Download HD .PNG', 'تحميل .PNG')}
+              {t('Download .PNG', 'تحميل .PNG')}
             </button>
           </div>
         </div>
@@ -356,7 +645,7 @@ export function SovereignNeuralLabPanel({ locale }: Props) {
         </div>
       </div>
 
-      {/* Two-Column Grid: Live Sovereign Markdown Deliverable + Unlimited Local/Cloud Connection Hub */}
+      {/* Two-Column Grid: Live Sovereign Markdown Deliverable + Interactive Dobby Matrix & Unlimited LLM Hub */}
       <div className="grid lg:grid-cols-12 gap-6">
         {/* Left 7 Cols: Live Sovereign Quantitative Deliverable */}
         <div className="lg:col-span-7 rounded-2xl border bg-card text-card-foreground p-6 shadow-sm space-y-4">
@@ -380,153 +669,222 @@ export function SovereignNeuralLabPanel({ locale }: Props) {
           </div>
         </div>
 
-        {/* Right 5 Cols: Custom Fine-Tuning & Unlimited Local Ollama / BYOK Hub */}
-        <div className="lg:col-span-5 rounded-2xl border bg-card text-card-foreground p-6 shadow-sm space-y-4 h-fit">
-          <div className="flex items-center gap-2 border-b pb-3">
-            <Sliders className="h-4 w-4 text-emerald-600" />
-            <div>
-              <h3 className="text-sm font-extrabold">
-                {t(
-                  'Unlimited LLM Router, Local Ollama & Custom Fine-Tuning',
-                  'إعدادات النماذج غير المحدودة (Ollama المحلي + التخصيص الصناعي)'
+        {/* Right 5 Cols: Interactive 8x8 Dobby Peg-Plan Inspector + Unlimited Local/Cloud Hub */}
+        <div className="lg:col-span-5 space-y-6">
+          {/* Interactive 8x8 Dobby Point-Paper & Reed Spec Card */}
+          <div className="rounded-2xl border bg-card text-card-foreground p-5 shadow-sm space-y-3">
+            <div className="flex items-center justify-between border-b pb-2.5">
+              <div className="flex items-center gap-2">
+                <Grid className="h-4 w-4 text-emerald-600" />
+                <h3 className="text-sm font-extrabold">
+                  {t(
+                    '8×8 Dobby Point-Paper & Reed Mass Balance',
+                    'مصفوفة الدوبي (8×8) وحسابات المشط واستهلاك الخيوط'
+                  )}
+                </h3>
+              </div>
+              <span className="text-[11px] font-mono font-bold text-emerald-600">
+                {telemetry.weaveGeometry.weaveRepeat}
+              </span>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-4 items-center">
+              {/* 8x8 Binary Grid */}
+              <div className="grid grid-cols-8 gap-1 p-2.5 rounded-xl bg-slate-950 border w-fit mx-auto">
+                {telemetry.weaveGeometry.matrix8x8.map((row, rIdx) =>
+                  row.map((val, cIdx) => (
+                    <div
+                      key={`${rIdx}-${cIdx}`}
+                      className={`w-6 h-6 rounded flex items-center justify-center text-[10px] font-mono font-bold ${
+                        val === 1
+                          ? 'bg-emerald-500 text-slate-950'
+                          : 'bg-slate-800 text-slate-400'
+                      }`}
+                      title={`Pick ${rIdx + 1}, End ${cIdx + 1}: ${val === 1 ? 'Warp Up (Riser)' : 'Weft Up (Sinker)'}`}
+                    >
+                      {val}
+                    </div>
+                  ))
                 )}
-              </h3>
-              <p className="text-[11px] text-muted-foreground">
-                {t(
-                  'Configure your preferred unlimited execution backend across all 19 modules.',
-                  'اضبط محرك التشغيل المفضل لديك ليتم تطبيقه عبر جميع وحدات المنصة.'
-                )}
-              </p>
+              </div>
+
+              <div className="space-y-2 text-xs">
+                <div className="rounded-lg border p-2 bg-muted/40">
+                  <div className="text-[10px] font-bold text-muted-foreground">
+                    {t('Harness & Denting Plan', 'الدرقات ونظام التطريح')}
+                  </div>
+                  <div className="font-extrabold">
+                    {telemetry.weaveGeometry.harnessFrames} Frames • {telemetry.weaveGeometry.reedCountDentsInch} dents/in ({telemetry.weaveGeometry.endsPerDent}/dent)
+                  </div>
+                </div>
+                <div className="rounded-lg border p-2 bg-muted/40">
+                  <div className="text-[10px] font-bold text-muted-foreground">
+                    {t('Reed Width & Crimp %', 'عرض المشط ونسبة التشريب')}
+                  </div>
+                  <div className="font-extrabold">
+                    {telemetry.weaveGeometry.reedWidthCm} cm (Warp {telemetry.weaveGeometry.warpCrimpPct}% / Weft {telemetry.weaveGeometry.weftCrimpPct}%)
+                  </div>
+                </div>
+                <div className="rounded-lg border p-2 bg-muted/40">
+                  <div className="text-[10px] font-bold text-muted-foreground">
+                    {t('Yarn Consumption / Linear Meter', 'استهلاك الغزل للمتر الطولي')}
+                  </div>
+                  <div className="font-extrabold text-emerald-600 dark:text-emerald-400">
+                    {telemetry.weaveGeometry.totalGramsPerLinearMeter} g/m ({telemetry.weaveGeometry.warpGramsPerLinearMeter}g W + {telemetry.weaveGeometry.weftGramsPerLinearMeter}g F)
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="space-y-3">
-            <div>
-              <label className="block text-xs font-bold mb-1">
-                {t('Primary AI Execution Architecture', 'معمارية التشغيل الأساسية')}
-              </label>
-              <select
-                value={customProvider}
-                onChange={(e) => setCustomProvider(e.target.value as any)}
-                className="w-full rounded-xl border bg-background px-3 py-2 text-xs font-bold"
-              >
-                <option value="sovereign">
+          {/* Unlimited Local Ollama & Cloud BYOK Configuration Card */}
+          <div className="rounded-2xl border bg-card text-card-foreground p-6 shadow-sm space-y-4">
+            <div className="flex items-center gap-2 border-b pb-3">
+              <Sliders className="h-4 w-4 text-emerald-600" />
+              <div>
+                <h3 className="text-sm font-extrabold">
                   {t(
-                    'Mahalla Sovereign Neural v4.0 (Built-From-Scratch • 0ms • 100% Unlimited)',
-                    'النموذج السيادي للمحلة v4.0 (مبني من الصفر • فوري وبلا حدود)'
+                    'Unlimited LLM Router, Local Ollama & Custom Fine-Tuning',
+                    'إعدادات النماذج غير المحدودة (Ollama المحلي + التخصيص الصناعي)'
                   )}
-                </option>
-                <option value="auto">
+                </h3>
+                <p className="text-[11px] text-muted-foreground">
                   {t(
-                    'Hybrid Multi-LLM Router + Sovereign Cascade (Unlimited)',
-                    'التوجيه الهجين متعدد النماذج + النموذج السيادي'
+                    'Configure your preferred unlimited execution backend across all 19 modules.',
+                    'اضبط محرك التشغيل المفضل لديك ليتم تطبيقه عبر جميع وحدات المنصة.'
                   )}
-                </option>
-                <option value="ollama">
-                  {t(
-                    'Local Ollama / vLLM / LM Studio Server (http://localhost:11434/v1)',
-                    'خادم محلي غير محدود Ollama / vLLM / LM Studio'
-                  )}
-                </option>
-                <option value="groq">
-                  {t('Groq LPU Cloud (Llama 3.3 70B / DeepSeek R1)', 'سحابة Groq فائقة السرعة')}
-                </option>
-                <option value="gemini">
-                  {t('Google Gemini 2.5 Flash API', 'واجهة Google Gemini 2.5 Flash')}
-                </option>
-                <option value="openrouter">
-                  {t('OpenRouter Multi-Model Gateway', 'بوابة OpenRouter')}
-                </option>
-                <option value="huggingface">
-                  {t('HuggingFace Serverless Inference', 'بوابة HuggingFace')}
-                </option>
-              </select>
+                </p>
+              </div>
             </div>
 
-            {customProvider === 'ollama' ? (
+            <div className="space-y-3">
               <div>
                 <label className="block text-xs font-bold mb-1">
-                  {t('Local OpenAI-Compatible Server URL', 'رابط الخادم المحلي (Ollama / vLLM)')}
+                  {t('Primary AI Execution Architecture', 'معمارية التشغيل الأساسية')}
                 </label>
-                <input
-                  type="text"
-                  value={customBaseUrl}
-                  onChange={(e) => setCustomBaseUrl(e.target.value)}
-                  placeholder="http://localhost:11434/v1"
-                  className="w-full rounded-xl border bg-background px-3 py-2 text-xs"
-                />
+                <select
+                  value={customProvider}
+                  onChange={(e) => setCustomProvider(e.target.value as any)}
+                  className="w-full rounded-xl border bg-background px-3 py-2 text-xs font-bold"
+                >
+                  <option value="sovereign">
+                    {t(
+                      'Mahalla Sovereign Neural v5.0 (Built-From-Scratch • 0ms • 100% Unlimited)',
+                      'النموذج السيادي للمحلة v5.0 (مبني من الصفر • فوري وبلا حدود)'
+                    )}
+                  </option>
+                  <option value="auto">
+                    {t(
+                      'Hybrid Multi-LLM Router + Sovereign Cascade (Unlimited)',
+                      'التوجيه الهجين متعدد النماذج + النموذج السيادي'
+                    )}
+                  </option>
+                  <option value="ollama">
+                    {t(
+                      'Local Ollama / vLLM / LM Studio Server (http://localhost:11434/v1)',
+                      'خادم محلي غير محدود Ollama / vLLM / LM Studio'
+                    )}
+                  </option>
+                  <option value="groq">
+                    {t('Groq LPU Cloud (Llama 3.3 70B / DeepSeek R1)', 'سحابة Groq فائقة السرعة')}
+                  </option>
+                  <option value="gemini">
+                    {t('Google Gemini 2.5 Flash API', 'واجهة Google Gemini 2.5 Flash')}
+                  </option>
+                  <option value="openrouter">
+                    {t('OpenRouter Multi-Model Gateway', 'بوابة OpenRouter')}
+                  </option>
+                  <option value="huggingface">
+                    {t('HuggingFace Serverless Inference', 'بوابة HuggingFace')}
+                  </option>
+                </select>
               </div>
-            ) : (
-              customProvider !== 'sovereign' && (
+
+              {customProvider === 'ollama' ? (
                 <div>
                   <label className="block text-xs font-bold mb-1">
-                    {t('API Key (Optional for Auto Cascade)', 'مفتاح API (اختياري)')}
+                    {t('Local OpenAI-Compatible Server URL', 'رابط الخادم المحلي (Ollama / vLLM)')}
                   </label>
                   <input
-                    type="password"
-                    value={customApiKey}
-                    onChange={(e) => setCustomApiKey(e.target.value)}
-                    placeholder={t('Paste Groq / Gemini / OpenRouter / HF key...', 'أدخل مفتاح API للاتصال المباشر...')}
+                    type="text"
+                    value={customBaseUrl}
+                    onChange={(e) => setCustomBaseUrl(e.target.value)}
+                    placeholder="http://localhost:11434/v1"
                     className="w-full rounded-xl border bg-background px-3 py-2 text-xs"
                   />
                 </div>
-              )
-            )}
-
-            <div>
-              <label className="block text-xs font-bold mb-1">
-                {t('Target Model Identifier', 'معرّف النموذج المستهدف')}
-              </label>
-              <input
-                type="text"
-                value={customModelName}
-                onChange={(e) => setCustomModelName(e.target.value)}
-                placeholder="mahalla-sovereign-v4 / llama3.3 / gemini-2.5-flash"
-                className="w-full rounded-xl border bg-background px-3 py-2 text-xs"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold mb-1 flex items-center gap-1.5">
-                <Database className="h-3.5 w-3.5 text-emerald-600" />
-                {t(
-                  'Custom Factory Knowledge & Domain Fine-Tuning Rules',
-                  'قواعد تخصيص وتدريب النموذج على بيانات مصنعك'
-                )}
-              </label>
-              <textarea
-                rows={3}
-                value={customFactoryRules}
-                onChange={(e) => setCustomFactoryRules(e.target.value)}
-                placeholder={t(
-                  'Example: Our mill operates 48 Picanol OmniPlus-i air-jet looms, 500 kWp rooftop solar, and specializes in Giza 86/94 hotel bedding for Germany...',
-                  'مثال: يمتلك مصنعنا ٤٨ نول هواء بيكانول، ومحطة طاقة شمسية ٥٠٠ كيلوواط، ومتخصصون في مفروشات الفنادق لقطن جيزة ٨٦/٩٤...'
-                )}
-                className="w-full rounded-xl border bg-background px-3 py-2 text-xs"
-              />
-            </div>
-
-            <button
-              type="button"
-              onClick={handleSaveConfig}
-              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 px-4 py-2.5 text-xs font-extrabold text-white transition cursor-pointer"
-            >
-              <Zap className="h-4 w-4" />
-              {t(
-                'Save Unlimited AI Configuration Across Platform',
-                'حفظ وتعميم إعدادات الذكاء الاصطناعي عبر المنصة'
+              ) : (
+                customProvider !== 'sovereign' && (
+                  <div>
+                    <label className="block text-xs font-bold mb-1">
+                      {t('API Key (Optional for Auto Cascade)', 'مفتاح API (اختياري)')}
+                    </label>
+                    <input
+                      type="password"
+                      value={customApiKey}
+                      onChange={(e) => setCustomApiKey(e.target.value)}
+                      placeholder={t('Paste Groq / Gemini / OpenRouter / HF key...', 'أدخل مفتاح API للاتصال المباشر...')}
+                      className="w-full rounded-xl border bg-background px-3 py-2 text-xs"
+                    />
+                  </div>
+                )
               )}
-            </button>
 
-            {savedBanner && (
-              <div className="flex items-center gap-2 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-xs font-bold text-emerald-700 dark:text-emerald-300">
-                <CheckCircle2 className="h-4 w-4 shrink-0" />
-                {t(
-                  'Saved! All 19 modules, chat, and studios are now using your configuration.',
-                  'تم الحفظ! جميع الوحدات والاستوديوهات تستخدم الآن هذا الإعداد.'
-                )}
+              <div>
+                <label className="block text-xs font-bold mb-1">
+                  {t('Target Model Identifier', 'معرّف النموذج المستهدف')}
+                </label>
+                <input
+                  type="text"
+                  value={customModelName}
+                  onChange={(e) => setCustomModelName(e.target.value)}
+                  placeholder="mahalla-sovereign-v5 / llama3.3 / gemini-2.5-flash"
+                  className="w-full rounded-xl border bg-background px-3 py-2 text-xs"
+                />
               </div>
-            )}
+
+              <div>
+                <label className="block text-xs font-bold mb-1 flex items-center gap-1.5">
+                  <Database className="h-3.5 w-3.5 text-emerald-600" />
+                  {t(
+                    'Custom Factory Knowledge & Domain Fine-Tuning Rules',
+                    'قواعد تخصيص وتدريب النموذج على بيانات مصنعك'
+                  )}
+                </label>
+                <textarea
+                  rows={3}
+                  value={customFactoryRules}
+                  onChange={(e) => setCustomFactoryRules(e.target.value)}
+                  placeholder={t(
+                    'Example: Our mill operates 48 Picanol OmniPlus-i air-jet looms, 500 kWp rooftop solar, and specializes in Giza 86/94 hotel bedding for Germany...',
+                    'مثال: يمتلك مصنعنا ٤٨ نول هواء بيكانول، ومحطة طاقة شمسية ٥٠٠ كيلوواط، ومتخصصون في مفروشات الفنادق لقطن جيزة ٨٦/٩٤...'
+                  )}
+                  className="w-full rounded-xl border bg-background px-3 py-2 text-xs"
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={handleSaveConfig}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 px-4 py-2.5 text-xs font-extrabold text-white transition cursor-pointer"
+              >
+                <Zap className="h-4 w-4" />
+                {t(
+                  'Save Unlimited AI Configuration Across Platform',
+                  'حفظ وتعميم إعدادات الذكاء الاصطناعي عبر المنصة'
+                )}
+              </button>
+
+              {savedBanner && (
+                <div className="flex items-center gap-2 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-xs font-bold text-emerald-700 dark:text-emerald-300">
+                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  {t(
+                    'Saved! All 19 modules, chat, and studios are now using your configuration.',
+                    'تم الحفظ! جميع الوحدات والاستوديوهات تستخدم الآن هذا الإعداد.'
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

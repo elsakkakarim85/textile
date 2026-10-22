@@ -911,6 +911,28 @@ export function UniversalModuleAiCopilot({
                     </button>
                     <button
                       type="button"
+                      onClick={() => setSovereignVisualMode('dobby-pegplan')}
+                      className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-[11px] font-bold transition cursor-pointer ${
+                        sovereignVisualMode === 'dobby-pegplan'
+                          ? 'bg-emerald-500 text-slate-950 border-emerald-400'
+                          : 'border-white/20 bg-white/10 text-white hover:bg-white/20'
+                      }`}
+                    >
+                      {t('4. 8×8 Dobby Peg-Plan', '٤. مصفوفة الدوبي والمشط')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSovereignVisualMode('uster-lab')}
+                      className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-[11px] font-bold transition cursor-pointer ${
+                        sovereignVisualMode === 'uster-lab'
+                          ? 'bg-emerald-500 text-slate-950 border-emerald-400'
+                          : 'border-white/20 bg-white/10 text-white hover:bg-white/20'
+                      }`}
+                    >
+                      {t('5. Uster® & CIE L*a*b* Lab', '٥. معمل Uster والمطياف')}
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => {
                         setSovereignVisualMode('studio-photo');
                         setVisualVariantIdx((v) => v + 1);
@@ -922,7 +944,7 @@ export function UniversalModuleAiCopilot({
                       }`}
                     >
                       <RefreshCw className="h-3 w-3" />
-                      {t('4. Studio Photo + HUD', '٤. تصوير استوديو + مؤشرات')}
+                      {t('6. Studio Photo + HUD', '٦. تصوير استوديو + مؤشرات')}
                     </button>
                     <button
                       type="button"

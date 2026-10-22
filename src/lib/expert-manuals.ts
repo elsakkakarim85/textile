@@ -3959,6 +3959,57 @@ export const EXPERT_MANUALS: Record<string, ExpertManualEntry> = {
     proTipEn: 'Toggle "Composite Company Brand & KPI Overlay" ON when exporting LinkedIn B2B ads so European buyers immediately see your company name and 0% EUR.1 duty badge on the visual!',
     proTipAr: 'فعّل خيار "دمج شعار الشركة ومؤشرات الجودة" عند تحميل الصور والفيديو ليظهر اسم مصنعك وشارات التصدير مباشرة على الكادر!',
   },
+
+  'sovereign-neural-lab': {
+    id: 'sovereign-neural-lab',
+    category: 'ai_academy',
+    badgeEn: 'Sovereign Neural Engine v5.0 Manual',
+    badgeAr: 'دليل المحرك العصبي السيادي v5.0 (مبني من الصفر)',
+    titleEn: 'Mahalla-Sovereign-LM v5.0 & Weave-Diffusion v5.0 — Built-From-Scratch Textile Neural Workbench',
+    titleAr: 'المختبر العصبي السيادي للمحلة (Mahalla-Sovereign-LM v5.0 + Weave-Diffusion v5.0) — مبني من الصفر وبلا حدود',
+    subtitleEn: 'Zero-rate-limit quantitative textile physics, Uster® 2023 yarn modeling, 8×8 Dobby peg-plan & crimp geometry, 5-mode procedural HD visual synthesis, and local Ollama / cloud BYOK integration.',
+    subtitleAr: 'محرك ذكاء اصطناعي هندسي مبني من الصفر بدون أي قيود أو حدود استخدام، يحل معادلات الغزل والنسيج والصباغة والتكاليف في أقل من 2 مللي ثانية ويرسم 5 مخططات هندسية ثلاثية الأبعاد.',
+    whatIsThisEn:
+      'A sovereign, built-from-scratch textile and industrial neural engine (`Mahalla-Sovereign-LM v5.0` and `Mahalla-Weave-Diffusion v5.0`) embedded natively in the platform alongside an unlimited multi-LLM router supporting Local Ollama (`http://localhost:11434/v1`), Groq LPU, Google Gemini 2.5 Flash, OpenRouter, and HuggingFace.',
+    whatIsThisAr:
+      'محرك ذكاء اصطناعي هندسي وبصري سيادي مبني من الصفر داخل المنصة (`Mahalla-Sovereign-LM v5.0` و `Mahalla-Weave-Diffusion v5.0`) يعمل جنباً إلى جنب مع موجه النماذج غير المحدود الذي يدعم الخوادم المحلية (`Ollama / vLLM`) والسحابية (`Groq / Gemini / OpenRouter`).',
+    howItWorksEn:
+      '1) Semantic Tokenizer & Physics Solver parses Arabic and English prompts (or interactive sliders) in <2ms to compute yarn linear density (Tex = 590.5/Ne), twist (TPI), Uster® 2023 5% benchmarks (CVm%, Tenacity cN/tex, Hairiness H, Spinning Draft), 8×8 Dobby point-paper weave matrices, reed count/width, warp/weft crimp %, isothermal 1:6 reactive dyeing stoichiometry, garment SAM line balancing, and FOB-to-Landed EUR.1/QIZ costs. 2) 5-Mode Procedural Canvas Renderer synthesizes 1280×540 HD visuals directly on HTML5 Canvas (3D Micro-Weave, 3D Smart Mill Twin, Vector CAD, 8×8 Dobby Peg-Plan & Crimp Wave, and Uster® & CIE L*a*b* Lab).',
+    howItWorksAr:
+      '١) المحلل اللغوي والفيزيائي يستخلص نمرة الغزل والتركيب النسجي والوزن ونسبة الحمام في أقل من 2 مللي ثانية ليحسب الترقيم المتري Tex، ومؤشرات Uster® 2023، ومصفوفة الدوبي 8×8، وحسابات المشط والتشريب واستهلاك الغزل للمتر الطولي، وتكلفة FOB والإعفاء الجمركي. ٢) المحرك البصري يرسم 5 أنماط هندسية عالية الدقة (1280×540) مباشرة على المتصفح بدون أي خوادم خارجية.',
+    whyToUseEn: [
+      'Guarantees 100% uptime, zero rate-limit banners, and sub-2ms engineering calculations forever.',
+      'Provides true textile engineering calculations (Uster® 5%, 8×8 Dobby draft, reed width, crimp %, g/m yarn mass balance, and EU ESPR Digital Product Passport JSON export).',
+      'Allows connecting local GPU servers (Ollama / vLLM) or custom API keys across all 19 platform modules.',
+    ],
+    whyToUseAr: [
+      'يضمن استمرارية العمل بنسبة 100% بدون أي رسائل تجاوز الحد الأقصى للاستخدام وبسرعة فورية.',
+      'يقدم حسابات هندسية نسجية حقيقية (مؤشرات Uster، مصفوفة الدوبي 8×8، عرض المشط، التشريب، ووزن الخيوط للمتر الطولي) مع تصدير جواز المنتج الأوروبي JSON.',
+      'يتيح ربط خادم محلي (Ollama) أو مفاتيح سحابية خاصة وتخصيص النموذج ببيانات ماكينات مصنعك.',
+    ],
+    howToUseSteps: [
+      {
+        titleEn: '1. Adjust the Parametric Sliders or Type Any Specification',
+        titleAr: '١. حرّك المؤشرات البارامترية أو اكتب أي مواصفة فنية',
+        detailEn: 'Slide Yarn Count (Ne 12–120), Width (110–340 cm), or Liquor Ratio (1:4.5–1:10) and watch all equations and visuals update in real time.',
+        detailAr: 'حرّك مؤشر نمرة الغزل أو عرض القماش أو نسبة الحمام وشاهد تحديث جميع المعادلات والرسوم لحظياً.',
+      },
+      {
+        titleEn: '2. Switch Across the 5 Engineering Visual Modes & Export PNG / JSON / MD',
+        titleAr: '٢. بدّل بين الأنماط البصرية الـ ٥ وحمّل ملفات .PNG و .JSON و .MD',
+        detailEn: 'Inspect 3D Micro-Weave, 3D Smart Mill Twin, Vector CAD, 8×8 Dobby Peg-Plan, or Uster® Lab, and click Export EU DPP (.JSON) or Download .PNG.',
+        detailAr: 'استعرض النسيج ثلاثي الأبعاد أو مصفوفة الدوبي أو معمل Uster وحمّل جواز المنتج الرقمي أو الصورة عالية الدقة.',
+      },
+      {
+        titleEn: '3. Save Custom Factory Rules or Local Ollama / Cloud Keys',
+        titleAr: '٣. احفظ قواعد مصنعك المخصصة أو اربط خادم Ollama المحلي',
+        detailEn: 'Enter your mill’s loom inventory or local Ollama URL and click "Save Unlimited AI Configuration Across Platform".',
+        detailAr: 'أدخل بيانات ماكينات مصنعك أو رابط خادم Ollama واضغط حفظ لتعميم الإعدادات على جميع وحدات المنصة.',
+      },
+    ],
+    proTipEn: 'Switch to Mode 4 (8×8 Dobby Peg-Plan & Crimp) to get the exact reed dents/inch, reed width in cm, and warp/weft gram consumption per linear meter before warping!',
+    proTipAr: 'اختر النمط الرابع (مصفوفة الدوبي والمشط) للحصول على نمرة المشط وعرض المشط بالسنتيمتر ووزن خيوط السداء واللحمة للمتر الطولي قبل تشغيل السداية!',
+  },
 };
 
 /**

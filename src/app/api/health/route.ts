@@ -33,8 +33,8 @@ export async function GET() {
       status: 'operational',
       rateLimits: 'unlimited',
       sovereignEngine: {
-        textModel: 'Mahalla-Sovereign-LM v4.0 (Built-From-Scratch Quantitative Textile Engine)',
-        visualModel: 'Mahalla-Weave-Diffusion v4.0 (3D Micro-Weave, Isometric Factory & CAD Renderer)',
+        textModel: 'Mahalla-Sovereign-LM v5.0 (Uster 2023 5%, 8x8 Dobby Weave, ZDHC & NPV/IRR Engine)',
+        visualModel: 'Mahalla-Weave-Diffusion v5.0 (5-Mode Procedural HD Canvas: Micro-Weave, Mill Twin, CAD, Dobby Peg-Plan & Uster/CIE Lab)',
         latencyMs: '< 2ms',
       },
       supportedFreeModels: FREE_LLM_CATALOG.map((m) => m.id),
