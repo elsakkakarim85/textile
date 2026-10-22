@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { route, parseBody } from '@/server/http';
 import { generate, type FreeLlmModelId } from '@/server/ai';
+import { runSovereignTextileLm } from '@/lib/sovereign-textile-lm';
 import {
   MODULE_AI_CONFIGS,
   synthesizeModuleExpertDeliverable,
@@ -62,6 +63,11 @@ Respond in ${
   });
 
   const usedFallback = res.model.includes('mahalla-sovereign');
+  const sovereignOut = runSovereignTextileLm({
+    prompt: body.prompt,
+    moduleKey: modKey,
+    locale: isAr ? 'ar' : 'en',
+  });
   const replyText = usedFallback
     ? synthesizeModuleExpertDeliverable(modKey, body.prompt, locale)
     : res.text;
@@ -70,6 +76,7 @@ Respond in ${
     reply: replyText,
     modelUsed: res.model,
     moduleId: modKey,
+    sovereignTelemetry: sovereignOut.telemetry,
     latencyMs: Date.now() - startMs,
     generatedAt: new Date().toISOString(),
   };

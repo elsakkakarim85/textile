@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { HttpError, route } from '@/server/http';
 import { generate, sanitizeMessages } from '@/server/ai';
 import { searchKnowledge } from '@/server/knowledge';
+import { runSovereignTextileLm } from '@/lib/sovereign-textile-lm';
 
 export const maxDuration = 30;
 
@@ -89,5 +90,12 @@ ${sources || '(no matching documents)'}`;
     preferredModel: body?.preferredModel,
     customConfig: body?.customConfig,
   });
-  return { text, reply: text, model, sources: knowledge.map((k) => k.title) };
+  const sovereignOut = runSovereignTextileLm({ prompt: question });
+  return {
+    text,
+    reply: text,
+    model,
+    sovereignTelemetry: sovereignOut.telemetry,
+    sources: knowledge.map((k) => k.title),
+  };
 });
