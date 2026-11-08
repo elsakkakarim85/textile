@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { safeQuery } from '@/server/cluster';
 import { route } from '@/server/http';
 import { generate, sanitizeMessages, type FreeLlmModelId } from '@/server/ai';
+import { runSovereignTextileLm } from '@/lib/sovereign-textile-lm';
 
 export const maxDuration = 30;
 
@@ -9,6 +10,7 @@ export const POST = route(async (req) => {
   const body = await req.json().catch(() => ({}));
   const messages = sanitizeMessages(body?.messages);
   const preferredModel = (body?.preferredModel || 'auto') as FreeLlmModelId;
+  const lastQuestion = messages.filter((m) => m.role === 'user').at(-1)?.content || '';
 
   const fallbackTelemetry = {
     totalUsers: 142,
@@ -58,6 +60,17 @@ LIVE PLATFORM TELEMETRY:
 - Settings: ${info.settingsSummary}
 - Recent Audit Actions: ${info.recentLogs}`;
 
-  const { text, model } = await generate({ system, messages, preferredModel });
-  return { text, model };
+  const { text, model } = await generate({
+    system,
+    messages,
+    preferredModel,
+    customConfig: body?.customConfig,
+  });
+  const sovereignOut = runSovereignTextileLm({ prompt: lastQuestion || 'Giza 86 Ne 40/1 sateen 300TC' });
+  return {
+    text,
+    model,
+    sovereignTelemetry: sovereignOut.telemetry,
+    platformTelemetry: info,
+  };
 });

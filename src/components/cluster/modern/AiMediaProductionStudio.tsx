@@ -7,6 +7,11 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Pill } from '@/components/cluster/ui';
 import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
+import { extractTextileTelemetry } from '@/lib/sovereign-textile-lm';
+import {
+  renderSovereignVisualToCanvas,
+  type SovereignVisualMode,
+} from '@/lib/sovereign-visual-model';
 import {
   Sparkles,
   Camera,
@@ -302,8 +307,10 @@ export function AiMediaProductionStudio({
   const [videoModelId, setVideoModelId] = useState<FreeVideoModelId>('veo-2');
   const [preferredLlm, setPreferredLlm] = useState<string>('auto');
 
-  // Workspace Mode: 'BOTH' | 'IMAGES' | 'VIDEO'
-  const [workspaceTab, setWorkspaceTab] = useState<'BOTH' | 'IMAGES' | 'VIDEO'>('BOTH');
+  // Workspace Mode: 'BOTH' | 'IMAGES' | 'VIDEO' | 'SOVEREIGN_CAD'
+  const [workspaceTab, setWorkspaceTab] = useState<'BOTH' | 'IMAGES' | 'VIDEO' | 'SOVEREIGN_CAD'>('BOTH');
+  const [sovereignVisualMode, setSovereignVisualMode] = useState<SovereignVisualMode>('weave-physics');
+  const [blueprintInjectedToast, setBlueprintInjectedToast] = useState<boolean>(false);
   const [showBrandedOverlay, setShowBrandedOverlay] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -321,6 +328,7 @@ export function AiMediaProductionStudio({
   const [recordingProgressPct, setRecordingProgressPct] = useState<number>(0);
 
   const videoCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const sovereignCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const loadedSceneImagesRef = useRef<Record<string, HTMLImageElement>>({});
 
   // Trigger initial generation on mount
@@ -861,6 +869,75 @@ export function AiMediaProductionStudio({
   const currentScenes = productionData?.videoStoryboard?.scenes || [];
   const activeScene = currentScenes[activeSceneIdx] || currentScenes[0];
 
+  const sovereignTelemetry = React.useMemo(
+    () => extractTextileTelemetry(`${companySpecialty} ${prompt}`),
+    [companySpecialty, prompt]
+  );
+
+  useEffect(() => {
+    const canvas = sovereignCanvasRef.current;
+    if (!canvas) return;
+    renderSovereignVisualToCanvas({
+      canvas,
+      prompt: `${companySpecialty} ${prompt}`,
+      moduleBadge: `${companyName} • ${certifications.slice(0, 42)}`,
+      locale,
+      mode: sovereignVisualMode,
+    });
+  }, [
+    companySpecialty,
+    prompt,
+    companyName,
+    certifications,
+    locale,
+    sovereignVisualMode,
+    workspaceTab,
+  ]);
+
+  const handleDownloadSovereignBlueprintPng = () => {
+    const canvas = sovereignCanvasRef.current;
+    if (!canvas) return;
+    const link = document.createElement('a');
+    link.download = `mahalla-sovereign-blueprint-${sovereignVisualMode}-${Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  };
+
+  const handleInjectBlueprintIntoScene3 = () => {
+    const canvas = sovereignCanvasRef.current;
+    if (!canvas || !productionData?.videoStoryboard?.scenes) return;
+    const dataUrl = canvas.toDataURL('image/png');
+    const img = new window.Image();
+    img.onload = () => {
+      loadedSceneImagesRef.current[dataUrl] = img;
+      setProductionData((prev: any) => {
+        if (!prev?.videoStoryboard?.scenes) return prev;
+        const nextScenes = prev.videoStoryboard.scenes.map((sc: any, idx: number) =>
+          idx === 2
+            ? {
+                ...sc,
+                imageUrl: dataUrl,
+                headlineEn: `Sovereign CAD Blueprint: Ne ${sovereignTelemetry.yarnCountNe}/${sovereignTelemetry.ply} (${sovereignTelemetry.gsm} GSM)`,
+                headlineAr: `المخطط الهندسي السيادي: غزل Ne ${sovereignTelemetry.yarnCountNe}/${sovereignTelemetry.ply} (${sovereignTelemetry.gsm} GSM)`,
+              }
+            : sc
+        );
+        return {
+          ...prev,
+          videoStoryboard: {
+            ...prev.videoStoryboard,
+            scenes: nextScenes,
+          },
+        };
+      });
+      setActiveSceneIdx(2);
+      setSceneProgress(35);
+      setBlueprintInjectedToast(true);
+      setTimeout(() => setBlueprintInjectedToast(false), 3000);
+    };
+    img.src = dataUrl;
+  };
+
   return (
     <section className="rounded-3xl border-2 border-indigo-500/30 bg-gradient-to-br from-slate-950 via-indigo-950/90 to-emerald-950 text-white p-6 md:p-8 shadow-2xl space-y-6">
       {/* Top Studio Banner */}
@@ -894,9 +971,10 @@ export function AiMediaProductionStudio({
         {/* Workspace View Switcher */}
         <div className="flex flex-wrap items-center gap-1.5 bg-white/10 p-1.5 rounded-2xl border border-white/15 shrink-0">
           {[
-            { id: 'BOTH', en: 'Images + Video Studio', ar: 'الصور + الفيديو معاً', icon: Layers },
+            { id: 'BOTH', en: 'All Studios (Images + Video + CAD)', ar: 'كل الاستوديوهات (صور + فيديو + مخطط)', icon: Layers },
             { id: 'IMAGES', en: '4-Angle Image Studio', ar: 'استوديو الصور (4 زوايا)', icon: Camera },
             { id: 'VIDEO', en: '5-Scene Video Producer', ar: 'استوديو الفيديو (5 مشاهد)', icon: Film },
+            { id: 'SOVEREIGN_CAD', en: '5-Mode Sovereign CAD & Uster Lab', ar: 'المخطط الهندسي السيادي (5 أنماط)', icon: Cpu },
           ].map((tab) => {
             const Icon = tab.icon;
             const active = workspaceTab === tab.id;
@@ -1561,6 +1639,151 @@ export function AiMediaProductionStudio({
             </div>
           </div>
         )}
+
+      {/* WORKSPACE C: SOVEREIGN 5-MODE ENGINEERING BLUEPRINT & USTER 2023 SPEC SHEET */}
+      {(workspaceTab === 'BOTH' || workspaceTab === 'SOVEREIGN_CAD') && (
+        <div className="space-y-4 pt-2 border-t border-white/15">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 className="text-lg font-extrabold flex items-center gap-2">
+                <Cpu className="w-5 h-5 text-emerald-400" />
+                {t(
+                  '3. Sovereign 5-Mode Engineering Blueprint & Uster® 2023 Spec Studio (Mahalla-Weave-Diffusion v5.0)',
+                  '٣. استوديو المخططات الهندسية السيادي ومعمل Uster® 2023 (5 أنماط هندسية حية — Mahalla-Weave-Diffusion v5.0)'
+                )}
+              </h3>
+              <p className="text-xs text-slate-300">
+                {t(
+                  'Zero-rate-limit procedural HTML5 Canvas renderer grounded in your Company Specialty & Prompt. Download as HD .PNG or inject directly into Video Scene 03 (.MP4).',
+                  'محرك رسم هندسي فوري بدون أي حدود استخدام، يحلل تخصص شركتك ويرسم ٥ مخططات هندسية عالية الدقة قابلة للتحميل بصيغة PNG أو الدمج المباشر داخل المشهد الثالث للفيديو (.MP4).'
+                )}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                type="button"
+                onClick={handleInjectBlueprintIntoScene3}
+                className="bg-purple-500 hover:bg-purple-400 text-slate-950 font-extrabold text-xs gap-1.5 cursor-pointer"
+              >
+                {blueprintInjectedToast ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4" />
+                    {t('Injected into Video Scene 03!', 'تم الدمج في المشهد ٠٣ بالفيديو!')}
+                  </>
+                ) : (
+                  <>
+                    <Film className="w-4 h-4" />
+                    {t('Inject Blueprint into Video Scene 03 (.MP4)', 'دمج المخطط في المشهد ٠٣ للفيديو (.MP4)')}
+                  </>
+                )}
+              </Button>
+              <Button
+                type="button"
+                onClick={handleDownloadSovereignBlueprintPng}
+                className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs gap-1.5 cursor-pointer"
+              >
+                <Download className="w-4 h-4" />
+                {t('Download Engineering Blueprint (.PNG)', 'تحميل المخطط الهندسي (.PNG)')}
+              </Button>
+            </div>
+          </div>
+
+          {/* 5-Mode Selector Bar */}
+          <div className="flex flex-wrap items-center gap-2 bg-slate-900/90 p-2 rounded-2xl border border-white/15">
+            {(
+              [
+                {
+                  id: 'weave-physics',
+                  en: '1. 3D Micro-Weave Simulation',
+                  ar: '١. محاكاة النسيج الميكروسكوبية 3D',
+                },
+                {
+                  id: 'isometric-factory',
+                  en: '2. 3D Isometric Smart Mill Twin',
+                  ar: '٢. التوأم الرقمي للمصنع الذكي 3D',
+                },
+                {
+                  id: 'cad-techpack',
+                  en: '3. Vector CAD & Pantone Spec',
+                  ar: '٣. مخطط الباترون والألوان CAD',
+                },
+                {
+                  id: 'dobby-pegplan',
+                  en: '4. 8×8 Dobby Peg-Plan & Crimp Wave',
+                  ar: '٤. مصفوفة الدوبي 8×8 وموجة التشريب',
+                },
+                {
+                  id: 'uster-lab',
+                  en: '5. Uster® 2023 & CIE L*a*b* Lab',
+                  ar: '٥. معمل Uster® 2023 ومطياف الألوان',
+                },
+              ] as { id: SovereignVisualMode; en: string; ar: string }[]
+            ).map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => setSovereignVisualMode(m.id)}
+                className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition cursor-pointer ${
+                  sovereignVisualMode === m.id
+                    ? 'bg-emerald-500 text-slate-950 shadow-md'
+                    : 'bg-white/5 text-slate-300 hover:bg-white/15'
+                }`}
+              >
+                {isAr ? m.ar : m.en}
+              </button>
+            ))}
+          </div>
+
+          {/* Live 1280x540 Sovereign Blueprint Canvas + Live Extracted Physics Strip */}
+          <div className="rounded-2xl overflow-hidden border-2 border-emerald-400/40 bg-slate-950 shadow-2xl">
+            <canvas
+              ref={sovereignCanvasRef}
+              width={1280}
+              height={540}
+              className="w-full max-h-[420px] object-contain block mx-auto"
+            />
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 p-3 bg-slate-900/95 border-t border-white/10 text-[11px]">
+              <div className="rounded-lg bg-white/5 px-2.5 py-1.5 border border-white/10">
+                <div className="text-slate-400 font-semibold">{t('Yarn Count & Tex', 'نمرة الغزل والترقيم')}</div>
+                <div className="text-emerald-300 font-extrabold font-mono">
+                  Ne {sovereignTelemetry.yarnCountNe}/{sovereignTelemetry.ply} ({sovereignTelemetry.tex} Tex)
+                </div>
+              </div>
+              <div className="rounded-lg bg-white/5 px-2.5 py-1.5 border border-white/10">
+                <div className="text-slate-400 font-semibold">{t('Uster® 5% CVm / Tenacity', 'معامل الاختلاف والمتانة')}</div>
+                <div className="text-sky-300 font-extrabold font-mono">
+                  {sovereignTelemetry.uster.cvmPct}% • {sovereignTelemetry.uster.tenacityCnTex} cN/tex
+                </div>
+              </div>
+              <div className="rounded-lg bg-white/5 px-2.5 py-1.5 border border-white/10">
+                <div className="text-slate-400 font-semibold">{t('Sett & Reed Plan', 'الكثافة والمشط')}</div>
+                <div className="text-amber-300 font-extrabold font-mono">
+                  {sovereignTelemetry.epi}×{sovereignTelemetry.ppi} ({sovereignTelemetry.weaveGeometry.reedCountDentsInch} d/in)
+                </div>
+              </div>
+              <div className="rounded-lg bg-white/5 px-2.5 py-1.5 border border-white/10">
+                <div className="text-slate-400 font-semibold">{t('Areal & Linear Mass', 'الوزن للمتر المربع والطولي')}</div>
+                <div className="text-purple-300 font-extrabold font-mono">
+                  {sovereignTelemetry.gsm} GSM • {sovereignTelemetry.weaveGeometry.totalGramsPerLinearMeter} g/m
+                </div>
+              </div>
+              <div className="rounded-lg bg-white/5 px-2.5 py-1.5 border border-white/10">
+                <div className="text-slate-400 font-semibold">{t('FOB Alexandria Cost', 'تكلفة التصدير FOB')}</div>
+                <div className="text-emerald-300 font-extrabold font-mono">
+                  ${sovereignTelemetry.costing.totalFobUsdKg.toFixed(2)}/kg (${sovereignTelemetry.costing.fobUnitUsd.toFixed(2)}/m)
+                </div>
+              </div>
+              <div className="rounded-lg bg-white/5 px-2.5 py-1.5 border border-white/10">
+                <div className="text-slate-400 font-semibold">{t('Carbon & Water DPP', 'البصمة الكربونية والمياه')}</div>
+                <div className="text-teal-300 font-extrabold font-mono">
+                  {sovereignTelemetry.sustainability.netKgCo2ePerKg} kg CO₂ • -{sovereignTelemetry.sustainability.waterSavedPct}% H₂O
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
