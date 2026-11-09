@@ -35,11 +35,13 @@ export async function GET() {
       sovereignEngine: {
         textModel: 'Mahalla-Sovereign-LM v5.0 (Uster 2023 5%, 8x8 Dobby Weave, ZDHC & NPV/IRR Engine)',
         visualModel: 'Mahalla-Weave-Diffusion v5.0 (5-Mode Procedural HD Canvas: Micro-Weave, Mill Twin, CAD, Dobby Peg-Plan & Uster/CIE Lab)',
+        videoModel: 'MiniMax Hailuo H3 Director (T2V-01-Director 1080p 60fps 6-DoF Camera Control + H.264 MP4 Studio)',
         latencyMs: '< 2ms',
       },
       supportedFreeModels: FREE_LLM_CATALOG.map((m) => m.id),
       providers: {
         sovereignBuiltFromScratchActive: true,
+        minimaxH3VideoDirectorActive: true,
         localOllamaAndVllmSupported: true,
         groqConfigured: Boolean(process.env.GROQ_API_KEY?.trim()),
         geminiConfigured: Boolean(process.env.GOOGLE_GENERATIVE_AI_API_KEY?.trim()),

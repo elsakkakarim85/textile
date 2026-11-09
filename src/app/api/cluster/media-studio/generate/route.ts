@@ -27,8 +27,8 @@ const MediaGenerateSchema = z.object({
     .enum(['flux-schnell', 'flux-realism', 'sdxl-turbo', 'imagen-3-bridge'])
     .default('flux-schnell'),
   videoModelId: z
-    .enum(['veo-2', 'wan-2.1-t2v', 'hunyuan-video', 'cogvideox-5b'])
-    .default('veo-2'),
+    .enum(['minimax-h3', 'veo-2', 'wan-2.1-t2v', 'hunyuan-video', 'cogvideox-5b'])
+    .default('minimax-h3'),
   preferredLlm: z
     .enum([
       'auto',
@@ -115,7 +115,7 @@ export const POST = route(async (req) => {
     prompt: rawBody.prompt,
     aspectRatio: rawBody.aspectRatio || ('16:9' as const),
     imageModelId: rawBody.imageModelId || ('flux-schnell' as const),
-    videoModelId: rawBody.videoModelId || ('veo-2' as const),
+    videoModelId: rawBody.videoModelId || ('minimax-h3' as const),
     preferredLlm: rawBody.preferredLlm,
     seed: rawBody.seed,
     locale: rawBody.locale || 'en',
@@ -273,14 +273,16 @@ export const POST = route(async (req) => {
     ),
   }));
 
-  // Build 5-Scene Video Storyboard with real AI keyframe URLs + camera motion + bilingual voiceover
+  // Build 5-Scene Video Storyboard with real AI keyframe URLs + MiniMax H3 camera motion + bilingual voiceover
   const scenes = [
     {
       sceneNumber: 1,
       durationSec: 4,
       cameraMotion: 'ZOOM_IN' as const,
-      cameraMotionLabelEn: 'Slow Anamorphic Push-In',
-      cameraMotionLabelAr: 'تقريب سينمائي تدريجي (Push-In)',
+      minimaxMotionId: 'PUSH_IN',
+      minimaxDirectorTag: '[Push in, Tilt up]',
+      cameraMotionLabelEn: '[Push in, Tilt up] MiniMax H3 Anamorphic Push',
+      cameraMotionLabelAr: '[Push in, Tilt up] تقريب سينمائي MiniMax H3',
       headlineEn: pMeta.hookEn,
       headlineAr: pMeta.hookAr,
       sublineEn: `${body.companyName} • ${body.companySpecialty}`,
@@ -289,15 +291,17 @@ export const POST = route(async (req) => {
       voiceoverAr: `مرحباً بكم في ${body.companyName} بمدينة المحلة الكبرى. نقدم لكم ${body.prompt} بأعلى معايير الجودة العالمية الموجهة لأسواق ${body.targetMarket}.`,
       kpiBadgeEn: 'EL-MAHALLA PREMIER EXPORTER',
       kpiBadgeAr: 'مصدر معتمد — المحلة الكبرى',
-      visualPromptEn: angleSpecs[0].promptEn,
+      visualPromptEn: `[Push in, Tilt up] ${angleSpecs[0].promptEn}`,
       keyframeUrl: images[0].imageUrl,
     },
     {
       sceneNumber: 2,
       durationSec: 4,
       cameraMotion: 'PAN_RIGHT' as const,
-      cameraMotionLabelEn: '100mm Macro Lateral Tracking Shot',
-      cameraMotionLabelAr: 'حركة كاميرا ماكرو جانبية على النسيج',
+      minimaxMotionId: 'MACRO_RACK_FOCUS',
+      minimaxDirectorTag: '[Truck right, Rack focus macro]',
+      cameraMotionLabelEn: '[Truck right, Rack focus macro] 100mm Fiber Tracking',
+      cameraMotionLabelAr: '[Truck right, Rack focus macro] تتبع ماكرو للشعيرات',
       headlineEn: 'Extra-Long Staple Fiber & Micro-Weave Perfection',
       headlineAr: 'ألياف قطنية فائقة الطول ودقة نسج وصباغة متناهية',
       sublineEn: `Spectrophotometer Shade Matching CMC ΔE ≤ 0.5 • High Tensile Strength`,
@@ -306,15 +310,17 @@ export const POST = route(async (req) => {
       voiceoverAr: `تخضع كل تشغيلة غزل ونسيج لفحص مجهري دقيق ومطابقة لونية بالمطياف الضوئي بأقل من نصف درجة حيود لوني.`,
       kpiBadgeEn: 'CMC ΔE ≤ 0.5 • USTER® 5% GRADE',
       kpiBadgeAr: 'حيود لوني ΔE ≤ 0.5 • جودة Uster 5%',
-      visualPromptEn: angleSpecs[1].promptEn,
+      visualPromptEn: `[Truck right, Rack focus macro] ${angleSpecs[1].promptEn}`,
       keyframeUrl: images[1].imageUrl,
     },
     {
       sceneNumber: 3,
       durationSec: 4,
       cameraMotion: 'ZOOM_OUT' as const,
-      cameraMotionLabelEn: 'Gimbal Crane Pull-Back Across Loom Hall',
-      cameraMotionLabelAr: 'حركة كاميرا واسعة داخل صالة الماكينات',
+      minimaxMotionId: 'PULL_OUT',
+      minimaxDirectorTag: '[Pull out, Pedestal up]',
+      cameraMotionLabelEn: '[Pull out, Pedestal up] Crane Reveal Across Loom Hall',
+      cameraMotionLabelAr: '[Pull out, Pedestal up] كاميرا كرين واسعة لصالة الإنتاج',
       headlineEn: 'Lean Six Sigma Manufacturing & 98.4% Right-First-Time',
       headlineAr: 'تصنيع رشيق (Lean Six Sigma) ومطابقة قياسية من المرة الأولى 98.4%',
       sublineEn: `Automated Machinery • Real-Time OEE Telemetry • ISO 17025 Testing`,
@@ -323,15 +329,17 @@ export const POST = route(async (req) => {
       voiceoverAr: `بفضل منظومة التصنيع الرشيق ولين 6 سيجما والماكينات الأوتوماتيكية، نضمن ثبات الجودة والالتزام التام بمواعيد شحن الحاويات.`,
       kpiBadgeEn: 'LEAN SIX SIGMA Cpk 1.48 • ISO 17025',
       kpiBadgeAr: 'قدرة العملية Cpk 1.48 • أيزو 17025',
-      visualPromptEn: angleSpecs[2].promptEn,
+      visualPromptEn: `[Pull out, Pedestal up] ${angleSpecs[2].promptEn}`,
       keyframeUrl: images[2].imageUrl,
     },
     {
       sceneNumber: 4,
       durationSec: 4,
       cameraMotion: 'PAN_LEFT' as const,
-      cameraMotionLabelEn: 'Orbital Sweep Over Eco-Certifications & DPP QR',
-      cameraMotionLabelAr: 'استعراض شهادات الاستدامة وجواز المنتج الأوروبي',
+      minimaxMotionId: 'ORBIT_360',
+      minimaxDirectorTag: '[Arc shot, Pan left]',
+      cameraMotionLabelEn: '[Arc shot, Pan left] 3D Orbital Sweep Over DPP & Certs',
+      cameraMotionLabelAr: '[Arc shot, Pan left] دوران ثلاثي الأبعاد حول شهادات التصدير',
       headlineEn: `Certified Compliance: ${body.certifications}`,
       headlineAr: `شهادات التوافق الدولية: ${body.certifications}`,
       sublineEn: `Zero-Duty Export via EUR.1 / QIZ + Cryptographic EU Digital Product Passport`,
@@ -340,15 +348,17 @@ export const POST = route(async (req) => {
       voiceoverAr: `تُرفق جميع الشحنات بشهادات ${body.certifications} وشهادات المنشأ للإعفاء الجمركي وجواز المنتج الرقمي الأوروبي.`,
       kpiBadgeEn: '0% CUSTOMS DUTY • EU ESPR DPP',
       kpiBadgeAr: 'إعفاء جمركي 0% • جواز منتج أوروبي',
-      visualPromptEn: angleSpecs[3].promptEn,
+      visualPromptEn: `[Arc shot, Pan left] ${angleSpecs[3].promptEn}`,
       keyframeUrl: images[3].imageUrl,
     },
     {
       sceneNumber: 5,
       durationSec: 4,
       cameraMotion: 'ZOOM_IN' as const,
-      cameraMotionLabelEn: 'Executive Hero Lock-Off & Call-to-Action',
-      cameraMotionLabelAr: 'كادر ختامي للهوية التجارية ودعوة التواصل المباشر',
+      minimaxMotionId: 'STATIC_LOCK',
+      minimaxDirectorTag: '[Push in, Static shot]',
+      cameraMotionLabelEn: '[Push in, Static shot] Executive Hero Lock-Off & CTA',
+      cameraMotionLabelAr: '[Push in, Static shot] كادر ختامي للهوية ودعوة التواصل',
       headlineEn: pMeta.ctaEn,
       headlineAr: pMeta.ctaAr,
       sublineEn: `${body.companyName} • Direct Export Desk • El-Mahalla Industrial Cluster`,
@@ -357,7 +367,7 @@ export const POST = route(async (req) => {
       voiceoverAr: `تواصل مع مكتب التصدير في ${body.companyName} اليوم، واطلب صندوق العينات المجاني عبر DHL وعرض السعر المخصص لطلبيتك.`,
       kpiBadgeEn: 'DHL 48H SWATCH DISPATCH • SMART ESCROW',
       kpiBadgeAr: 'إرسال عينات DHL خلال 48 ساعة • ضمان بنكي',
-      visualPromptEn: angleSpecs[0].promptEn,
+      visualPromptEn: `[Push in, Static shot] ${angleSpecs[0].promptEn}`,
       keyframeUrl: images[0].imageUrl,
     },
   ];
@@ -392,11 +402,13 @@ User Prompt: ${body.prompt}`,
         : `• **Visual Positioning:** Position ${body.companyName} as a vertically integrated, audit-ready El-Mahalla export manufacturer combining Egyptian cotton heritage with Industry 4.0 precision.\n• **Lighting & Color Psychology:** Anchor frames in ${body.primaryColorHex} and ${body.accentColorHex} with 35° raking macro strobes to accentuate yarn twist and sateen/terry luster.\n• **On-Screen Technical Proof:**Prominently badge ${body.certifications} and spectrophotometer ΔE ≤ 0.5 tolerance.\n• **Conversion Hook:** Drive ${body.targetMarket} buyers to request the 48-hour DHL physical swatch box and 0%-duty EUR.1/QIZ landed-cost quote.`;
   }
 
-  // Video model specialized master prompts (for Veo 2, Wan 2.1, HunyuanVideo, CogVideoX)
+  // Video model specialized master prompts (for MiniMax H3, Veo 2, Wan 2.1, HunyuanVideo, CogVideoX)
   const videoModelPrompts = {
+    'minimax-h3': `[MiniMax Hailuo H3 / T2V-01-Director Master Script — ${body.aspectRatio}, 1080p 60fps Cloth Physics] [Push in, Tilt up] Commercial hero showcase for ${body.companyName} (${body.companySpecialty}): ${body.prompt}, sunlit luxury textile drape with specular sheen in ${body.primaryColorHex} and ${body.accentColorHex}. [Truck right, Rack focus macro] 100mm macro raking strobe across individual combed Egyptian cotton fibers and high-density weave structure (CMC ΔE ≤ 0.5). [Pull out, Pedestal up] High-speed Picanol air-jet weaving and low-liquor reactive dyeing hall in El-Mahalla El-Kubra. [Arc shot, Pan left] Export presentation box stamped with ${body.certifications} and EU Digital Product Passport QR code for ${body.targetMarket}.`,
     'veo-2': `[Google Veo 2 / VideoFX Master Prompt — ${body.aspectRatio}, 24fps Cinema] Continuous multi-shot commercial documentary for ${body.companyName}: Shot 1 (0-4s): ${angleSpecs[0].promptEn}. Shot 2 (4-8s): 100mm macro pan across ${body.prompt} showing individual Egyptian cotton fibers and lustrous weave. Shot 3 (8-12s): Gimbal tracking shot inside ${body.companyName} automated weaving & dyeing hall. Shot 4 (12-16s): Close-up of export swatch box with ${body.certifications} & EU DPP QR code. Lighting: ${pMeta.cameraStyle}.`,
     'wan-2.1-t2v': `[Wan 2.1 14B Text-to-Video Prompt] Photorealistic 1080p commercial video of ${body.prompt} manufactured by ${body.companyName}, smooth camera dolly motion, ultra-detailed fabric drape physics, realistic fiber micro-surface reflection, studio rim lighting in ${body.primaryColorHex} and ${body.accentColorHex}, 8k raw cinema quality.`,
     'hunyuan-video': `[HunyuanVideo / CogVideoX-5B Prompt] High-motion cinematic textile showcase: ${body.prompt} flowing in slow-motion 60fps under warm studio spotlights, transitioning to macro weave structure and ${body.companyName} luxury export presentation for ${body.targetMarket}.`,
+    'cogvideox-5b': `[THUDM CogVideoX-5B Industrial Prompt] Precision industrial cinematography inside ${body.companyName}: automated ring spinning, high-speed weaving of ${body.prompt}, and ISO 17025 quality inspection for ${body.targetMarket}.`,
   };
 
   return {

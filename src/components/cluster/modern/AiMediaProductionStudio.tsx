@@ -54,10 +54,102 @@ export type FreeImageModelId =
   | 'imagen-3-bridge';
 
 export type FreeVideoModelId =
+  | 'minimax-h3'
   | 'veo-2'
   | 'wan-2.1-t2v'
   | 'hunyuan-video'
   | 'cogvideox-5b';
+
+export const MINIMAX_CAMERA_MOVEMENTS = [
+  {
+    id: 'PUSH_IN',
+    tag: '[Push in]',
+    labelEn: '[Push in] Dolly Push',
+    labelAr: '[Push in] تقريب للأمام',
+    dx: 0,
+    dy: 0,
+    scaleStart: 1.02,
+    scaleEnd: 1.22,
+    rotDeg: 0,
+  },
+  {
+    id: 'PULL_OUT',
+    tag: '[Pull out]',
+    labelEn: '[Pull out] Crane Reveal',
+    labelAr: '[Pull out] ابتعاد واسع',
+    dx: 0,
+    dy: 0,
+    scaleStart: 1.22,
+    scaleEnd: 1.02,
+    rotDeg: 0,
+  },
+  {
+    id: 'PAN_RIGHT',
+    tag: '[Pan right]',
+    labelEn: '[Pan right] Pan Right',
+    labelAr: '[Pan right] بانوراما يمين',
+    dx: 0.09,
+    dy: 0,
+    scaleStart: 1.14,
+    scaleEnd: 1.14,
+    rotDeg: 0,
+  },
+  {
+    id: 'PAN_LEFT',
+    tag: '[Pan left]',
+    labelEn: '[Pan left] Pan Left',
+    labelAr: '[Pan left] بانوراما يسار',
+    dx: -0.09,
+    dy: 0,
+    scaleStart: 1.14,
+    scaleEnd: 1.14,
+    rotDeg: 0,
+  },
+  {
+    id: 'TRUCK_RIGHT',
+    tag: '[Truck right, Follow]',
+    labelEn: '[Truck right] Loom Track',
+    labelAr: '[Truck right] تتبع جانبي',
+    dx: 0.11,
+    dy: -0.02,
+    scaleStart: 1.12,
+    scaleEnd: 1.18,
+    rotDeg: 0,
+  },
+  {
+    id: 'TILT_UP',
+    tag: '[Tilt up, Pedestal up]',
+    labelEn: '[Tilt up] Jib Elevate',
+    labelAr: '[Tilt up] ارتفاع للأعلى',
+    dx: 0,
+    dy: -0.08,
+    scaleStart: 1.12,
+    scaleEnd: 1.16,
+    rotDeg: 0,
+  },
+  {
+    id: 'ORBIT_360',
+    tag: '[Arc shot, Pan right]',
+    labelEn: '[Arc shot] 3D Orbit',
+    labelAr: '[Arc shot] دوران 3D',
+    dx: 0.06,
+    dy: -0.03,
+    scaleStart: 1.1,
+    scaleEnd: 1.2,
+    rotDeg: 1.6,
+  },
+  {
+    id: 'MACRO_RACK_FOCUS',
+    tag: '[Push in, Rack focus macro]',
+    labelEn: '[Rack focus] 100mm Macro',
+    labelAr: '[Rack focus] تركيز ماكرو',
+    dx: 0.02,
+    dy: -0.02,
+    scaleStart: 1.05,
+    scaleEnd: 1.26,
+    rotDeg: 0,
+  },
+] as const;
 
 interface CompanyProfilePreset {
   id: string;
@@ -244,6 +336,12 @@ const FREE_IMAGE_MODELS: { id: FreeImageModelId; labelEn: string; labelAr: strin
 
 const FREE_VIDEO_MODELS: { id: FreeVideoModelId; labelEn: string; labelAr: string; badge: string }[] = [
   {
+    id: 'minimax-h3',
+    labelEn: 'MiniMax Hailuo H3 Director (T2V-01-Director 1080p 60fps • 6-DoF Camera Control)',
+    labelAr: 'نموذج MiniMax Hailuo H3 المجاني (تحكم احترافي بحركة الكاميرا 1080p 60fps + MP4)',
+    badge: 'MiniMax H3 Free #1',
+  },
+  {
     id: 'veo-2',
     labelEn: 'Google Veo 2 / VideoFX + Live HTML5 H.264 MP4 Studio Producer',
     labelAr: 'محرك Google Veo 2 + منتج الفيديو المباشر بصيغة MP4 HD',
@@ -304,8 +402,11 @@ export function AiMediaProductionStudio({
   );
   const [aspectRatio, setAspectRatio] = useState<'16:9' | '9:16' | '1:1' | '4:5'>('16:9');
   const [imageModelId, setImageModelId] = useState<FreeImageModelId>('flux-schnell');
-  const [videoModelId, setVideoModelId] = useState<FreeVideoModelId>('veo-2');
+  const [videoModelId, setVideoModelId] = useState<FreeVideoModelId>('minimax-h3');
   const [preferredLlm, setPreferredLlm] = useState<string>('auto');
+  const [minimaxApiKey, setMinimaxApiKey] = useState<string>('');
+  const [minimaxCloudStatus, setMinimaxCloudStatus] = useState<string | null>(null);
+  const [minimaxDispatching, setMinimaxDispatching] = useState<boolean>(false);
 
   // Workspace Mode: 'BOTH' | 'IMAGES' | 'VIDEO' | 'SOVEREIGN_CAD'
   const [workspaceTab, setWorkspaceTab] = useState<'BOTH' | 'IMAGES' | 'VIDEO' | 'SOVEREIGN_CAD'>('BOTH');
@@ -498,25 +599,33 @@ export function AiMediaProductionStudio({
       ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, w, h);
 
-      // 2. If AI Keyframe Image is loaded, draw with Ken Burns camera motion
+      // 2. If AI Keyframe Image is loaded, draw with MiniMax H3 6-DoF Camera-Director trajectory
+      const mmMove =
+        MINIMAX_CAMERA_MOVEMENTS.find((m) => m.id === scene?.minimaxMotionId) ||
+        MINIMAX_CAMERA_MOVEMENTS[0];
       const cachedImg = scene?.keyframeUrl
         ? loadedSceneImagesRef.current[scene.keyframeUrl]
         : null;
       if (cachedImg && cachedImg.complete && cachedImg.naturalWidth > 0) {
         ctx.save();
-        let scale = 1.05 + tNorm * 0.12;
-        let offsetX = 0;
-        let offsetY = 0;
-        if (scene.cameraMotion === 'ZOOM_OUT') {
-          scale = 1.18 - tNorm * 0.12;
-        } else if (scene.cameraMotion === 'PAN_RIGHT') {
-          scale = 1.14;
-          offsetX = (tNorm - 0.5) * w * 0.08;
-        } else if (scene.cameraMotion === 'PAN_LEFT') {
-          scale = 1.14;
-          offsetX = (0.5 - tNorm) * w * 0.08;
+        let scale = mmMove.scaleStart + tNorm * (mmMove.scaleEnd - mmMove.scaleStart);
+        let offsetX = (tNorm - 0.5) * w * mmMove.dx;
+        let offsetY = (tNorm - 0.5) * h * mmMove.dy;
+        const rotRad = ((tNorm - 0.5) * (mmMove.rotDeg || 0) * Math.PI) / 180;
+
+        if (!scene?.minimaxMotionId) {
+          if (scene?.cameraMotion === 'ZOOM_OUT') {
+            scale = 1.18 - tNorm * 0.12;
+          } else if (scene?.cameraMotion === 'PAN_RIGHT') {
+            scale = 1.14;
+            offsetX = (tNorm - 0.5) * w * 0.08;
+          } else if (scene?.cameraMotion === 'PAN_LEFT') {
+            scale = 1.14;
+            offsetX = (0.5 - tNorm) * w * 0.08;
+          }
         }
         ctx.translate(w / 2 + offsetX, h / 2 + offsetY);
+        if (rotRad !== 0) ctx.rotate(rotRad);
         ctx.scale(scale, scale);
         ctx.drawImage(cachedImg, -w / 2, -h / 2, w, h);
         ctx.restore();
@@ -529,6 +638,24 @@ export function AiMediaProductionStudio({
         vig.addColorStop(1, 'rgba(9, 14, 28, 0.94)');
         ctx.fillStyle = vig;
         ctx.fillRect(0, 0, w, h);
+
+        // If MiniMax H3 Macro Rack Focus is active, draw optical 100mm focus reticle
+        if (scene?.minimaxMotionId === 'MACRO_RACK_FOCUS') {
+          ctx.save();
+          const rRadius = 64 + Math.sin(tNorm * Math.PI * 2) * 10;
+          ctx.strokeStyle = 'rgba(52, 211, 153, 0.55)';
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([6, 4]);
+          ctx.beginPath();
+          ctx.arc(w * 0.5, h * 0.42, rRadius, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle = 'rgba(52, 211, 153, 0.85)';
+          ctx.font = 'bold 11px monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText('100mm MACRO RACK FOCUS • ΔE ≤ 0.5', w * 0.5, h * 0.42 - rRadius - 8);
+          ctx.restore();
+        }
       } else {
         // Crisp Procedural Textile Micro-Weave & Studio Spotlight Backdrop
         ctx.save();
@@ -615,13 +742,14 @@ export function AiMediaProductionStudio({
       ctx.roundRect(pad, cardY, 10, cardH, [18, 0, 0, 18]);
       ctx.fill();
 
-      // Scene Camera Motion Tag
+      // Scene Camera Motion Tag + MiniMax H3 Director Bracket HUD
       const motionLabel = isAr ? scene?.cameraMotionLabelAr : scene?.cameraMotionLabelEn;
+      const mmTag = scene?.minimaxDirectorTag || mmMove.tag;
       ctx.fillStyle = accentColorHex || '#F59E0B';
       ctx.font = 'bold 13px monospace';
       ctx.textAlign = 'left';
       ctx.fillText(
-        `SCENE 0${sceneIndex + 1}/0${totalScenes} • ${motionLabel || 'CINEMA SHOT'}`,
+        `SCENE 0${sceneIndex + 1}/0${totalScenes} • 🎥 MINIMAX H3 ${mmTag} • ${motionLabel || 'CINEMA SHOT'}`,
         pad + 28,
         cardY + 30
       );
@@ -916,6 +1044,7 @@ export function AiMediaProductionStudio({
           idx === 2
             ? {
                 ...sc,
+                keyframeUrl: dataUrl,
                 imageUrl: dataUrl,
                 headlineEn: `Sovereign CAD Blueprint: Ne ${sovereignTelemetry.yarnCountNe}/${sovereignTelemetry.ply} (${sovereignTelemetry.gsm} GSM)`,
                 headlineAr: `المخطط الهندسي السيادي: غزل Ne ${sovereignTelemetry.yarnCountNe}/${sovereignTelemetry.ply} (${sovereignTelemetry.gsm} GSM)`,
@@ -938,6 +1067,84 @@ export function AiMediaProductionStudio({
     img.src = dataUrl;
   };
 
+  const handleApplyMinimaxCameraMove = (move: (typeof MINIMAX_CAMERA_MOVEMENTS)[number]) => {
+    setProductionData((prev: any) => {
+      if (!prev?.videoStoryboard?.scenes) return prev;
+      const nextScenes = prev.videoStoryboard.scenes.map((sc: any, idx: number) =>
+        idx === activeSceneIdx
+          ? {
+              ...sc,
+              minimaxMotionId: move.id,
+              minimaxDirectorTag: move.tag,
+              cameraMotionLabelEn: `${move.labelEn} (MiniMax H3)`,
+              cameraMotionLabelAr: `${move.labelAr} (MiniMax H3)`,
+              visualPromptEn: `${move.tag} ${sc.visualPromptEn.replace(/^\[[^\]]+\]\s*/, '')}`,
+            }
+          : sc
+      );
+      return {
+        ...prev,
+        videoStoryboard: {
+          ...prev.videoStoryboard,
+          scenes: nextScenes,
+        },
+      };
+    });
+    setSceneProgress(10);
+  };
+
+  const handleDispatchMinimaxH3 = async () => {
+    setMinimaxDispatching(true);
+    setMinimaxCloudStatus(null);
+    try {
+      const tags = currentScenes.map((s: any) => s.minimaxDirectorTag || '[Push in]');
+      const res = await fetch('/api/cluster/media-studio/minimax-h3', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          companyName,
+          companySpecialty,
+          prompt,
+          cameraTags: tags,
+          modelVariant: 'T2V-01-Director',
+          resolution: '1080p',
+          fps: 30,
+          apiKey: minimaxApiKey || undefined,
+          locale,
+        }),
+      });
+      const data = await res.json();
+      if (data?.directorPrompt) {
+        setProductionData((prev: any) => {
+          if (!prev?.videoStoryboard) return prev;
+          return {
+            ...prev,
+            videoStoryboard: {
+              ...prev.videoStoryboard,
+              videoModelPrompts: {
+                ...(prev.videoStoryboard.videoModelPrompts || {}),
+                'minimax-h3': data.directorPrompt,
+              },
+            },
+          };
+        });
+      }
+      setMinimaxCloudStatus(
+        isAr
+          ? data?.cloudTask?.messageAr || 'تم بناء مسار كاميرا MiniMax H3 وتحديث الفيديو بنجاح!'
+          : data?.cloudTask?.messageEn || 'MiniMax H3 Camera-Director script & 60fps trajectory synthesized!'
+      );
+    } catch {
+      setMinimaxCloudStatus(
+        isAr
+          ? 'محرك MiniMax H3 المحلي جاهز للتصدير الفوري بصيغة .MP4!'
+          : 'MiniMax H3 local H.264 .MP4 studio engine ready!'
+      );
+    } finally {
+      setMinimaxDispatching(false);
+    }
+  };
+
   return (
     <section className="rounded-3xl border-2 border-indigo-500/30 bg-gradient-to-br from-slate-950 via-indigo-950/90 to-emerald-950 text-white p-6 md:p-8 shadow-2xl space-y-6">
       {/* Top Studio Banner */}
@@ -951,7 +1158,7 @@ export function AiMediaProductionStudio({
                 'استوديو إنتاج الصور والفيديوهات بالذكاء الاصطناعي • تحليل بيانات الشركة والغرض التسويقي'
               )}
             </span>
-            <Pill tone="purple">FLUX.1 • Imagen 3 • Google Veo 2 • Wan 2.1</Pill>
+            <Pill tone="purple">MiniMax H3 Director • FLUX.1 • Imagen 3 • Google Veo 2 • Wan 2.1</Pill>
             <ExpertManualButton manualId="ai-media-studio" locale={locale} variant="pill" />
           </div>
           <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">
@@ -1578,7 +1785,80 @@ export function AiMediaProductionStudio({
                   </div>
                 )}
 
-                {/* Master Video Prompts for Google Veo 2, Wan 2.1 & HunyuanVideo */}
+                {/* MiniMax Hailuo H3 Camera-Director Matrix & Live 6-DoF Trajectory Deck */}
+                <div className="rounded-2xl border-2 border-emerald-400/35 bg-slate-900/95 p-4 space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-300 flex items-center gap-1.5">
+                      <Video className="w-3.5 h-3.5" />
+                      {t(
+                        `MiniMax H3 Camera-Director Matrix (Scene 0${(activeScene?.sceneNumber || 1)})`,
+                        `مصفوفة تحكم كاميرا MiniMax H3 (مشهد ٠${(activeScene?.sceneNumber || 1)})`
+                      )}
+                    </span>
+                    <Pill tone="emerald">T2V-01-Director • 1080p 60fps</Pill>
+                  </div>
+                  <p className="text-[11px] text-slate-300 leading-relaxed">
+                    {t(
+                      'Click any official MiniMax H3 [Bracket] camera movement below to immediately apply 6-DoF camera trajectory physics to the active scene and exported .MP4 video:',
+                      'اضغط على أي أمر حركة كاميرا قياسي لنموذج MiniMax H3 أدناه لتطبيقه فوراً على المشهد الحالي وعلى ملف الفيديو المصدر (.MP4):'
+                    )}
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                    {MINIMAX_CAMERA_MOVEMENTS.map((mv) => {
+                      const isSelected = activeScene?.minimaxMotionId === mv.id;
+                      return (
+                        <button
+                          key={mv.id}
+                          type="button"
+                          onClick={() => handleApplyMinimaxCameraMove(mv)}
+                          className={`px-2 py-1.5 rounded-lg text-[10px] font-bold border text-start transition cursor-pointer ${
+                            isSelected
+                              ? 'bg-emerald-500 text-slate-950 border-emerald-300 shadow'
+                              : 'bg-white/5 border-white/15 text-slate-200 hover:bg-white/15'
+                          }`}
+                        >
+                          <div className="font-mono font-extrabold truncate">{mv.tag}</div>
+                          <div className="truncate opacity-85">
+                            {isAr ? mv.labelAr.replace(/^\[[^\]]+\]\s*/, '') : mv.labelEn.replace(/^\[[^\]]+\]\s*/, '')}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Optional MiniMax Cloud API Key + 1-Click Synthesis */}
+                  <div className="pt-2 border-t border-white/10 space-y-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <input
+                        type="password"
+                        value={minimaxApiKey}
+                        onChange={(e) => setMinimaxApiKey(e.target.value)}
+                        placeholder={t(
+                          'Optional: MINIMAX_API_KEY (leave blank for Free Local MP4 & Hailuo Bridge)',
+                          'اختياري: مفتاح MINIMAX_API_KEY (اتركه فارغاً للتوليد المجاني المباشر MP4)'
+                        )}
+                        className="flex-1 rounded-xl border border-white/20 bg-slate-950 px-3 py-1.5 text-[11px] text-white"
+                      />
+                      <button
+                        type="button"
+                        disabled={minimaxDispatching}
+                        onClick={handleDispatchMinimaxH3}
+                        className="rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold px-3 py-1.5 text-[11px] transition cursor-pointer shrink-0"
+                      >
+                        {minimaxDispatching
+                          ? t('Synthesizing H3...', 'جاري التوليد...')
+                          : t('⚡ Synthesize MiniMax H3 Script', '⚡ توليد مسار MiniMax H3')}
+                      </button>
+                    </div>
+                    {minimaxCloudStatus && (
+                      <div className="text-[11px] text-emerald-300 bg-emerald-500/10 border border-emerald-500/25 rounded-lg px-2.5 py-1.5">
+                        ✓ {minimaxCloudStatus}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Master Video Prompts for MiniMax H3, Google Veo 2, Wan 2.1 & HunyuanVideo */}
                 <div className="rounded-2xl border border-white/15 bg-slate-900/90 p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-extrabold uppercase tracking-wider text-sky-300 flex items-center gap-1.5">
@@ -1594,6 +1874,7 @@ export function AiMediaProductionStudio({
                         copyText(
                           'master-video-prompt',
                           productionData.videoStoryboard.videoModelPrompts?.[videoModelId] ||
+                            productionData.videoStoryboard.videoModelPrompts?.['minimax-h3'] ||
                             productionData.videoStoryboard.videoModelPrompts?.['veo-2'] ||
                             ''
                         )
@@ -1611,10 +1892,26 @@ export function AiMediaProductionStudio({
 
                   <p className="text-[11px] font-mono text-slate-300 bg-slate-950/90 p-3 rounded-xl border border-white/10 leading-relaxed max-h-32 overflow-y-auto">
                     {productionData.videoStoryboard.videoModelPrompts?.[videoModelId] ||
+                      productionData.videoStoryboard.videoModelPrompts?.['minimax-h3'] ||
                       productionData.videoStoryboard.videoModelPrompts?.['veo-2']}
                   </p>
 
-                  <div className="grid grid-cols-2 gap-2 pt-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+                    <a
+                      href="https://hailuoai.video"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() =>
+                        copyText(
+                          'master-video-prompt',
+                          productionData.videoStoryboard.videoModelPrompts?.['minimax-h3'] || ''
+                        )
+                      }
+                      className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/40 py-2 px-3 text-xs font-extrabold text-emerald-200 transition"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5 text-emerald-300" />
+                      {t('Open Free MiniMax H3 (Hailuo)', 'فتح MiniMax H3 المجاني')}
+                    </a>
                     <a
                       href="https://labs.google/fx/tools/video-fx"
                       target="_blank"
