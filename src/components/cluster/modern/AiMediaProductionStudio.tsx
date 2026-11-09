@@ -403,6 +403,9 @@ export function AiMediaProductionStudio({
   const [aspectRatio, setAspectRatio] = useState<'16:9' | '9:16' | '1:1' | '4:5'>('16:9');
   const [imageModelId, setImageModelId] = useState<FreeImageModelId>('flux-schnell');
   const [videoModelId, setVideoModelId] = useState<FreeVideoModelId>('minimax-h3');
+  const [minimaxVariant, setMinimaxVariant] = useState<
+    'T2V-01-Director' | 'I2V-01-Live' | 'Hailuo-H3-Pro' | 'S2V-01'
+  >('T2V-01-Director');
   const [preferredLlm, setPreferredLlm] = useState<string>('auto');
   const [minimaxApiKey, setMinimaxApiKey] = useState<string>('');
   const [minimaxCloudStatus, setMinimaxCloudStatus] = useState<string | null>(null);
@@ -628,6 +631,22 @@ export function AiMediaProductionStudio({
         if (rotRad !== 0) ctx.rotate(rotRad);
         ctx.scale(scale, scale);
         ctx.drawImage(cachedImg, -w / 2, -h / 2, w, h);
+        ctx.restore();
+
+        // 60fps MiniMax H3 Specular Cloth-Drape Shimmer Wave
+        ctx.save();
+        const shimmerX = w * (-0.2 + tNorm * 1.4);
+        const shimmerGrad = ctx.createLinearGradient(
+          shimmerX - w * 0.18,
+          0,
+          shimmerX + w * 0.18,
+          h
+        );
+        shimmerGrad.addColorStop(0, 'rgba(255,255,255,0)');
+        shimmerGrad.addColorStop(0.5, 'rgba(255,255,255,0.09)');
+        shimmerGrad.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = shimmerGrad;
+        ctx.fillRect(0, 0, w, h);
         ctx.restore();
 
         // Dark cinematic gradient vignette for broadcast text legibility
@@ -1093,6 +1112,75 @@ export function AiMediaProductionStudio({
     setSceneProgress(10);
   };
 
+  const handleApplyMinimaxChoreographyTemplate = (motionIds: readonly string[], label: string) => {
+    setProductionData((prev: any) => {
+      if (!prev?.videoStoryboard?.scenes) return prev;
+      const nextScenes = prev.videoStoryboard.scenes.map((sc: any, idx: number) => {
+        const mId = motionIds[idx % motionIds.length];
+        const move =
+          MINIMAX_CAMERA_MOVEMENTS.find((m) => m.id === mId) || MINIMAX_CAMERA_MOVEMENTS[0];
+        return {
+          ...sc,
+          minimaxMotionId: move.id,
+          minimaxDirectorTag: move.tag,
+          cameraMotionLabelEn: `${move.labelEn} (MiniMax H3)`,
+          cameraMotionLabelAr: `${move.labelAr} (MiniMax H3)`,
+          visualPromptEn: `${move.tag} ${sc.visualPromptEn.replace(/^\[[^\]]+\]\s*/, '')}`,
+        };
+      });
+      return {
+        ...prev,
+        videoStoryboard: {
+          ...prev.videoStoryboard,
+          scenes: nextScenes,
+        },
+      };
+    });
+    setMinimaxCloudStatus(
+      isAr
+        ? `تم تطبيق مسار الكاميرا المتكامل (${label}) على المشاهد الـ ٥!`
+        : `Applied 5-scene MiniMax H3 choreography (${label})!`
+    );
+  };
+
+  const handleAnimateImageWithMinimaxI2v = (imgSpec: any, idx: number) => {
+    setVideoModelId('minimax-h3');
+    setMinimaxVariant('I2V-01-Live');
+    const targetScene = idx % 5;
+    const move =
+      idx === 1
+        ? MINIMAX_CAMERA_MOVEMENTS.find((m) => m.id === 'MACRO_RACK_FOCUS') ||
+          MINIMAX_CAMERA_MOVEMENTS[0]
+        : MINIMAX_CAMERA_MOVEMENTS[idx % MINIMAX_CAMERA_MOVEMENTS.length];
+    setProductionData((prev: any) => {
+      if (!prev?.videoStoryboard?.scenes) return prev;
+      const nextScenes = prev.videoStoryboard.scenes.map((sc: any, sIdx: number) =>
+        sIdx === targetScene
+          ? {
+              ...sc,
+              keyframeUrl: imgSpec.imageUrl,
+              minimaxMotionId: move.id,
+              minimaxDirectorTag: move.tag,
+              cameraMotionLabelEn: `[I2V-01-Live] ${move.labelEn}`,
+              cameraMotionLabelAr: `[I2V-01-Live] ${move.labelAr}`,
+              visualPromptEn: `[I2V-01-Live] ${move.tag} ${imgSpec.promptEn}`,
+            }
+          : sc
+      );
+      return {
+        ...prev,
+        videoStoryboard: {
+          ...prev.videoStoryboard,
+          scenes: nextScenes,
+        },
+      };
+    });
+    setActiveSceneIdx(targetScene);
+    setSceneProgress(0);
+    setIsPlayingVideo(true);
+    if (workspaceTab === 'IMAGES') setWorkspaceTab('BOTH');
+  };
+
   const handleDispatchMinimaxH3 = async () => {
     setMinimaxDispatching(true);
     setMinimaxCloudStatus(null);
@@ -1106,7 +1194,8 @@ export function AiMediaProductionStudio({
           companySpecialty,
           prompt,
           cameraTags: tags,
-          modelVariant: 'T2V-01-Director',
+          modelVariant: minimaxVariant,
+          firstFrameImageUrl: activeScene?.keyframeUrl || undefined,
           resolution: '1080p',
           fps: 30,
           apiKey: minimaxApiKey || undefined,
@@ -1597,10 +1686,25 @@ export function AiMediaProductionStudio({
                           e.stopPropagation();
                           handleDownloadBrandedImagePng(img, idx);
                         }}
-                        className="flex-1 inline-flex items-center justify-center gap-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold py-1.5 px-2.5 text-[11px] transition cursor-pointer"
+                        className="flex-1 inline-flex items-center justify-center gap-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold py-1.5 px-2 text-[11px] transition cursor-pointer"
                       >
                         <Download className="w-3.5 h-3.5" />
-                        {t('Download PNG', 'تحميل PNG')}
+                        {t('PNG', 'PNG')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAnimateImageWithMinimaxI2v(img, idx);
+                        }}
+                        title={t(
+                          'Animate this frame into a 60fps MP4 scene via MiniMax H3 I2V-01-Live',
+                          'تحريك هذه الصورة إلى مشهد فيديو 60fps عبر نموذج MiniMax H3 I2V-01-Live'
+                        )}
+                        className="inline-flex items-center justify-center gap-1 rounded-lg bg-purple-500/30 border border-purple-400/50 hover:bg-purple-500/50 text-purple-200 font-extrabold py-1.5 px-2 text-[11px] transition cursor-pointer"
+                      >
+                        <Film className="w-3.5 h-3.5" />
+                        {t('I2V-01', 'تحريك H3')}
                       </button>
                       <button
                         type="button"
@@ -1608,14 +1712,13 @@ export function AiMediaProductionStudio({
                           e.stopPropagation();
                           copyText(`img-prompt-${idx}`, img.promptEn);
                         }}
-                        className="inline-flex items-center justify-center gap-1 rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 text-white font-bold py-1.5 px-2.5 text-[11px] transition cursor-pointer"
+                        className="inline-flex items-center justify-center gap-1 rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 text-white font-bold py-1.5 px-2 text-[11px] transition cursor-pointer"
                       >
                         {copiedKey === `img-prompt-${idx}` ? (
                           <Check className="w-3.5 h-3.5 text-emerald-400" />
                         ) : (
                           <Copy className="w-3.5 h-3.5" />
                         )}
-                        {t('Prompt', 'الأمر')}
                       </button>
                       <a
                         href={img.imageUrl}
@@ -1795,7 +1898,71 @@ export function AiMediaProductionStudio({
                         `مصفوفة تحكم كاميرا MiniMax H3 (مشهد ٠${(activeScene?.sceneNumber || 1)})`
                       )}
                     </span>
-                    <Pill tone="emerald">T2V-01-Director • 1080p 60fps</Pill>
+                    <select
+                      value={minimaxVariant}
+                      onChange={(e) => setMinimaxVariant(e.target.value as any)}
+                      className="rounded-lg border border-emerald-400/40 bg-emerald-500/15 px-2.5 py-1 text-[10px] font-extrabold text-emerald-200 cursor-pointer"
+                    >
+                      <option value="T2V-01-Director" className="bg-slate-950 text-white">
+                        T2V-01-Director (1080p Camera Control)
+                      </option>
+                      <option value="I2V-01-Live" className="bg-slate-950 text-white">
+                        I2V-01-Live (Image-to-Video 60fps)
+                      </option>
+                      <option value="Hailuo-H3-Pro" className="bg-slate-950 text-white">
+                        Hailuo-H3-Pro (Cloth Physics Master)
+                      </option>
+                      <option value="S2V-01" className="bg-slate-950 text-white">
+                        S2V-01 (Subject-Consistent Mill ID)
+                      </option>
+                    </select>
+                  </div>
+
+                  {/* 1-Click 5-Scene Choreography Presets */}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="text-[10px] font-bold text-slate-400">
+                      {t('5-Scene Choreography:', 'مسار الـ ٥ مشاهد:')}
+                    </span>
+                    {[
+                      {
+                        id: 'hotel',
+                        en: '5-Star Hotel Sateen',
+                        ar: 'فنادق ٥ نجوم',
+                        moves: ['PUSH_IN', 'MACRO_RACK_FOCUS', 'PAN_RIGHT', 'ORBIT_360', 'PUSH_IN'] as const,
+                      },
+                      {
+                        id: 'macro',
+                        en: '100mm Macro Lab',
+                        ar: 'فحص ماكرو 100mm',
+                        moves: ['MACRO_RACK_FOCUS', 'TRUCK_RIGHT', 'TILT_UP', 'PAN_LEFT', 'PUSH_IN'] as const,
+                      },
+                      {
+                        id: 'mill',
+                        en: 'Loom & Dye Tour',
+                        ar: 'جولة الأنوال والمصبغة',
+                        moves: ['TRUCK_RIGHT', 'PULL_OUT', 'TILT_UP', 'PAN_RIGHT', 'PUSH_IN'] as const,
+                      },
+                      {
+                        id: 'dpp',
+                        en: '360° Export & DPP',
+                        ar: 'عرض التصدير 360°',
+                        moves: ['ORBIT_360', 'PUSH_IN', 'MACRO_RACK_FOCUS', 'PULL_OUT', 'ORBIT_360'] as const,
+                      },
+                    ].map((ch) => (
+                      <button
+                        key={ch.id}
+                        type="button"
+                        onClick={() =>
+                          handleApplyMinimaxChoreographyTemplate(
+                            ch.moves,
+                            isAr ? ch.ar : ch.en
+                          )
+                        }
+                        className="rounded-lg border border-white/15 bg-white/5 hover:bg-emerald-500/20 hover:border-emerald-400/40 px-2 py-1 text-[10px] font-bold text-slate-200 transition cursor-pointer"
+                      >
+                        🎬 {isAr ? ch.ar : ch.en}
+                      </button>
+                    ))}
                   </div>
                   <p className="text-[11px] text-slate-300 leading-relaxed">
                     {t(

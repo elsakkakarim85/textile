@@ -3914,16 +3914,16 @@ export const EXPERT_MANUALS: Record<string, ExpertManualEntry> = {
   'ai-media-studio': {
     id: 'ai-media-studio',
     category: 'ai_academy',
-    badgeEn: 'AI Image & Video Studio Manual',
-    badgeAr: 'دليل استوديو إنتاج الصور والفيديوهات الذكي',
-    titleEn: 'AI Image & Multi-Scene HD Video Production Studio (Company DNA + Purpose Engine)',
-    titleAr: 'استوديو إنتاج الصور والفيديوهات عالية الدقة بالذكاء الاصطناعي (تحليل الشركة والغرض التسويقي)',
-    subtitleEn: 'Generate 4-angle photorealistic commercial & 100mm macro textile images and 5-scene HD promotional videos (.MP4) grounded in your mill capabilities, certifications, and commercial purpose.',
-    subtitleAr: 'توليد صور فوتوغرافية وماكرو بـ ٤ زوايا كاميرا وفيديوهات ترويجية من ٥ مشاهد بالتعليق الصوتي وتحميل مباشر بصيغة .MP4 و .PNG بناءً على تحليل بيانات مصنعك والغرض المستهدف.',
+    badgeEn: 'MiniMax H3 Video & AI Media Studio Manual',
+    badgeAr: 'دليل استوديو إنتاج الصور وفيديوهات MiniMax H3 (.MP4)',
+    titleEn: 'AI Image, MiniMax Hailuo H3 Video Director & 5-Mode CAD Production Studio',
+    titleAr: 'استوديو إنتاج الصور وفيديوهات MiniMax Hailuo H3 والمخططات الهندسية (.MP4 / .PNG)',
+    subtitleEn: 'Generate 4-angle photorealistic commercial & 100mm macro textile images, 5-scene MiniMax H3 6-DoF camera-controlled videos (.MP4), and 5-mode Sovereign CAD blueprints.',
+    subtitleAr: 'توليد صور فوتوغرافية وماكرو بـ ٤ زوايا كاميرا وفيديوهات ترويجية من ٥ مشاهد بنظام تحكم الكاميرا MiniMax H3 وتحميل مباشر بصيغة .MP4 و .PNG.',
     whatIsThisEn:
-      'An end-to-end industrial and commercial media production studio that combines your Company Information Analysis (machinery, yarn counts, OEKO-TEX/ISO/EUR.1 certifications, target export market, and HEX colors) with 8 specialized purposes (B2B Buyer Pitch, 100mm Macro Swatch, Heimtextil Booth, Factory OEE Documentary, Social Reel, ESG/DPP Proof, SOP Training, and Luxury Catalog) to generate real photorealistic images via Free FLUX.1/SDXL models and multi-scene HD videos (.MP4) with synchronized bilingual voiceover.',
+      'An end-to-end industrial and commercial media production studio that combines your Company Information Analysis (machinery, yarn counts, OEKO-TEX/ISO/EUR.1 certifications, target export market, and HEX colors) with 8 specialized purposes, Free FLUX.1/SDXL image models, the Free MiniMax Hailuo H3 Video Director (`T2V-01-Director` & `I2V-01-Live` with 12 `[Bracket]` camera movements), and our 5-Mode Sovereign CAD Blueprint synthesizer.',
     whatIsThisAr:
-      'استوديو متكامل لإنتاج الوسائط الصناعية والتجارية يدمج تحليل بيانات مصنعك (الماكينات، نمر الغزل، شهادات الأيزو والأيكوتكس و EUR.1، السوق التصديري، وألوان الهوية) مع ٨ أغراض متخصصة لتوليد ٤ لقطات فوتوغرافية وماكرو حقيقية عبر نماذج FLUX.1 المجانية، وإنتاج فيديو إعلاني من ٥ مشاهد بالتعليق الصوتي وتحميل ملف الفيديو الحقيقي بصيغة .MP4.',
+      'استوديو متكامل لإنتاج الوسائط الصناعية والتجارية يدمج تحليل بيانات مصنعك مع ٨ أغراض متخصصة، ونماذج FLUX.1 للصور، ومحرك الفيديو المجاني MiniMax Hailuo H3 (`T2V-01-Director` و `I2V-01-Live` مع ١٢ حركة كاميرا سينمائية)، واستوديو المخططات الهندسية السيادي.',
     howItWorksEn:
       '1) Company DNA & Purpose Analyzer sends your mill capabilities, certifications, target market, and text prompt to the Free LLM Creative Director to synthesize a purpose-aligned visual positioning brief, 4 specialized camera-angle prompts, and a 5-scene broadcast video script. 2) 4-Angle Free AI Image Suite generates 4 live photorealistic images (Hero Shot, 100mm Macro Weave, Automated Factory & QC Lab, and Export Swatch Box) via FLUX.1-Schnell / FLUX-Realism / SDXL Turbo with optional branded company overlay and 1-click PNG export. 3) 5-Scene HTML5 Cinema Player & H.264 MP4 Video Recorder renders a 60fps multi-scene video with Ken Burns camera motion, broadcast lower-thirds, synchronized Arabic/English voiceover, and H.264/AVC1 MP4 muxing to a downloadable .MP4 video file.',
     howItWorksAr:

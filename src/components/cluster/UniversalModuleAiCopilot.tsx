@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { Muxer, ArrayBufferTarget } from 'mp4-muxer';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import {
@@ -150,6 +151,7 @@ export function UniversalModuleAiCopilot({
   const [sovereignVisualMode, setSovereignVisualMode] = useState<
     SovereignVisualMode | 'studio-photo'
   >('weave-physics');
+  const [isRecordingMp4, setIsRecordingMp4] = useState(false);
   const [showCustomAiSettings, setShowCustomAiSettings] = useState(false);
   const [customProvider, setCustomProvider] = useState<
     'auto' | 'sovereign' | 'groq' | 'gemini' | 'openrouter' | 'huggingface' | 'ollama'
@@ -513,6 +515,95 @@ export function UniversalModuleAiCopilot({
     a.href = url;
     a.download = `mahalla-ai-${selectedModule}-visual.png`;
     a.click();
+  };
+
+  const handleExportMinimaxMp4Video = async () => {
+    const canvas = visualCanvasRef.current;
+    if (!canvas || isRecordingMp4) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    setIsRecordingMp4(true);
+    const modes: SovereignVisualMode[] = [
+      'weave-physics',
+      'isometric-factory',
+      'cad-techpack',
+      'dobby-pegplan',
+      'uster-lab',
+    ];
+    const fps = 30;
+    const framesPerMode = 24;
+    const w = 1280;
+    const h = 540;
+    const promptText =
+      customPrompt.trim() ||
+      (isAr ? cfg.quickActions[0].promptAr : cfg.quickActions[0].promptEn);
+
+    try {
+      if (typeof window !== 'undefined' && 'VideoEncoder' in window && 'VideoFrame' in window) {
+        const target = new ArrayBufferTarget();
+        const muxer = new Muxer({
+          target,
+          video: { codec: 'avc', width: w, height: h },
+          fastStart: 'in-memory',
+        });
+        const encoder = new (window as any).VideoEncoder({
+          output: (chunk: any, meta: any) => muxer.addVideoChunk(chunk, meta),
+          error: (e: any) => console.error(e),
+        });
+        encoder.configure({
+          codec: 'avc1.42001f',
+          width: w,
+          height: h,
+          bitrate: 4_500_000,
+          framerate: fps,
+        });
+
+        let frameIdx = 0;
+        for (let m = 0; m < modes.length; m++) {
+          setSovereignVisualMode(modes[m]);
+          for (let f = 0; f < framesPerMode; f++) {
+            renderSovereignVisualToCanvas({
+              canvas,
+              prompt: promptText,
+              moduleBadge: isAr ? cfg.badgeAr : cfg.badgeEn,
+              locale,
+              mode: modes[m],
+            });
+            // Draw MiniMax H3 Camera-Director HUD overlay
+            ctx.fillStyle = 'rgba(16, 185, 129, 0.9)';
+            ctx.font = 'bold 12px monospace';
+            ctx.fillText(
+              `🎥 MINIMAX H3 [Push in, Follow] • SCENE 0${m + 1}/05 (${modes[m].toUpperCase()})`,
+              46,
+              526
+            );
+
+            const vf = new (window as any).VideoFrame(canvas, {
+              timestamp: Math.round((frameIdx * 1_000_000) / fps),
+              duration: Math.round(1_000_000 / fps),
+            });
+            encoder.encode(vf, { keyFrame: frameIdx % 24 === 0 });
+            vf.close();
+            frameIdx++;
+            if (frameIdx % 8 === 0) await new Promise((r) => setTimeout(r, 8));
+          }
+        }
+        await encoder.flush();
+        muxer.finalize();
+        const blob = new Blob([target.buffer], { type: 'video/mp4' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `mahalla-minimax-h3-${selectedModule}.mp4`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    } catch (err) {
+      console.error('MiniMax MP4 export error:', err);
+    } finally {
+      setIsRecordingMp4(false);
+    }
   };
 
   const handleCopy = () => {
@@ -953,6 +1044,17 @@ export function UniversalModuleAiCopilot({
                     >
                       <Download className="h-3 w-3" />
                       {t('Download HD .PNG', 'تحميل .PNG')}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isRecordingMp4}
+                      onClick={handleExportMinimaxMp4Video}
+                      className="inline-flex items-center gap-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 px-2.5 py-1 text-[11px] font-extrabold text-slate-950 transition cursor-pointer"
+                    >
+                      <Film className="h-3 w-3" />
+                      {isRecordingMp4
+                        ? t('Encoding H3 .MP4...', 'جاري تصدير .MP4...')
+                        : t('🎬 MiniMax H3 .MP4', '🎬 فيديو MiniMax H3 .MP4')}
                     </button>
                     <Link
                       href={`/${locale}/cluster/media-studio?prompt=${encodeURIComponent(
