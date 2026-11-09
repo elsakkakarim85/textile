@@ -50,16 +50,28 @@ interface Props {
 
 function inferModuleFromPathname(pathname: string): ClusterModuleId | null {
   const p = pathname.toLowerCase();
-  if (p.includes('/sign-in') || p.includes('/sign-up')) return null;
-  if (p.includes('/cluster/lean-manufacturing')) return 'lean-manufacturing';
+  // Do not render the bottom AI Copilot on auth pages, root home page, or pages that are already dedicated full-screen AI studios
+  if (
+    p.includes('/sign-in') ||
+    p.includes('/sign-up') ||
+    p.endsWith('/ai') ||
+    p.includes('/ai/') ||
+    p.includes('/admin') ||
+    p.includes('/cluster/media-studio') ||
+    p.includes('/cluster/google-labs') ||
+    p.includes('/cluster/brand-studio') ||
+    p.includes('/cluster/export-intelligence') ||
+    p.includes('/cluster/lean-manufacturing') ||
+    p.includes('/cluster/academy/studio')
+  ) {
+    return null;
+  }
   if (p.includes('/cluster/procurement')) return 'procurement';
   if (p.includes('/cluster/capacity')) return 'capacity';
   if (p.includes('/cluster/consortia')) return 'consortia';
   if (p.includes('/cluster/facilities')) return 'facilities';
   if (p.includes('/cluster/maturity')) return 'maturity';
   if (p.includes('/cluster/academy')) return 'academy';
-  if (p.includes('/cluster/brand-studio')) return 'brand-studio';
-  if (p.includes('/cluster/export-intelligence')) return 'export-intelligence';
   if (p.includes('/cluster/sustainability')) return 'sustainability';
   if (p.includes('/cluster/funding')) return 'funding';
   if (p.includes('/cluster/forum')) return 'forum';
@@ -71,7 +83,7 @@ function inferModuleFromPathname(pathname: string): ClusterModuleId | null {
   if (p.includes('/recruitment')) return 'recruitment';
   if (p.includes('/factories') || p.includes('/dashboard')) return 'factories';
   if (p.includes('/cluster')) return 'observatory';
-  return 'export-intelligence';
+  return null;
 }
 
 const ALL_MODULE_KEYS = Object.keys(MODULE_AI_CONFIGS) as ClusterModuleId[];
@@ -641,34 +653,8 @@ export function UniversalModuleAiCopilot({
     window.speechSynthesis.speak(utter);
   };
 
-  const scrollToCopilot = () => {
-    setExpanded(true);
-    const el = document.getElementById('mahalla-universal-ai-copilot');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
-
   return (
-    <>
-      {/* Floating Quick-Launch AI Specialist Pill */}
-      <div className="fixed bottom-5 end-5 z-40 flex items-center gap-1.5 print:hidden">
-        <ExpertManualButton manualId="gadget-ai-copilot" locale={locale} variant="icon" />
-        <button
-          type="button"
-          onClick={scrollToCopilot}
-          className="inline-flex items-center gap-2 rounded-full border-2 border-emerald-400/60 bg-slate-950/95 px-4 py-2.5 text-xs font-extrabold text-white shadow-2xl hover:bg-emerald-950 transition cursor-pointer"
-        >
-          <Bot className="h-4 w-4 text-emerald-400 animate-pulse" />
-          <span className="hidden sm:inline">{isAr ? cfg.badgeAr : cfg.badgeEn}</span>
-          <span className="sm:hidden">{t('Free AI Copilot', 'المساعد الذكي')}</span>
-          <span className="rounded-full bg-emerald-500/20 border border-emerald-400/40 px-2 py-0.5 text-[10px] text-emerald-300">
-            Free LLM
-          </span>
-        </button>
-      </div>
-
-      <section id="mahalla-universal-ai-copilot" className="container mx-auto px-4 py-6 print:hidden scroll-mt-20">
+    <section id="mahalla-universal-ai-copilot" className="container mx-auto px-4 py-6 print:hidden scroll-mt-20">
         <div className="rounded-3xl border-2 border-emerald-500/35 bg-gradient-to-br from-slate-950 via-emerald-950/90 to-slate-900 text-white shadow-xl overflow-hidden">
           {/* Top Header Bar */}
           <div className="px-6 py-4 border-b border-white/10 flex flex-wrap items-center justify-between gap-3 bg-white/[0.03]">
@@ -1192,7 +1178,6 @@ export function UniversalModuleAiCopilot({
         )}
       </div>
     </section>
-    </>
   );
 }
 

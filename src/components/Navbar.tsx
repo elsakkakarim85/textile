@@ -357,13 +357,13 @@ export default function Navbar({ locale }: { locale: string }) {
       items: [
         {
           href: `/${locale}/ai`,
-          label: t('Multi-LLM AI Command Center & Arena', 'مركز الذكاء الاصطناعي المتعدد والمقارنة'),
+          label: t('Multi-LLM AI Command Center & Sovereign Lab', 'مركز الذكاء الاصطناعي والمختبر العصبي السيادي'),
           desc: t(
-            'Groq Llama 3.3 70B, Gemini 2.5, DeepSeek R1, Qwen 72B & Side-by-Side Arena',
-            'استشر 7 نماذج ذكاء اصطناعي مجانية وقارن بينها جنباً إلى جنب'
+            'Sovereign v5.0, Llama 3.3 70B, Gemini 2.5, DeepSeek R1, Qwen 72B & Side-by-Side Arena',
+            'النموذج السيادي v5.0 و Llama 3.3 و Gemini 2.5 و DeepSeek R1 والمقارنة المباشرة'
           ),
           icon: Sparkles,
-          badge: t('7 Free LLMs', '7 نماذج'),
+          badge: t('Sovereign v5', 'سيادي v5'),
           accent: 'purple',
         },
         {
@@ -389,13 +389,13 @@ export default function Navbar({ locale }: { locale: string }) {
         },
         {
           href: `/${locale}/cluster/media-studio`,
-          label: t('AI Image & Video Production Studio', 'استوديو إنتاج الصور والفيديوهات الذكي'),
+          label: t('AI Image & MiniMax H3 Video Studio', 'استوديو الصور وفيديو MiniMax H3 MP4'),
           desc: t(
-            'Generate 4-angle FLUX images & 5-scene HD MP4 videos from company DNA & purpose',
-            'توليد صور فوتوغرافية بـ 4 زوايا وفيديوهات HD MP4 من 5 مشاهد بتحليل بيانات الشركة'
+            'Generate 4-angle FLUX images & 5-scene MiniMax Hailuo H3 1080p MP4 videos from Company DNA',
+            'توليد صور فوتوغرافية بـ 4 زوايا وفيديوهات MiniMax H3 MP4 بحركة الكاميرا السداسية'
           ),
           icon: Sparkles,
-          badge: 'FLUX + MP4',
+          badge: 'MiniMax H3',
           accent: 'emerald',
         },
         {

@@ -5,7 +5,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Pill, DbOfflineBanner } from '@/components/cluster/ui';
 import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 import { PrintCertificateButton } from '@/components/cluster/modern/PrintCertificateButton';
-import { GoogleCreativeLabIntegration } from '@/components/cluster/modern/GoogleCreativeLabIntegration';
 import {
   ShieldCheck,
   MapPin,
@@ -323,15 +322,6 @@ export default async function DPPVerificationPage({
             </Link>
           </div>
         </div>
-      </div>
-
-      {/* Google Stitch DPP Mobile UI Prototyper & Google Opal CBAM/ESPR Auditor */}
-      <div className="max-w-6xl w-full mt-10">
-        <GoogleCreativeLabIntegration
-          locale={locale}
-          defaultTool="stitch"
-          contextModule="dpp"
-        />
       </div>
     </div>
   );

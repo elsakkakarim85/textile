@@ -8,7 +8,6 @@ import { tr } from '@/lib/i18n-inline';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
-import { GoogleCreativeLabIntegration } from '@/components/cluster/modern/GoogleCreativeLabIntegration';
 import { AiMediaProductionStudio } from '@/components/cluster/modern/AiMediaProductionStudio';
 import { SovereignNeuralLabPanel } from '@/components/cluster/modern/SovereignNeuralLabPanel';
 import ReactMarkdown from 'react-markdown';
@@ -131,7 +130,7 @@ export default function AIBrainPage() {
   const isAr = locale === 'ar';
   const t = (en: string, ar: string) => tr(locale, en, ar);
 
-  const [activeTab, setActiveTab] = useState<'chat' | 'agents' | 'arena' | 'sovereign'>('chat');
+  const [activeTab, setActiveTab] = useState<'chat' | 'sovereign' | 'media' | 'agents' | 'arena'>('chat');
 
   // Tab 1: Chat State
   const [messages, setMessages] = useState<
@@ -462,7 +461,7 @@ export default function AIBrainPage() {
         </div>
       </div>
 
-      {/* 3-Mode Command Center Navigation Tabs */}
+      {/* 5-Tab Unified AI Command Center Navigation */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
         <div className="flex flex-wrap gap-2">
           <button
@@ -475,31 +474,7 @@ export default function AIBrainPage() {
             }`}
           >
             <Bot className="w-4 h-4" />
-            {t('1. Interactive AI Consultant & Diagrams', '١. المستشار الهندسي والمخططات التفاعلية')}
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('agents')}
-            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-extrabold transition cursor-pointer ${
-              activeTab === 'agents'
-                ? 'bg-emerald-600 text-white shadow'
-                : 'bg-muted/60 text-foreground hover:bg-muted'
-            }`}
-          >
-            <Layers className="w-4 h-4" />
-            {t('2. All 18 Module AI Specialists (72 Workflows)', '٢. دليل الـ ١٨ وكيلاً ذكياً للوحدات (٧٢ مهمة)')}
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('arena')}
-            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-extrabold transition cursor-pointer ${
-              activeTab === 'arena'
-                ? 'bg-emerald-600 text-white shadow'
-                : 'bg-muted/60 text-foreground hover:bg-muted'
-            }`}
-          >
-            <Columns2 className="w-4 h-4" />
-            {t('3. Multi-LLM Side-by-Side Benchmark Arena', '٣. ساحة المقارنة المزدوجة بين النماذج المجانية')}
+            {t('1. AI Consultant & Diagrams', '١. المستشار الهندسي والمخططات')}
           </button>
           <button
             type="button"
@@ -512,9 +487,45 @@ export default function AIBrainPage() {
           >
             <Cpu className="w-4 h-4" />
             {t(
-              '4. Sovereign Neural Lab v4.0 (Built-From-Scratch • Unlimited)',
-              '٤. المختبر العصبي السيادي v4.0 (مبني من الصفر • بلا حدود)'
+              '2. Sovereign Neural Lab v5.0 (Unlimited)',
+              '٢. المختبر العصبي السيادي v5.0 (بلا حدود)'
             )}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('media')}
+            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-extrabold transition cursor-pointer ${
+              activeTab === 'media'
+                ? 'bg-emerald-600 text-white shadow'
+                : 'bg-muted/60 text-foreground hover:bg-muted'
+            }`}
+          >
+            <Sparkles className="w-4 h-4" />
+            {t('3. AI Image & MiniMax H3 Video Studio', '٣. استوديو الصور وفيديو MiniMax H3')}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('agents')}
+            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-extrabold transition cursor-pointer ${
+              activeTab === 'agents'
+                ? 'bg-emerald-600 text-white shadow'
+                : 'bg-muted/60 text-foreground hover:bg-muted'
+            }`}
+          >
+            <Layers className="w-4 h-4" />
+            {t('4. 18 Module AI Specialists', '٤. وكلاء الوحدات التخصصية (١٨ وكيلاً)')}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('arena')}
+            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-extrabold transition cursor-pointer ${
+              activeTab === 'arena'
+                ? 'bg-emerald-600 text-white shadow'
+                : 'bg-muted/60 text-foreground hover:bg-muted'
+            }`}
+          >
+            <Columns2 className="w-4 h-4" />
+            {t('5. Side-by-Side LLM Arena', '٥. ساحة المقارنة بين النماذج')}
           </button>
         </div>
 
@@ -962,21 +973,16 @@ export default function AIBrainPage() {
         </div>
       )}
 
-      {/* TAB 4: Built-From-Scratch Sovereign Neural Engine v4.0 Lab & Custom Trainer */}
+      {/* TAB 2: Built-From-Scratch Sovereign Neural Engine v5.0 Lab & Custom Trainer */}
       {activeTab === 'sovereign' && <SovereignNeuralLabPanel locale={locale} />}
 
-      {/* AI Image & Multi-Scene HD Video Production Studio */}
-      <AiMediaProductionStudio
-        locale={locale}
-        defaultPurpose="FACTORY_TOUR_OEE"
-      />
-
-      {/* Google Opal, Stitch, Pomelli & Mixboard Free AI Ecosystem Hub */}
-      <GoogleCreativeLabIntegration
-        locale={locale}
-        defaultTool="opal"
-        contextModule="ai"
-      />
+      {/* TAB 3: AI Image & Multi-Scene HD Video Production Studio (MiniMax Hailuo H3) */}
+      {activeTab === 'media' && (
+        <AiMediaProductionStudio
+          locale={locale}
+          defaultPurpose="FACTORY_TOUR_OEE"
+        />
+      )}
     </div>
   );
 }

@@ -41,7 +41,6 @@ import {
   HelpCircle,
 } from 'lucide-react';
 import { ExpertManualButton, openExpertManual } from '@/components/cluster/ExpertManualModal';
-import { GoogleCreativeLabIntegration } from '@/components/cluster/modern/GoogleCreativeLabIntegration';
 import { AiMediaProductionStudio } from '@/components/cluster/modern/AiMediaProductionStudio';
 
 interface Props {
@@ -981,13 +980,6 @@ export function BrandMarketingStudioClient({
             en: '6. AI CMO Copywriter',
             ar: '٦. المساعد التسويقي الذكي',
             manualId: 'brand-cmo-ai',
-          },
-          {
-            id: 'GOOGLE_LABS',
-            icon: Sparkles,
-            en: '7. Google Pomelli • Mixboard • Stitch • Opal',
-            ar: '٧. منظومة جوجل (Pomelli • Mixboard • Stitch • Opal)',
-            manualId: 'google-pomelli',
           },
         ].map((tab) => {
           const Icon = tab.icon;
@@ -2017,6 +2009,14 @@ export function BrandMarketingStudioClient({
               ))}
             </div>
           </div>
+
+          {/* Section C: Integrated AI Image & MiniMax Hailuo H3 Video Production Studio */}
+          <AiMediaProductionStudio
+            locale={locale}
+            defaultPurpose="B2B_BUYER_PITCH"
+            defaultCompanyName={isAr ? kit.brandNameAr : kit.brandNameEn}
+            defaultPrompt={isAr ? kit.topicAr : kit.topicEn}
+          />
         </div>
       )}
 
@@ -2452,21 +2452,6 @@ export function BrandMarketingStudioClient({
           </div>
         </Card>
       )}
-
-      {/* TAB 7 OR PERSISTENT FOOTER: AI Image & Video Production Studio + Google Labs Ecosystem */}
-      <div className="pt-2 space-y-8">
-        <AiMediaProductionStudio
-          locale={locale}
-          defaultPurpose="B2B_BUYER_PITCH"
-          defaultCompanyName={isAr ? kit.brandNameAr : kit.brandNameEn}
-          defaultPrompt={isAr ? kit.topicAr : kit.topicEn}
-        />
-        <GoogleCreativeLabIntegration
-          locale={locale}
-          defaultTool="pomelli"
-          contextModule="brand"
-        />
-      </div>
     </div>
   );
 }

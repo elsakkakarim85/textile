@@ -11,7 +11,6 @@ import { PageHeader, StatCard, DbOfflineBanner } from '@/components/cluster/ui';
 import { InstantBrandStudioBar } from '@/components/cluster/modern/InstantBrandStudioBar';
 import { InstantExportIntelligenceBar } from '@/components/cluster/modern/InstantExportIntelligenceBar';
 import { InstantLeanStudioBar } from '@/components/cluster/modern/InstantLeanStudioBar';
-import { GoogleCreativeLabIntegration } from '@/components/cluster/modern/GoogleCreativeLabIntegration';
 import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 
 export const dynamic = 'force-dynamic';
@@ -191,15 +190,6 @@ export default async function ClusterHubPage({ params }: { params: Promise<{ loc
             </div>
           </section>
         ))}
-      </div>
-
-      {/* Embedded Google Labs Suite (Pomelli, Mixboard, Stitch, Opal) */}
-      <div className="mt-12">
-        <GoogleCreativeLabIntegration
-          locale={locale}
-          defaultTool="pomelli"
-          contextModule="hub"
-        />
       </div>
     </div>
   );

@@ -310,26 +310,20 @@ const PURPOSE_OPTIONS: {
 const FREE_IMAGE_MODELS: { id: FreeImageModelId; labelEn: string; labelAr: string; badge: string }[] = [
   {
     id: 'flux-schnell',
-    labelEn: 'FLUX.1-Schnell (Free Photorealistic Commercial AI)',
-    labelAr: 'نموذج FLUX.1-Schnell (توليد فوتوغرافي واقعي مجاني)',
+    labelEn: 'FLUX.1-Schnell HD (Photorealistic Commercial AI)',
+    labelAr: 'نموذج FLUX.1-Schnell HD (توليد فوتوغرافي واقعي)',
     badge: 'Best Overall',
   },
   {
     id: 'flux-realism',
-    labelEn: 'FLUX-Realism Macro (100mm Fiber & Weave Specialist)',
-    labelAr: 'نموذج FLUX-Realism (متخصص تفاصيل الألياف والماكرو)',
+    labelEn: 'FLUX.1-Realism Macro (100mm Fiber & Weave Physics)',
+    labelAr: 'نموذج FLUX.1-Realism (متخصص تفاصيل الألياف والماكرو)',
     badge: 'Macro 8K',
   },
   {
-    id: 'sdxl-turbo',
-    labelEn: 'SDXL Turbo Lightning (Instant Concept Storyboard)',
-    labelAr: 'نموذج SDXL Turbo (توليد فائق السرعة للكادرات)',
-    badge: 'Ultra Fast',
-  },
-  {
     id: 'imagen-3-bridge',
-    labelEn: 'Google Imagen 3 / ImageFX + Studio Canvas',
-    labelAr: 'محرك Google Imagen 3 / ImageFX + استوديو التصميم',
+    labelEn: 'Google Imagen 3 / ImageFX + Sovereign CAD Studio',
+    labelAr: 'محرك Google Imagen 3 + الاستوديو الهندسي السيادي',
     badge: 'Google Labs',
   },
 ];
@@ -352,18 +346,6 @@ const FREE_VIDEO_MODELS: { id: FreeVideoModelId; labelEn: string; labelAr: strin
     labelEn: 'Alibaba Wan 2.1 14B Open-Source T2V + Live Studio Renderer',
     labelAr: 'نموذج Wan 2.1 14B مفتوح المصدر + رندر الفيديو المباشر',
     badge: 'Open-Weight #1',
-  },
-  {
-    id: 'hunyuan-video',
-    labelEn: 'Tencent HunyuanVideo 60fps Fabric Physics + Live Renderer',
-    labelAr: 'نموذج HunyuanVideo لحركة الأقمشة الواقعية + رندر مباشر',
-    badge: 'Cloth Physics',
-  },
-  {
-    id: 'cogvideox-5b',
-    labelEn: 'THUDM CogVideoX-5B Industrial Motion + Live Renderer',
-    labelAr: 'نموذج CogVideoX-5B للتصوير الصناعي + رندر مباشر',
-    badge: 'Industrial',
   },
 ];
 
