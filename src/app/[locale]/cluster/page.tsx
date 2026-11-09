@@ -8,9 +8,6 @@ import { prisma } from '@/lib/prisma';
 import { safeQuery, currentUserId, findUserFactory } from '@/server/cluster';
 import { tr, fmtNumber } from '@/lib/i18n-inline';
 import { PageHeader, StatCard, DbOfflineBanner } from '@/components/cluster/ui';
-import { InstantBrandStudioBar } from '@/components/cluster/modern/InstantBrandStudioBar';
-import { InstantExportIntelligenceBar } from '@/components/cluster/modern/InstantExportIntelligenceBar';
-import { InstantLeanStudioBar } from '@/components/cluster/modern/InstantLeanStudioBar';
 import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 
 export const dynamic = 'force-dynamic';
@@ -132,12 +129,6 @@ export default async function ClusterHubPage({ params }: { params: Promise<{ loc
         <StatCard label={t('Active collaborations', 'التعاونات النشطة')} value={fmtNumber(locale, c.pools + c.capacity + c.consortia)} icon={Handshake} tone="blue" />
         <StatCard label={t('Maturity assessments', 'تقييمات النضج')} value={fmtNumber(locale, c.assessments)} icon={Gauge} tone="green" />
         <StatCard label={t('Certificates earned', 'الشهادات المكتسبة')} value={fmtNumber(locale, c.completions)} icon={GraduationCap} tone="amber" />
-      </div>
-
-      <div className="mb-10 space-y-6">
-        <InstantLeanStudioBar locale={locale} />
-        <InstantExportIntelligenceBar locale={locale} />
-        <InstantBrandStudioBar locale={locale} />
       </div>
 
       {factory && (

@@ -7,14 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Pill } from '@/components/cluster/ui';
 import { ExpertManualButton, openExpertManual } from '@/components/cluster/ExpertManualModal';
-import { AiMediaProductionStudio } from '@/components/cluster/modern/AiMediaProductionStudio';
 import {
   Sparkles,
   Palette,
   LayoutGrid,
   MonitorSmartphone,
   Workflow,
-  Video,
   ExternalLink,
   Copy,
   Check,
@@ -34,7 +32,7 @@ import {
   FileJson,
 } from 'lucide-react';
 
-export type GoogleToolTabId = 'pomelli' | 'mixboard' | 'stitch' | 'opal' | 'minimax-h3';
+export type GoogleToolTabId = 'pomelli' | 'mixboard' | 'stitch' | 'opal';
 export type GoogleIntegrationContext =
   | 'brand'
   | 'export'
@@ -861,8 +859,8 @@ export function GoogleCreativeLabIntegration({
           </div>
         </div>
 
-        {/* 5 Creative AI Tool Switcher Tabs (Google Pomelli, Mixboard, Stitch, Opal + MiniMax H3 Video) */}
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
+        {/* 4 Google Labs Tool Switcher Tabs (Pomelli, Mixboard, Stitch, Opal) */}
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
           {[
             {
               id: 'pomelli' as const,
@@ -903,16 +901,6 @@ export function GoogleCreativeLabIntegration({
               titleAr: '٤. Google Opal (سلاسل الأتمتة)',
               subEn: 'No-code multi-step industrial AI workflows',
               subAr: 'بناء وتشغيل التطبيقات الذكية متعددة الخطوات',
-            },
-            {
-              id: 'minimax-h3' as const,
-              manualId: 'ai-media-studio',
-              icon: Video,
-              badge: '1080p 60fps MP4',
-              titleEn: '5. MiniMax H3 Video',
-              titleAr: '٥. MiniMax H3 (إنتاج الفيديو)',
-              subEn: 'Free 6-DoF camera-director video & .MP4 studio',
-              subAr: 'توليد الفيديوهات بالتحكم السينمائي للكاميرا .MP4',
             },
           ].map((tb) => {
             const Icon = tb.icon;
@@ -1800,15 +1788,6 @@ export function GoogleCreativeLabIntegration({
                 </div>
               )}
             </Card>
-          </div>
-        )}
-
-        {/* ===================================================================
-            TAB 5: MINIMAX HAILUO H3 VIDEO DIRECTOR & H.264 .MP4 STUDIO
-           =================================================================== */}
-        {activeTool === 'minimax-h3' && (
-          <div className="space-y-4">
-            <AiMediaProductionStudio locale={locale} defaultPurpose="B2B_BUYER_PITCH" />
           </div>
         )}
       </div>

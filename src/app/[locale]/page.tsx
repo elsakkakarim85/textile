@@ -4,10 +4,7 @@ import { Card } from '@/components/ui/card';
 import { prisma } from '@/lib/prisma';
 import { tr, fmtNumber, fmtMoney } from '@/lib/i18n-inline';
 import { Pill, ProgressBar } from '@/components/cluster/ui';
-import { InstantTopicCourseBar } from '@/components/cluster/modern/InstantTopicCourseBar';
-import { InstantBrandStudioBar } from '@/components/cluster/modern/InstantBrandStudioBar';
-import { InstantExportIntelligenceBar } from '@/components/cluster/modern/InstantExportIntelligenceBar';
-import { InstantLeanStudioBar } from '@/components/cluster/modern/InstantLeanStudioBar';
+import { UnifiedInstantStudiosSwitcher } from '@/components/cluster/modern/UnifiedInstantStudiosSwitcher';
 import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
 import {
   Factory,
@@ -301,12 +298,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </div>
       </section>
 
-      {/* Instant Any-Topic AI Lean, Export Intelligence, Course & Brand Studio Spotlights */}
-      <section className="container mx-auto pt-8 px-4 space-y-5">
-        <InstantLeanStudioBar locale={locale} />
-        <InstantExportIntelligenceBar locale={locale} />
-        <InstantTopicCourseBar locale={locale} />
-        <InstantBrandStudioBar locale={locale} />
+      {/* Unified 4-Tab AI Studio Launchpad */}
+      <section className="container mx-auto pt-8 px-4">
+        <UnifiedInstantStudiosSwitcher locale={locale} />
       </section>
 
       {/* Core Cluster Modules Grid */}

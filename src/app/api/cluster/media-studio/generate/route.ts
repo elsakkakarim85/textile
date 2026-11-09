@@ -3,8 +3,12 @@ import { route, parseBody } from '@/server/http';
 import { generate, type FreeLlmModelId } from '@/server/ai';
 
 const MediaGenerateSchema = z.object({
-  companyName: z.string().min(2).max(160),
-  companySpecialty: z.string().min(2).max(400),
+  companyName: z.string().min(2).max(160).default('El-Mahalla Heritage Textiles Co.'),
+  companySpecialty: z
+    .string()
+    .min(2)
+    .max(400)
+    .default('100% Egyptian Giza 86/94 Combed Cotton Spinning, Weaving & Reactive Dyeing'),
   certifications: z.string().max(300).default('OEKO-TEX Standard 100, ISO 17025, EUR.1 0% EU Duty, EU DPP'),
   targetMarket: z.string().max(200).default('European Union (Germany, Italy, France) & USA Hospitality'),
   primaryColorHex: z.string().max(20).default('#064E3B'),

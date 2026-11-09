@@ -157,7 +157,7 @@ export function UniversalModuleAiCopilot({
   const [latencyMs, setLatencyMs] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
   const [speaking, setSpeaking] = useState(false);
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const [showVisualStudio, setShowVisualStudio] = useState(false);
   const [visualVariantIdx, setVisualVariantIdx] = useState(0);
   const [sovereignVisualMode, setSovereignVisualMode] = useState<
@@ -229,6 +229,7 @@ export function UniversalModuleAiCopilot({
       (overridePrompt ?? customPrompt).trim() ||
       (isAr ? cfg.quickActions[0].promptAr : cfg.quickActions[0].promptEn);
 
+    setExpanded(true);
     setLoading(true);
     setCustomPrompt(finalPrompt);
     const t0 = Date.now();
@@ -811,6 +812,27 @@ export function UniversalModuleAiCopilot({
                   {t('Apply & Save Engine Config', 'حفظ وتفعيل إعدادات المحرك')}
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {!expanded && (
+          <div className="px-6 py-3 flex flex-wrap items-center justify-between gap-2 bg-slate-950/60">
+            <span className="text-xs font-bold text-slate-300">
+              {isAr ? cfg.titleAr : cfg.titleEn}:
+            </span>
+            <div className="flex flex-wrap items-center gap-1.5">
+              {cfg.quickActions.map((act) => (
+                <button
+                  key={act.id}
+                  type="button"
+                  onClick={() => runCopilot(isAr ? act.promptAr : act.promptEn)}
+                  className="inline-flex items-center gap-1 rounded-full border border-emerald-400/35 bg-emerald-500/15 hover:bg-emerald-500/30 px-3 py-1 text-[11px] font-bold text-emerald-200 transition cursor-pointer"
+                >
+                  <Sparkles className="h-3 w-3 text-emerald-400 shrink-0" />
+                  {isAr ? act.labelAr : act.labelEn}
+                </button>
+              ))}
             </div>
           </div>
         )}
