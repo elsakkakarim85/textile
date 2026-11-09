@@ -349,8 +349,8 @@ export default function Navbar({ locale }: { locale: string }) {
       icon: Sparkles,
       columns: 1,
       spotlightTitle: t(
-        'Compare 7 Free LLMs Side-by-Side or Generate Certified Courses',
-        'قارن بين ٧ نماذج ذكاء اصطناعي مجانية أو ولّد دورات تدريبية معتمدة'
+        'Compare 6 Verified LLMs Side-by-Side or Generate Certified Courses',
+        'قارن بين ٦ نماذج ذكاء اصطناعي معتمدة أو ولّد دورات تدريبية بشهادات'
       ),
       spotlightHref: `/${locale}/ai`,
       spotlightCta: t('Open AI Arena', 'افتح مركز الذكاء'),
@@ -805,8 +805,17 @@ export default function Navbar({ locale }: { locale: string }) {
             })}
           </div>
 
-          {/* Zone 3 (Right): Manual Icon, Workspace Icon, Currency, Language, Theme, Dashboard, Auth */}
+          {/* Zone 3 (Right): Search/Tools, Manual Icon, Workspace Icon, Currency, Language, Theme, Dashboard, Auth */}
           <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+            <button
+              type="button"
+              onClick={triggerQuickSearch}
+              title={t('Quick Search & Industrial Calculators (Ctrl+K)', 'البحث السريع والحاسبات الهندسية (Ctrl+K)')}
+              className="inline-flex items-center justify-center h-7 w-7 rounded-lg border bg-muted/40 hover:bg-muted text-foreground transition-colors cursor-pointer shrink-0"
+              aria-label="Quick Search and Calculators"
+            >
+              <Search className="w-3.5 h-3.5 text-primary" />
+            </button>
             <ExpertManualButton locale={locale} variant="icon" />
             <div className="hidden lg:block shrink-0">
               <PersonaSwitcher locale={locale} />

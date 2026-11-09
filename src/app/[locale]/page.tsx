@@ -190,7 +190,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
           <p className="text-xs sm:text-sm md:text-base text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             {t(
-              'Uniting Egyptian spinning, weaving, dyeing, and garment factories to apply Lean Six Sigma & OEE, discover global export buyers across 190+ countries, pool raw-material procurement, form export consortia, and train teams on any topic with 7 free AI models.',
+              'Uniting Egyptian spinning, weaving, dyeing, and garment factories to apply Lean Six Sigma & OEE, discover global export buyers across 190+ countries, pool raw-material procurement, form export consortia, and train teams on any topic with 6 verified AI models.',
               'توحيد مصانع الغزل والنسيج والصباغة والملابس بالمحلة الكبرى لتطبيق التصنيع الرشيق ولين 6 سيجما، واستكشاف المشترين الدوليين في 190+ دولة، والشراء المجمع للخامات، وتشكيل التحالفات التصديرية، وتدريب الكوادر بالذكاء الاصطناعي.'
             )}
           </p>
@@ -241,7 +241,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             <Link href={`/${locale}/ai`}>
               <Button variant="outline" size="sm" className="h-9 px-4 text-xs font-bold rounded-full">
                 <Bot className="w-4 h-4 me-1.5 text-primary" />
-                {t('7-LLM AI Arena', 'مركز الذكاء الاصطناعي')}
+                {t('6-LLM AI Arena', 'مركز الذكاء الاصطناعي')}
               </Button>
             </Link>
           </div>

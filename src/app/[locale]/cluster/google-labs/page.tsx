@@ -1,9 +1,7 @@
 import Link from 'next/link';
 import { tr } from '@/lib/i18n-inline';
-import { PageHeader, Pill } from '@/components/cluster/ui';
 import { GoogleCreativeLabIntegration } from '@/components/cluster/modern/GoogleCreativeLabIntegration';
-import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
-import { Sparkles, Megaphone, Globe2, Gauge, Cpu } from 'lucide-react';
+import { Megaphone, Globe2, Gauge, Cpu, ArrowLeft, Film } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,24 +22,29 @@ export default async function GoogleLabsHubPage({
       : 'pomelli';
 
   return (
-    <div className="container mx-auto py-8 px-4 space-y-8">
-      <PageHeader
-        icon={Sparkles}
-        manualId="google-pomelli"
-        title={t(
-          'Google Labs Free AI Suite: Pomelli • Mixboard • Stitch • Opal',
-          'منظومة مختبرات جوجل المجانية: Pomelli • Mixboard • Stitch • Opal'
-        )}
-        subtitle={t(
-          'Extract your mill Business DNA & launch B2B campaigns with Google Pomelli, design Pantone TCX fabric moodboards with Mixboard, prototype UI/UX buyer portals & Andon tablets with Stitch, and run 4-node industrial AI mini-apps with Opal.',
-          'استخرج الحمض النووي التسويقي لمصنعك وأطلق حملات التصدير عبر Google Pomelli، وصمم لوحات الألوان والنسج بـ Mixboard، وابتكر واجهات بوابات المشترين وشاشات الأندون بـ Stitch، وشغّل تطبيقات الذكاء الصناعية المصغرة بـ Opal.'
-        )}
-        actions={
-          <div className="flex flex-wrap items-center gap-2">
-            <Pill tone="emerald">100% Free Google Labs Ecosystem</Pill>
-            <ExpertManualButton manualId="google-opal" locale={locale} variant="pill" />
-          </div>
-        }
+    <div className="container mx-auto py-6 px-4 space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <Link
+          href={`/${locale}/cluster`}
+          className="inline-flex items-center gap-1.5 rounded-xl border bg-background px-3.5 py-1.5 text-xs font-bold hover:bg-muted transition"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          {t('Back to Cluster Hub', 'العودة إلى مركز التجمع')}
+        </Link>
+        <Link
+          href={`/${locale}/cluster/media-studio`}
+          className="inline-flex items-center gap-1.5 rounded-xl border bg-background px-3.5 py-1.5 text-xs font-bold hover:bg-muted transition"
+        >
+          <Film className="w-3.5 h-3.5 text-emerald-500" />
+          {t('AI Image & .MP4 Video Studio', 'استوديو الصور وفيديو MP4')}
+        </Link>
+      </div>
+
+      {/* Main Interactive 4-Tool Studio */}
+      <GoogleCreativeLabIntegration
+        locale={locale}
+        defaultTool={validTool}
+        contextModule="hub"
       />
 
       {/* Quick Jump Links to Relative Platform Modules */}
@@ -118,13 +121,6 @@ export default async function GoogleLabsHubPage({
           </div>
         </Link>
       </div>
-
-      {/* Main Interactive 4-Tool Studio */}
-      <GoogleCreativeLabIntegration
-        locale={locale}
-        defaultTool={validTool}
-        contextModule="hub"
-      />
     </div>
   );
 }

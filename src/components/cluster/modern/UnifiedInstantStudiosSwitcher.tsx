@@ -121,7 +121,11 @@ export function UnifiedInstantStudiosSwitcher({ locale }: { locale: string }) {
       <div>
         {activeTab === 'lean' && <InstantLeanStudioBar locale={locale} />}
         {activeTab === 'export' && <InstantExportIntelligenceBar locale={locale} />}
-        {activeTab === 'academy' && <InstantTopicCourseBar locale={locale} />}
+        {activeTab === 'academy' && (
+          <div className="rounded-3xl border-2 border-indigo-500/35 bg-gradient-to-br from-slate-950 via-indigo-950/90 to-emerald-950 p-5 md:p-6 text-white shadow-xl">
+            <InstantTopicCourseBar locale={locale} />
+          </div>
+        )}
         {activeTab === 'brand' && <InstantBrandStudioBar locale={locale} />}
       </div>
     </div>

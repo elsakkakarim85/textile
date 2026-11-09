@@ -55,7 +55,7 @@ export function Footer({ locale }: { locale: string }) {
                 9-Pillar Lean Six Sigma
               </span>
               <span className="rounded-full border border-amber-500/40 bg-amber-500/15 px-3 py-1 font-bold text-amber-300">
-                7 Free LLM Models
+                6 Verified LLM Models
               </span>
             </div>
           </div>

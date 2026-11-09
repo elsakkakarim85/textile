@@ -114,22 +114,6 @@ export default async function AiCourseStudioPage({
 
   return (
     <div className="container mx-auto py-8 px-4 space-y-6">
-      <div className="flex items-center justify-between">
-        <Link
-          href={`/${locale}/cluster/academy`}
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary font-medium"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          {t('Back to Cluster Academy Catalog', 'العودة إلى كتالوج أكاديمية التجمع')}
-        </Link>
-        <Link href={`/${locale}/cluster/academy`}>
-          <Button variant="outline" size="sm" className="gap-1.5">
-            <GraduationCap className="w-4 h-4" />
-            {t('Browse All Courses & Certificates', 'تصفح جميع الدورات والشهادات')}
-          </Button>
-        </Link>
-      </div>
-
       <PageHeader
         icon={Sparkles}
         title={t(
@@ -140,6 +124,14 @@ export default async function AiCourseStudioPage({
           'Create expert-level training courses from Beginner to Advanced based on your factory’s real competency gaps, grounded in trusted UNIDO, ZDHC, ISO 17025, OEKO-TEX, and EU ESPR resources with full multimedia and verifiable certifications.',
           'ابتكر دورات تدريبية احترافية تتدرج من المبتدئ إلى المتقدم بناءً على الاحتياجات الفعلية لمصنعك، وموثقة من مصادر معتمدة (UNIDO, ZDHC, ISO 17025, OEKO-TEX, EU ESPR) مع وسائط متعددة وشهادات رقمية معتمدة.'
         )}
+        actions={
+          <Link href={`/${locale}/cluster/academy`}>
+            <Button variant="outline" size="sm" className="gap-1.5 font-bold">
+              <GraduationCap className="w-4 h-4 text-primary" />
+              {t('Browse All Courses & Certificates', 'تصفح جميع الدورات والشهادات')}
+            </Button>
+          </Link>
+        }
       />
 
       <AiCourseStudioClient

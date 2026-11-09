@@ -50,15 +50,12 @@ export type MediaPurposeId =
 export type FreeImageModelId =
   | 'flux-schnell'
   | 'flux-realism'
-  | 'sdxl-turbo'
   | 'imagen-3-bridge';
 
 export type FreeVideoModelId =
   | 'minimax-h3'
   | 'veo-2'
-  | 'wan-2.1-t2v'
-  | 'hunyuan-video'
-  | 'cogvideox-5b';
+  | 'wan-2.1-t2v';
 
 export const MINIMAX_CAMERA_MOVEMENTS = [
   {

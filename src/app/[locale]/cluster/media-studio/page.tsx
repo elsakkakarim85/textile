@@ -1,8 +1,7 @@
+import Link from 'next/link';
 import { tr } from '@/lib/i18n-inline';
-import { PageHeader, Pill } from '@/components/cluster/ui';
 import { AiMediaProductionStudio, type MediaPurposeId } from '@/components/cluster/modern/AiMediaProductionStudio';
-import { ExpertManualButton } from '@/components/cluster/ExpertManualModal';
-import { Film } from 'lucide-react';
+import { ArrowLeft, Megaphone, Sparkles } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,25 +31,32 @@ export default async function AiMediaStudioPage({
     : 'B2B_BUYER_PITCH';
 
   return (
-    <div className="container mx-auto py-8 px-4 space-y-8">
-      <PageHeader
-        icon={Film}
-        manualId="ai-media-studio"
-        title={t(
-          'AI Image & Video Production Studio (FLUX.1 • Imagen 3 • Veo 2 • Wan 2.1)',
-          'استوديو إنتاج الصور والفيديوهات بالذكاء الاصطناعي (FLUX.1 • Imagen 3 • Veo 2 • Wan 2.1)'
-        )}
-        subtitle={t(
-          'Generate 4-angle photorealistic commercial & 100mm macro textile images and 5-scene HD promotional videos (.MP4) integrated with your Company DNA Analysis and commercial purpose.',
-          'أنتج صوراً فوتوغرافية وماكرو بـ ٤ زوايا كاميرا وفيديوهات ترويجية وصناعية عالية الدقة (٥ مشاهد بصيغة .MP4) متكاملة مع تحليل بيانات مصنعك والغرض التسويقي.'
-        )}
-        actions={
-          <div className="flex flex-wrap items-center gap-2">
-            <Pill tone="emerald">Free Multi-Model AI Studio</Pill>
-            <ExpertManualButton manualId="ai-media-studio" locale={locale} variant="pill" />
-          </div>
-        }
-      />
+    <div className="container mx-auto py-6 px-4 space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <Link
+          href={`/${locale}/cluster`}
+          className="inline-flex items-center gap-1.5 rounded-xl border bg-background px-3.5 py-1.5 text-xs font-bold hover:bg-muted transition"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          {t('Back to Cluster Hub', 'العودة إلى مركز التجمع')}
+        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href={`/${locale}/cluster/brand-studio`}
+            className="inline-flex items-center gap-1.5 rounded-xl border bg-background px-3.5 py-1.5 text-xs font-bold hover:bg-muted transition"
+          >
+            <Megaphone className="w-3.5 h-3.5 text-amber-500" />
+            {t('AI Brand & Collateral Studio', 'استوديو الهوية والمطبوعات')}
+          </Link>
+          <Link
+            href={`/${locale}/cluster/google-labs`}
+            className="inline-flex items-center gap-1.5 rounded-xl border bg-background px-3.5 py-1.5 text-xs font-bold hover:bg-muted transition"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
+            {t('Google Labs Suite', 'منظومة مختبرات جوجل')}
+          </Link>
+        </div>
+      </div>
 
       <AiMediaProductionStudio
         locale={locale}
