@@ -26,6 +26,8 @@ import {
   Clock,
   RefreshCw,
   Film,
+  Mic,
+  MicOff,
 } from 'lucide-react';
 import { tr } from '@/lib/i18n-inline';
 import { Pill } from '@/components/cluster/ui';
@@ -157,6 +159,7 @@ export function UniversalModuleAiCopilot({
   const [latencyMs, setLatencyMs] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
   const [speaking, setSpeaking] = useState(false);
+  const [listening, setListening] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [showVisualStudio, setShowVisualStudio] = useState(false);
   const [visualVariantIdx, setVisualVariantIdx] = useState(0);
@@ -654,6 +657,40 @@ export function UniversalModuleAiCopilot({
     window.speechSynthesis.speak(utter);
   };
 
+  const toggleVoiceMic = () => {
+    if (typeof window === 'undefined') return;
+    const SpeechRec =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRec) {
+      runCopilot();
+      return;
+    }
+    if (listening) {
+      setListening(false);
+      return;
+    }
+    try {
+      const rec = new SpeechRec();
+      rec.lang = isAr ? 'ar-EG' : 'en-US';
+      rec.interimResults = false;
+      rec.maxAlternatives = 1;
+      setListening(true);
+      rec.onresult = (event: any) => {
+        const transcript = event?.results?.[0]?.[0]?.transcript || '';
+        setListening(false);
+        if (transcript) {
+          setCustomPrompt(transcript);
+          runCopilot(transcript);
+        }
+      };
+      rec.onerror = () => setListening(false);
+      rec.onend = () => setListening(false);
+      rec.start();
+    } catch {
+      setListening(false);
+    }
+  };
+
   return (
     <section id="mahalla-universal-ai-copilot" className="container mx-auto px-4 py-6 print:hidden scroll-mt-20">
         <div className="rounded-3xl border-2 border-emerald-500/35 bg-gradient-to-br from-slate-950 via-emerald-950/90 to-slate-900 text-white shadow-xl overflow-hidden">
@@ -667,8 +704,8 @@ export function UniversalModuleAiCopilot({
             <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-500/15 px-2.5 py-0.5 text-[11px] font-bold text-amber-300">
               <Zap className="h-3 w-3" />
               {t(
-                '100% Free Multi-LLM Engine (Llama 3.3 • DeepSeek R1 • Mistral • Qwen 2.5 • Gemini)',
-                'محرك ذكاء اصطناعي مجاني متعدد النماذج (Llama 3.3 • DeepSeek R1 • Mistral • Qwen 2.5)'
+                'Smart Assistant • Click a ready task or speak by voice 🎙️',
+                'المساعد الذكي لهذه الصفحة • اضغط على مهمة جاهزة أو تحدث بصوتك 🎙️'
               )}
             </span>
             <ExpertManualButton manualId="gadget-ai-copilot" locale={locale} variant="mini" />
@@ -822,6 +859,20 @@ export function UniversalModuleAiCopilot({
               {isAr ? cfg.titleAr : cfg.titleEn}:
             </span>
             <div className="flex flex-wrap items-center gap-1.5">
+              <button
+                type="button"
+                onClick={toggleVoiceMic}
+                className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[11px] font-extrabold transition cursor-pointer ${
+                  listening
+                    ? 'border-rose-400 bg-rose-600 text-white animate-pulse'
+                    : 'border-amber-400/50 bg-amber-500/20 hover:bg-amber-500/35 text-amber-200'
+                }`}
+              >
+                {listening ? <MicOff className="h-3 w-3 shrink-0" /> : <Mic className="h-3 w-3 shrink-0" />}
+                {listening
+                  ? t('Listening... Speak now', 'جاري الاستماع... تحدث الآن')
+                  : t('🎙️ Speak by Voice', '🎙️ تحدث بصوتك')}
+              </button>
               {cfg.quickActions.map((act) => (
                 <button
                   key={act.id}
@@ -930,6 +981,22 @@ export function UniversalModuleAiCopilot({
                 className="flex-1 rounded-xl border border-white/20 bg-slate-900/90 px-4 py-3 text-sm text-white placeholder:text-slate-400 focus:border-emerald-400 focus:outline-none"
               />
               <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={toggleVoiceMic}
+                  className={`inline-flex items-center justify-center gap-1.5 rounded-xl border px-3.5 py-3 text-xs font-extrabold transition cursor-pointer ${
+                    listening
+                      ? 'border-rose-400 bg-rose-600 text-white animate-pulse'
+                      : 'border-amber-400/50 bg-amber-500/20 hover:bg-amber-500/35 text-amber-200'
+                  }`}
+                >
+                  {listening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                  <span>
+                    {listening
+                      ? t('Listening...', 'استماع...')
+                      : t('🎙️ Voice', '🎙️ تحدث بصوتك')}
+                  </span>
+                </button>
                 <button
                   type="submit"
                   disabled={loading}

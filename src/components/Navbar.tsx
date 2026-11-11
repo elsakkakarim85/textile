@@ -75,9 +75,36 @@ export default function Navbar({ locale }: { locale: string }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileExpandedCat, setMobileExpandedCat] = useState<string | null>('marketplaces');
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [zoomPct, setZoomPct] = useState<number>(100);
   const navRef = useRef<HTMLDivElement>(null);
 
   const t = (en: string, ar: string) => tr(locale, en, ar);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('mahalla_font_zoom');
+      if (saved) {
+        const num = Number(saved);
+        if (num >= 100 && num <= 125) {
+          setZoomPct(num);
+          document.documentElement.style.fontSize = `${num}%`;
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const cycleTextZoom = () => {
+    const next = zoomPct === 100 ? 112 : zoomPct === 112 ? 122 : 100;
+    setZoomPct(next);
+    try {
+      document.documentElement.style.fontSize = `${next}%`;
+      localStorage.setItem('mahalla_font_zoom', String(next));
+    } catch {
+      // ignore
+    }
+  };
 
   // Close menus on route change
   useEffect(() => {
@@ -109,65 +136,65 @@ export default function Navbar({ locale }: { locale: string }) {
   const categories: NavCategory[] = [
     {
       id: 'marketplaces',
-      label: t('Marketplaces', 'الأسواق التجارية'),
+      label: t('Buy & Sell', 'البيع والشراء'),
       icon: ShoppingBag,
       columns: 1,
       spotlightTitle: t(
-        'Source Verified Giza Yarns, Fabrics, Dyestuffs & Circular Waste Lots',
-        'تسوق الغزول والأقمشة والخامات والعوادم مباشرة من مصانع المحلة المعتمدة'
+        'Buy & sell yarns, fabrics, dyes, and factory products directly',
+        'اشترِ وبِع الغزول والأقمشة والخامات والمنتجات مباشرة من مصانع المحلة'
       ),
       spotlightHref: `/${locale}/marketplaces/products`,
-      spotlightCta: t('Browse B2B Catalog', 'تصفح سوق المنتجات'),
+      spotlightCta: t('Open Market', 'افتح السوق'),
       items: [
         {
           href: `/${locale}/marketplaces/products`,
-          label: t('Finished Products Marketplace', 'سوق المنتجات النهائية والغزول'),
+          label: t('Finished Products & Fabrics Market', 'سوق المنتجات النهائية والأقمشة'),
           desc: t(
-            'Export-grade Giza yarns, fabrics, hotel bedlinen & terry towels with EU DPP',
-            'غزول قطن جيزة، أقمشة، مفروشات فندقية، ووبريات جاهزة للتصدير مع جواز المنتج'
+            'Ready-to-ship towels, bedlinen, fabrics, and garments from verified mills',
+            'فوط، مفروشات فندقية، أقمشة، وملابس جاهزة للبيع والتصدير من المصانع'
           ),
           icon: ShoppingBag,
-          badge: 'B2B',
+          badge: t('Products', 'منتجات'),
           accent: 'emerald',
         },
         {
           href: `/${locale}/marketplaces/resources`,
-          label: t('Raw Materials, Yarns & Dyestuffs', 'سوق الخامات والغزول والصبغات'),
+          label: t('Yarns, Dyes & Raw Materials Market', 'سوق الغزول والصبغات والخامات'),
           desc: t(
-            'Uster® 5% Giza yarns, ZDHC reactive dyes, auxiliaries & loom spare parts',
-            'غزول معتمدة، صبغات نشطة ZDHC، كيماويات مساعدة، وقطع غيار الأنوال'
+            'Egyptian cotton yarns, reactive dyes, chemicals, and machine spare parts',
+            'غزول قطن جيزة، صبغات، كيماويات مساعدة، وقطع غيار ماكينات النسيج'
           ),
           icon: Package,
           accent: 'blue',
         },
         {
           href: `/${locale}/marketplaces/waste`,
-          label: t('Circular Waste & GRS Exchange', 'بورصة العوادم والتدوير الدائري'),
+          label: t('Cotton Waste & Recycling Exchange', 'بورصة العوادم والقصاقيص للتدوير'),
           desc: t(
-            'Sorted comber noil, cutting clips & 5S Red-Tag salvage with CO2e metrics',
-            'عوادم تمشيط وقصاقيص مفروزة للتدوير مع حاسبة وفر الكربون والمياه'
+            'Buy or sell sorted cotton waste, comber noil, and fabric cutting clips',
+            'بيع وشراء عوادم الغزل والتمشيط وقصاقيص القماش المفروزة لإعادة التدوير'
           ),
           icon: Recycle,
-          badge: 'GRS',
+          badge: t('Recycling', 'تدوير'),
           accent: 'emerald',
         },
         {
           href: `/${locale}/marketplaces/matchmaking`,
-          label: t('B2B RFQ Matchmaking & Tenders', 'بورصة مناقصات التوريد (RFQ)'),
+          label: t('Post a Buying Request / Price Quote', 'اطلب تسعير طلبية أو قدم عرض سعر'),
           desc: t(
-            'Post sourcing specs or submit AI-assisted factory quotations',
-            'انشر مواصفات طلبيتك أو قدم عروض أسعار فنية ومالية من مصنعك'
+            'Post what you want to buy or submit price quotes from your factory',
+            'انشر مواصفات الطلبية التي تريد شراءها أو قدم عرض سعر من مصنعك'
           ),
           icon: FileText,
-          badge: 'RFQ',
+          badge: t('Orders', 'طلبيات'),
           accent: 'amber',
         },
         {
           href: `/${locale}/factories`,
-          label: t('Verified Factories Directory', 'دليل المصانع المعتمدة بالمحلة'),
+          label: t('Verified Mahalla Factories Directory', 'دليل مصانع المحلة المعتمدة'),
           desc: t(
-            '520+ spinning, weaving, knitting, dyeing & garment mills with KYC badges',
-            'أكثر من 520 مصنع غزل ونسيج وتريكو وصباغة وملابس موثق'
+            'Browse spinning, weaving, knitting, dyeing, and garment factories',
+            'تصفح بيانات وتخصصات مصانع الغزل والنسيج والتريكو والصباغة والملابس'
           ),
           icon: Building2,
         },
@@ -175,246 +202,247 @@ export default function Navbar({ locale }: { locale: string }) {
     },
     {
       id: 'trade',
-      label: t('Export & Trade', 'التصدير والشحن'),
+      label: t('Export & Buyers', 'التصدير والمشترون'),
       icon: Globe2,
       columns: 1,
       spotlightTitle: t(
-        'Discover Verified International Buyers & Live Tenders across 190+ Countries',
-        'اكتشف المشترين الدوليين الموثقين والمناقصات العالمية في أكثر من 190 دولة'
+        'Find foreign buyers, export tenders & shipping costs across 190+ countries',
+        'اعثر على مشترين دوليين ومناقصات حقيقية واحسب الشحن والجمارك بسهولة'
       ),
       spotlightHref: `/${locale}/cluster/export-intelligence`,
-      spotlightCta: t('Launch Export AI', 'افتح ذكاء التصدير'),
+      spotlightCta: t('Find Buyers', 'ابحث عن مشترين'),
       items: [
         {
           href: `/${locale}/cluster/export-intelligence`,
-          label: t('Global Export & Buyers AI Hub', 'ذكاء التصدير والمشترين الدوليين'),
+          label: t('Find Foreign Buyers & Export Studies', 'كشاف المشترين الدوليين ودراسات التصدير'),
           desc: t(
-            'Market studies, verified international buyers, export tenders & NTM tariffs',
-            'دراسات الأسواق، قاعدة المشترين المعتمدين، المناقصات الدولية، وتحليل الجمارك'
+            'Best countries for your product, verified buyers, tenders, and customs rules',
+            'أفضل الدول لتصدير منتجك، قوائم المشترين الموثقين، المناقصات، والجمارك'
           ),
           icon: Globe2,
-          badge: t('Flagship AI', 'رائد'),
+          badge: t('Top Tool', 'الأهم'),
           accent: 'emerald',
         },
         {
           href: `/${locale}/services/logistics`,
-          label: t('Incoterms 2020 Freight & Duty Simulator', 'محاكي الشحن والجمارك (Incoterms)'),
+          label: t('Shipping & Customs Cost Calculator', 'حاسبة تكلفة الشحن والجمارك'),
           desc: t(
-            'EXW/FOB/CIF/DDP container freight & EUR.1 / QIZ duty savings calculator',
-            'حاسبة تكلفة الحاويات البحرية والجوية والوفر الجمركي لاتفاقيات التجارة'
+            'Calculate sea/air container shipping cost and 0% duty savings easily',
+            'احسب تكلفة شحن الحاوية البحرية أو الجوية ونسبة الإعفاء الجمركي'
           ),
           icon: Ship,
           accent: 'blue',
         },
         {
           href: `/${locale}/dashboard/contracts`,
-          label: t('Smart Milestone Escrow (30/40/30)', 'عقود الضمان الذكية (30/40/30)'),
+          label: t('Safe Export Payment Contracts (30/40/30)', 'عقود ضمان الدفعات الآمنة (30/40/30)'),
           desc: t(
-            'CBE-regulated milestone payment protection for buyers & mills',
-            'حماية المدفوعات التصديرية بنظام الدفعات المرحلية الموثقة'
+            'Protect buyer and factory payments across production and shipping stages',
+            'حماية حقوق المصنع والمشتري بنظام الدفعات المضمونة على ٣ مراحل'
           ),
           icon: ShieldCheck,
         },
         {
           href: `/${locale}/dpp/demo-giza-yarn`,
-          label: t('EU Digital Product Passport (DPP)', 'جواز المنتج الرقمي الأوروبي (DPP)'),
+          label: t('European Product Certificate (DPP)', 'جواز السفر الرقمي للمنتج الأوروبي'),
           desc: t(
-            'Cryptographic SHA-256 origin, carbon & Six Sigma quality traceability',
-            'شهادة التتبع الرقمي الموثقة للمنشأ والبصمة الكربونية وجودة التصدير لأوروبا'
+            'Digital QR certificate proving Egyptian cotton origin and quality for Europe',
+            'شهادة رقمية برمز QR تثبت منشأ القطن المصري وجودة المنتج للتصدير لأوروبا'
           ),
           icon: ShieldCheck,
-          badge: 'ESPR',
+          badge: t('EU Ready', 'لأوروبا'),
           accent: 'blue',
         },
       ],
     },
     {
-      id: 'excellence',
-      label: t('Lean & ESG', 'اللين والاستدامة'),
-      icon: Gauge,
-      columns: 1,
-      spotlightTitle: t(
-        'Run a 9-Pillar Lean Six Sigma & OEE Diagnostic',
-        'شغّل تشخيص اللين 6 سيجما وكفاءة المعدات OEE'
-      ),
-      spotlightHref: `/${locale}/cluster/lean-manufacturing`,
-      spotlightCta: t('Open Lean Hub', 'افتح مركز اللين'),
-      items: [
-        {
-          href: `/${locale}/cluster/lean-manufacturing`,
-          label: t('Lean Six Sigma & OEE Suite', 'التصنيع الرشيق ولين 6 سيجما'),
-          desc: t(
-            '9-Pillar VSM, 5S, OEE, SMED, Poka-Yoke, Six Sigma Cpk & A3 Kaizen Studio',
-            'منظومة اللين: خريطة القيمة، 5S، كفاءة المعدات OEE، SMED، بوكا يوكي، و6 سيجما'
-          ),
-          icon: Gauge,
-          badge: t('9 Pillars', '9 ركائز'),
-          accent: 'emerald',
-        },
-        {
-          href: `/${locale}/cluster/maturity`,
-          label: t('Industry 4.0 Digital Maturity', 'تقييم النضج الرقمي والصناعة 4.0'),
-          desc: t(
-            '6-Dimension diagnostic radar & prioritized 90-day modernization roadmap',
-            'تشخيص رقمي عبر 6 أبعاد مع خارطة طريق تطويرية لمدة 90 يوماً'
-          ),
-          icon: BarChart3,
-        },
-        {
-          href: `/${locale}/cluster/sustainability`,
-          label: t('ESG, Carbon & EU CBAM Readiness', 'الاستدامة والبصمة الكربونية CBAM'),
-          desc: t(
-            'Scope 1/2 CO2e calculator, water intensity, ZDHC & EU compliance',
-            'حاسبة انبعاثات الكربون وكثافة المياه والتوافق مع اشتراطات الاتحاد الأوروبي'
-          ),
-          icon: Leaf,
-          badge: 'CBAM',
-          accent: 'emerald',
-        },
-        {
-          href: `/${locale}/cluster/funding`,
-          label: t('Grants, Subsidies & Green Finance', 'التمويل والمنح الصناعية الخضراء'),
-          desc: t(
-            'UNIDO/TIGARA technical assistance, EBRD GEFF, MSMEDA & IMC grants',
-            'منح مشروع تجارة والبنك الأوروبي EBRD وجهاز تنمية المشروعات ومركز تحديث الصناعة'
-          ),
-          icon: Landmark,
-        },
-      ],
-    },
-    {
       id: 'collaboration',
-      label: t('Collaboration', 'التعاون الصناعي'),
+      label: t('Bulk Buy & Machines', 'الشراء المجمع والماكينات'),
       icon: Handshake,
       columns: 1,
       spotlightTitle: t(
-        'Save 12–18% on Giza Yarn & ZDHC Dyes via Joint Procurement',
-        'وفّر ١٢–١٨٪ من تكلفة الغزول والصبغات عبر الشراء المجمع'
+        'Save 12–18% on yarn & dyes by pooling orders with Mahalla factories',
+        'وفّر ١٢–١٨٪ من سعر الغزل والصبغات عبر الشراء المجمع مع مصانع المحلة'
       ),
       spotlightHref: `/${locale}/cluster/procurement`,
-      spotlightCta: t('Join Buying Pools', 'انضم للشراء المجمع'),
+      spotlightCta: t('Join Group Buy', 'انضم للشراء المجمع'),
       items: [
         {
           href: `/${locale}/cluster/procurement`,
-          label: t('Joint Procurement Pools', 'الشراء المجمع للخامات والطاقة'),
+          label: t('Wholesale Group Buying (Save 12–18%)', 'الشراء المجمع للخامات بسعر الجملة'),
           desc: t(
-            'Aggregate SME demand for Giza yarn, reactive dyes & solar PPA (12–15% savings)',
-            'تجميع طلبات المصانع لشراء الغزول والصبغات والطاقة بخصومات تصل إلى 15%'
+            'Join other factories to buy cotton yarn, dyes, and solar energy at bulk discount',
+            'اشترك مع مصانع المحلة لشراء الغزول والصبغات والطاقة بخصم الجملة (١٢–١٨٪)'
           ),
           icon: ShoppingCart,
-          badge: t('Save 14%', 'وفر 14%'),
+          badge: t('Save 15%', 'وفر ١٥٪'),
           accent: 'emerald',
         },
         {
           href: `/${locale}/cluster/capacity`,
-          label: t('Idle Capacity & Subcontracting', 'تبادل الطاقات التشغيلية الفائضة'),
+          label: t('Rent Idle Machines & Subcontracting', 'تبادل ساعات تشغيل الماكينات'),
           desc: t(
-            'Smart matching between idle looms/dyehouses and urgent overflow orders',
-            'مطابقة ذكية بين ساعات التشغيل الفائضة بالمصانع وطلبات التشغيل للغير'
+            'Earn money from idle machines or book a trusted partner factory for your order',
+            'شغّل ماكيناتك الفائضة لتحقيق دخل إضافي أو احجز تشغيل لدى مصنع موثوق'
           ),
           icon: ArrowRightLeft,
         },
         {
           href: `/${locale}/cluster/consortia`,
-          label: t('Multi-Factory Export Consortia', 'التحالفات التصديرية المشتركة'),
+          label: t('Export Alliances Between Factories', 'التحالفات التصديرية بين المصانع'),
           desc: t(
-            'Combine spinning, weaving, dyeing & sewing SMEs to win mega export RFQs',
-            'تكوين تكتلات تصديرية متكاملة من عدة مصانع للفوز بالمناقصات الدولية الكبرى'
+            'Partner with 3–5 factories across spinning to sewing to win big export orders',
+            'تعاون مع عدة مصانع مكملة لك للفوز بطلبيات التصدير الكبيرة معاً'
           ),
           icon: Handshake,
         },
         {
           href: `/${locale}/cluster/facilities`,
-          label: t('Shared Labs, CAD & ZLD Facilities', 'حجز المعامل والمرافق المشتركة'),
+          label: t('Book Quality Testing Labs & CAD Studio', 'حجز معامل الفحص واستوديو التصميم'),
           desc: t(
-            'Book ISO 17025 testing labs, 3D CAD studio & effluent treatment slots',
-            'حجز فوري لمعامل الفحص المعتمدة واستوديو التصميم ومحطة معالجة المياه'
+            'Book yarn/fabric quality labs, 3D design studio, and training rooms by the hour',
+            'حجز فوري بالساعة لمعامل اختبار الجودة واستوديو التصميم وقاعات التدريب'
           ),
           icon: FlaskConical,
         },
         {
           href: `/${locale}/services`,
-          label: t('Industrial Support Services', 'سوق الخدمات الصناعية المساندة'),
+          label: t('Maintenance, Packaging & Lab Services', 'خدمات الصيانة والتغليف والشهادات'),
           desc: t(
-            'Accredited labs, TPM maintenance contractors, packaging & certifiers',
-            'مقدمو خدمات الصيانة، الفحص المعملي، التغليف، وشهادات الأيزو والأيكوتكس'
+            'Find machine maintenance technicians, export packaging, and ISO certifiers',
+            'دليل شركات صيانة الماكينات والتغليف التصديري واستخراج شهادات الجودة'
           ),
           icon: Wrench,
         },
       ],
     },
     {
+      id: 'excellence',
+      label: t('Reduce Waste & Grants', 'تقليل الهالك والمنح'),
+      icon: Gauge,
+      columns: 1,
+      spotlightTitle: t(
+        'Cut fabric defects, reduce machine stops, and apply for factory grants',
+        'قلل الهالك وأعطال الماكينات واحصل على منح وتمويل لتطوير مصنعك'
+      ),
+      spotlightHref: `/${locale}/cluster/lean-manufacturing`,
+      spotlightCta: t('Open Cost & Waste Tool', 'افتح تقليل الهالك'),
+      items: [
+        {
+          href: `/${locale}/cluster/lean-manufacturing`,
+          label: t('Reduce Waste & Stop Breakdowns (Lean)', 'تقليل الهالك والأعطال وتحسين الإنتاج'),
+          desc: t(
+            'Simple calculators and plans to stop fabric defects, cut downtime, and lower cost',
+            'أدوات مبسطة لتقليل عيوب القماش والصباغة وتقليل توقف الماكينات وحساب التكلفة'
+          ),
+          icon: Gauge,
+          badge: t('Cut Cost', 'خفض التكلفة'),
+          accent: 'emerald',
+        },
+        {
+          href: `/${locale}/cluster/funding`,
+          label: t('Factory Grants & Low-Interest Loans', 'المنح المجانية والقروض الميسرة للمصانع'),
+          desc: t(
+            'Apply for EU/UNIDO TIGARA, EBRD, and MSMEDA grants to upgrade machines',
+            'قدم بسهولة على منح مشروع تجارة والبنك الأوروبي والقروض الميسرة لتحديث الماكينات'
+          ),
+          icon: Landmark,
+          badge: t('Grants', 'منح وتمويل'),
+          accent: 'amber',
+        },
+        {
+          href: `/${locale}/cluster/sustainability`,
+          label: t('Save Energy & EU Export Report (CBAM)', 'توفير الكهرباء والمياه وشهادة أوروبا'),
+          desc: t(
+            'Calculate electricity, water, and carbon savings and download EU CBAM report',
+            'حاسبة مبسطة لاستهلاك الكهرباء والمياه وإصدار تقرير الكربون للتصدير لأوروبا'
+          ),
+          icon: Leaf,
+          badge: 'CBAM',
+          accent: 'emerald',
+        },
+        {
+          href: `/${locale}/cluster/maturity`,
+          label: t('2-Minute Factory Checkup & 90-Day Plan', 'التقييم السريع للمصنع وخطة التطوير'),
+          desc: t(
+            'Answer 6 simple questions to get your factory score and 90-day upgrade plan',
+            'أجب عن ٦ أسئلة بسيطة لتحصل على تقييم مصنعك وخطة تطوير عملية لمدة ٩٠ يوماً'
+          ),
+          icon: BarChart3,
+        },
+      ],
+    },
+    {
       id: 'ai_academy',
-      label: t('AI & Academy', 'الذكاء والأكاديمية'),
+      label: t('Videos, Catalog & Training', 'الفيديو والكتالوج والتدريب'),
       icon: Sparkles,
       columns: 1,
       spotlightTitle: t(
-        'Compare 6 Verified LLMs Side-by-Side or Generate Certified Courses',
-        'قارن بين ٦ نماذج ذكاء اصطناعي معتمدة أو ولّد دورات تدريبية بشهادات'
+        'Create factory videos, printable catalogs, and worker training in 1 click',
+        'اصنع فيديو دعائي وكتالوج لمصنعك أو أنشئ دورة تدريبية لعمالك بضغطة زر'
       ),
-      spotlightHref: `/${locale}/ai`,
-      spotlightCta: t('Open AI Arena', 'افتح مركز الذكاء'),
+      spotlightHref: `/${locale}/cluster/media-studio`,
+      spotlightCta: t('Create Video Now', 'اصنع فيديو الآن'),
       items: [
         {
-          href: `/${locale}/ai`,
-          label: t('Multi-LLM AI Command Center & Sovereign Lab', 'مركز الذكاء الاصطناعي والمختبر العصبي السيادي'),
+          href: `/${locale}/cluster/media-studio`,
+          label: t('Create Factory Video & Photos (MP4)', 'استوديو عمل الفيديوهات والصور (MP4)'),
           desc: t(
-            'Sovereign v5.0, Llama 3.3 70B, Gemini 2.5, DeepSeek R1, Qwen 72B & Side-by-Side Arena',
-            'النموذج السيادي v5.0 و Llama 3.3 و Gemini 2.5 و DeepSeek R1 والمقارنة المباشرة'
+            'Generate HD .MP4 commercial videos with voiceover & subtitles + 4 product photos',
+            'توليد فيديو دعائي MP4 بالصوت والترجمة المكتوبة + ٤ صور احترافية للمنتجات'
           ),
           icon: Sparkles,
-          badge: t('Sovereign v5', 'سيادي v5'),
-          accent: 'purple',
-        },
-        {
-          href: `/${locale}/cluster/academy`,
-          label: t('Cluster Academy & AI Course Studio', 'الأكاديمية واستوديو الدورات الذكي'),
-          desc: t(
-            'Generate 3-tier technical courses on any topic + verifiable MC-* certificates',
-            'توليد دورات تدريبية هندسية من 3 مستويات بالذكاء الاصطناعي مع شهادات معتمدة'
-          ),
-          icon: GraduationCap,
-          badge: t('AI Studio', 'استوديو'),
+          badge: t('Video MP4', 'فيديو MP4'),
           accent: 'emerald',
         },
         {
           href: `/${locale}/cluster/brand-studio`,
-          label: t('AI Brand, Marketing & Print Studio', 'استوديو الهوية والتسويق والمطبوعات'),
+          label: t('Create Brochure, Catalog & Brand', 'تصميم كتالوج وبروشور وهوية المصنع'),
           desc: t(
-            'SVG logos, 90-day marketing plans, brochures, flyers & trade-show roll-ups',
-            'تصميم الشعارات، خطط التسويق، البروشورات، ورول أب المعارض الدولية'
+            'Create your logo, 90-day marketing plan, printable brochure, flyer & poster',
+            'تصميم شعار المصنع وخطة التسويق وبروشور وفلاير وبوستر جاهز للطباعة فوراً'
           ),
           icon: Megaphone,
           accent: 'amber',
         },
         {
-          href: `/${locale}/cluster/media-studio`,
-          label: t('AI Image & MiniMax H3 Video Studio', 'استوديو الصور وفيديو MiniMax H3 MP4'),
+          href: `/${locale}/cluster/academy`,
+          label: t('Worker & Engineer Training Academy', 'أكاديمية تدريب العمال والمهندسين'),
           desc: t(
-            'Generate 4-angle FLUX images & 5-scene MiniMax Hailuo H3 1080p MP4 videos from Company DNA',
-            'توليد صور فوتوغرافية بـ 4 زوايا وفيديوهات MiniMax H3 MP4 بحركة الكاميرا السداسية'
+            'Ready practical courses or generate any custom training course with certificates',
+            'دورات عملية مبسطة أو أنشئ أي دورة تدريبية لعمال مصنعك مع شهادة معتمدة'
           ),
-          icon: Sparkles,
-          badge: 'MiniMax H3',
+          icon: GraduationCap,
+          badge: t('Training', 'تدريب'),
           accent: 'emerald',
         },
         {
           href: `/${locale}/cluster/google-labs`,
-          label: t('Google Pomelli, Stitch, Opal & Mixboard', 'استوديو جوجل: Pomelli • Stitch • Opal • Mixboard'),
+          label: t('Fabric Color Boards & Social Ads', 'لوحات ألوان الأقمشة والبطاقات الإعلانية'),
           desc: t(
-            'Free Google Labs Business DNA campaigns, swatch moodboards, UI prototyper & Opal AI mini-apps',
-            'استخراج الحمض النووي التسويقي، لوحات الألوان، تصميم الواجهات، وتطبيقات Opal الذكية'
+            'Create fabric color palettes, social media ad cards, and buyer previews',
+            'تنسيق ألوان الأقمشة وتوليد بطاقات إعلانية جاهزة للنشر وإرسالها للمشترين'
           ),
           icon: Sparkles,
-          badge: 'Google Labs',
           accent: 'blue',
         },
         {
-          href: `/${locale}/dashboard/knowledge`,
-          label: t('Industrial RAG Knowledge Base', 'قاعدة المعرفة الهندسية والقياسية (RAG)'),
+          href: `/${locale}/ai`,
+          label: t('Smart AI Assistant & Advisor Center', 'المساعد الذكي الشامل للاستشارات'),
           desc: t(
-            'Semantic pgvector search across AATCC, ISO, ZDHC & Lean SMED playbooks',
-            'بحث دلالي ذكي في المراجع القياسية لأعمال الصباغة والنسيج واللين'
+            'Ask any question about spinning, weaving, dyeing, costing, or export in Arabic/English',
+            'اسأل أي سؤال في الغزل والنسيج والصباغة وحساب التكلفة والتصدير واحصل على إجابة فورية'
+          ),
+          icon: Sparkles,
+          badge: t('Ask AI', 'اسأل الآن'),
+          accent: 'purple',
+        },
+        {
+          href: `/${locale}/dashboard/knowledge`,
+          label: t('Technical Guides & Standards Library', 'مكتبة الأدلة الفنية والمواصفات القياسية'),
+          desc: t(
+            'Simple search across dyeing, weaving, quality, and export reference guides',
+            'ابحث بسهولة في أدلة تشغيل الصباغة والنسيج وفحص الجودة والمواصفات'
           ),
           icon: BookOpen,
         },
@@ -422,69 +450,70 @@ export default function Navbar({ locale }: { locale: string }) {
     },
     {
       id: 'ecosystem',
-      label: t('Observatory', 'المرصد والمجتمع'),
+      label: t('Community & Jobs', 'المجتمع والوظائف'),
       icon: BarChart3,
       columns: 1,
       spotlightTitle: t(
-        'Live Cluster Macro KPIs, Capacity Heatmaps & Peer Percentiles',
-        'المؤشرات الكلية الحية للتجمع وخرائط الطاقات وترتيب المصانع'
+        'Connect with experts, hire factory technicians, and join cluster events',
+        'تواصل مع الخبراء، ووظف الفنيين والمهندسين، وشارك في المعارض والفعاليات'
       ),
       spotlightHref: `/${locale}/cluster/observatory`,
-      spotlightCta: t('View Observatory', 'استعرض المرصد'),
+      spotlightCta: t('View Cluster Stats', 'إحصائيات التجمع'),
       items: [
         {
-          href: `/${locale}/cluster/observatory`,
-          label: t('Cluster Observatory & Peer Benchmark', 'مرصد التجمع ومقارنة الأداء'),
-          desc: t(
-            'Executive macro KPIs, capacity heatmaps, CO2e trends & factory percentiles',
-            'لوحة المؤشرات الكلية للتجمع، خرائط الطاقة الإنتاجية، وترتيب مصنعك بين الأقران'
-          ),
-          icon: BarChart3,
-          badge: t('Live KPIs', 'مباشر'),
-          accent: 'blue',
-        },
-        {
           href: `/${locale}/recruitment`,
-          label: t('Industrial Recruitment & ILUO Jobs', 'بوابة التوظيف الصناعي والمهندسين'),
+          label: t('Factory Jobs & Hiring Technicians', 'وظائف المصانع وتوظيف الفنيين والمهندسين'),
           desc: t(
-            'Textile engineering & technician roles with AI applicant pitch generator',
-            'وظائف مهندسي وفنيي الغزل والنسيج والصباغة مع مساعد التقديم الذكي'
+            'Post job openings in your factory or apply for spinning, weaving & dyeing jobs',
+            'أعلن عن الوظائف المتاحة بمصنعك أو قدم على وظائف الغزل والنسيج والصباغة'
           ),
           icon: Briefcase,
+          badge: t('Jobs', 'وظائف'),
+          accent: 'emerald',
         },
         {
           href: `/${locale}/cluster/experts`,
-          label: t('Verified Experts & Free Mentorship', 'دليل الخبراء والإرشاد الصناعي'),
+          label: t('Consult Verified Textile Experts', 'استشارة الخبراء والاستشاريين المعتمدين'),
           desc: t(
-            'Connect with Master Black Belts, dyeing chemists & EU export consultants',
-            'تواصل مع خبراء اللين 6 سيجما وكيمياء الصباغة والتصدير الدولي'
+            'Book free advice with spinning, weaving, dyeing, quality, and export experts',
+            'احجز استشارة مجانية مع خبراء الغزل والنسيج والصباغة والجودة والتصدير'
           ),
           icon: UserCheck,
         },
         {
           href: `/${locale}/cluster/forum`,
-          label: t('Technical Q&A Forum', 'المنتدى الفني وتبادل الخبرات'),
+          label: t('Factory Owners & Engineers Forum', 'منتدى أصحاب المصانع والمهندسين'),
           desc: t(
-            'Peer troubleshooting on yarn quality, dyeing RFT, loom maintenance & CBAM',
-            'نقاشات هندسية وحلول مجربة لمشكلات الغزل والصباغة وصيانة الأنوال'
+            'Ask questions, share experience, and solve technical machine issues together',
+            'اطرح سؤالك وشارك خبرتك وحل مشكلات الماكينات والإنتاج مع زملائك بالمحلة'
           ),
           icon: MessagesSquare,
         },
         {
           href: `/${locale}/cluster/events`,
-          label: t('Workshops, Trade Fairs & Events', 'الفعاليات والمعارض وورش العمل'),
+          label: t('Trade Fairs, Workshops & Buyer Days', 'المعارض وورش العمل ولقاءات المشترين'),
           desc: t(
-            'B2B matchmaking days, Heimtextil delegations & 1-click .ICS calendar sync',
-            'أيام التشبيك التجاري، بعثات المعارض الدولية، والندوات التدريبية'
+            'Register for international exhibitions, training workshops, and buyer meetings',
+            'سجل في بعثات المعارض الدولية وورش العمل التدريبية ولقاءات المشترين'
           ),
           icon: CalendarDays,
         },
         {
-          href: `/${locale}/cluster/announcements`,
-          label: t('Official PMO Bulletins', 'التعميمات والنشرات الرسمية'),
+          href: `/${locale}/cluster/observatory`,
+          label: t('Cluster Statistics & Performance', 'إحصائيات ومؤشرات تجمع المحلة'),
           desc: t(
-            'Cluster governance updates, subsidy deadlines & export alerts',
-            'إعلانات إدارة التجمع ومواعيد التقديم على المنح والبعثات التصديرية'
+            'See live statistics on cluster production, savings, and export growth',
+            'شاهد الإحصائيات الحية للإنتاج والوفر المالي ونمو الصادرات بالتجمع'
+          ),
+          icon: BarChart3,
+          accent: 'blue',
+        },
+        {
+          href: `/${locale}/cluster/announcements`,
+          label: t('Official News & Grant Deadlines', 'الأخبار الرسمية ومواعيد المنح'),
+          desc: t(
+            'Latest official calls, grant deadlines, and news from cluster management',
+            'أحدث الإعلانات الرسمية ومواعيد التقديم على المنح والبعثات التصديرية'
           ),
           icon: Megaphone,
         },
@@ -815,6 +844,19 @@ export default function Navbar({ locale }: { locale: string }) {
               aria-label="Quick Search and Calculators"
             >
               <Search className="w-3.5 h-3.5 text-primary" />
+            </button>
+            <button
+              type="button"
+              onClick={cycleTextZoom}
+              title={t('Enlarge Text Size for Easier Reading', 'تكبير حجم الخط لسهولة القراءة')}
+              className={`inline-flex items-center justify-center h-7 px-1.5 rounded-lg border text-[11px] font-black transition-colors cursor-pointer shrink-0 ${
+                zoomPct > 100
+                  ? 'border-sky-500 bg-sky-500/15 text-sky-700 dark:text-sky-300'
+                  : 'bg-muted/40 hover:bg-muted text-foreground'
+              }`}
+              aria-label="Enlarge Text Size"
+            >
+              A+
             </button>
             <ExpertManualButton locale={locale} variant="icon" />
             <div className="hidden lg:block shrink-0">
