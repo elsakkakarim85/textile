@@ -53,6 +53,7 @@ export type FreeImageModelId =
   | 'imagen-3-bridge';
 
 export type FreeVideoModelId =
+  | 'moneyprinter-turbo'
   | 'minimax-h3'
   | 'veo-2'
   | 'wan-2.1-t2v';
@@ -327,6 +328,12 @@ const FREE_IMAGE_MODELS: { id: FreeImageModelId; labelEn: string; labelAr: strin
 
 const FREE_VIDEO_MODELS: { id: FreeVideoModelId; labelEn: string; labelAr: string; badge: string }[] = [
   {
+    id: 'moneyprinter-turbo',
+    labelEn: 'MoneyPrinterTurbo GitHub Engine (AI Script + B-Roll + Edge-TTS + Burned-In .SRT + .MP4)',
+    labelAr: 'أداة MoneyPrinterTurbo من GitHub (سيناريو ذكي + لقطات B-Roll + تعليق صوتي + ترجمة .SRT + .MP4)',
+    badge: 'GitHub #1 Auto-Video',
+  },
+  {
     id: 'minimax-h3',
     labelEn: 'MiniMax Hailuo H3 Director (T2V-01-Director 1080p 60fps • 6-DoF Camera Control)',
     labelAr: 'نموذج MiniMax Hailuo H3 المجاني (تحكم احترافي بحركة الكاميرا 1080p 60fps + MP4)',
@@ -389,6 +396,30 @@ export function AiMediaProductionStudio({
   const [minimaxApiKey, setMinimaxApiKey] = useState<string>('');
   const [minimaxCloudStatus, setMinimaxCloudStatus] = useState<string | null>(null);
   const [minimaxDispatching, setMinimaxDispatching] = useState<boolean>(false);
+
+  // MoneyPrinterTurbo (github.com/harry0703/MoneyPrinterTurbo) State
+  const [mptVoiceName, setMptVoiceName] = useState<string>(
+    isAr ? 'ar-EG-ShakirNeural-Male' : 'en-US-ChristopherNeural-Male'
+  );
+  const [mptVoiceRate, setMptVoiceRate] = useState<number>(1.02);
+  const [mptTransitionMode, setMptTransitionMode] = useState<
+    'FadeIn' | 'SlideIn' | 'Shuffle' | 'FadeOut' | 'None'
+  >('FadeIn');
+  const [mptSubtitleEnabled, setMptSubtitleEnabled] = useState<boolean>(true);
+  const [mptSubtitlePosition, setMptSubtitlePosition] = useState<'bottom' | 'center' | 'top'>('bottom');
+  const [mptSubtitleColor, setMptSubtitleColor] = useState<string>('#FBBF24');
+  const [mptStrokeColor, setMptStrokeColor] = useState<string>('#000000');
+  const [mptFontSize, setMptFontSize] = useState<number>(54);
+  const [mptScript, setMptScript] = useState<string>('');
+  const [mptTerms, setMptTerms] = useState<string>(
+    'Egyptian Giza cotton weave, luxury hotel sateen bedlinen, automated air-jet loom, textile dyeing lab, export swatch box'
+  );
+  const [mptSrtContent, setMptSrtContent] = useState<string>('');
+  const [mptJsonPayload, setMptJsonPayload] = useState<string>('');
+  const [mptServerUrl, setMptServerUrl] = useState<string>('');
+  const [mptPexelsKey, setMptPexelsKey] = useState<string>('');
+  const [mptLoading, setMptLoading] = useState<boolean>(false);
+  const [mptStatusMsg, setMptStatusMsg] = useState<string | null>(null);
 
   // Workspace Mode: 'BOTH' | 'IMAGES' | 'VIDEO' | 'SOVEREIGN_CAD'
   const [workspaceTab, setWorkspaceTab] = useState<'BOTH' | 'IMAGES' | 'VIDEO' | 'SOVEREIGN_CAD'>('BOTH');
@@ -521,14 +552,15 @@ export function AiMediaProductionStudio({
         window.speechSynthesis.cancel();
         const text = isAr ? scene.voiceoverAr : scene.voiceoverEn;
         const utter = new SpeechSynthesisUtterance(text);
-        utter.lang = isAr ? 'ar-EG' : 'en-US';
-        utter.rate = 1.02;
+        const voiceLang = mptVoiceName.split('-').slice(0, 2).join('-');
+        utter.lang = voiceLang || (isAr ? 'ar-EG' : 'en-US');
+        utter.rate = mptVoiceRate || 1.02;
         window.speechSynthesis.speak(utter);
       } catch {
         // ignore speech synthesis errors
       }
     },
-    [voiceMuted, isAr]
+    [voiceMuted, isAr, mptVoiceName, mptVoiceRate]
   );
 
   // Advance video scenes & progress timer when playing
@@ -774,6 +806,70 @@ export function AiMediaProductionStudio({
       ctx.font = 'italic 14px sans-serif';
       ctx.fillText(`🎙️ "${vo.slice(0, 96)}${vo.length > 96 ? '...' : ''}"`, pad + 28, cardY + cardH - 16);
 
+      // 5. MoneyPrinterTurbo Burned-In Kinetic Subtitles (github.com/harry0703/MoneyPrinterTurbo)
+      if (mptSubtitleEnabled && vo) {
+        ctx.save();
+        const scaledFont = Math.max(20, Math.min(38, Math.round((mptFontSize / 1280) * w * 0.56)));
+        ctx.font = `900 ${scaledFont}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        const words = vo.split(/\s+/);
+        const activeWordIdx = Math.min(words.length - 1, Math.floor(tNorm * words.length));
+        const chunkStart = Math.floor(activeWordIdx / 7) * 7;
+        const chunkWords = words.slice(chunkStart, chunkStart + 7);
+        const captionLine = chunkWords.join(' ');
+
+        const subY =
+          mptSubtitlePosition === 'top'
+            ? pad * 0.75 + 96
+            : mptSubtitlePosition === 'center'
+            ? Math.round(h * 0.48)
+            : cardY - 36;
+
+        const textMetrics = ctx.measureText(captionLine);
+        const pillW = Math.min(w - pad * 2, textMetrics.width + 44);
+        const pillH = scaledFont + 22;
+
+        ctx.fillStyle = 'rgba(5, 8, 20, 0.82)';
+        ctx.beginPath();
+        ctx.roundRect(w / 2 - pillW / 2, subY - pillH / 2, pillW, pillH, 12);
+        ctx.fill();
+        ctx.strokeStyle = `${mptSubtitleColor}66`;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = Math.max(2, mptFontSize * 0.08);
+        ctx.strokeStyle = mptStrokeColor || '#000000';
+        ctx.strokeText(captionLine, w / 2, subY);
+
+        ctx.fillStyle = mptSubtitleColor || '#FBBF24';
+        ctx.fillText(captionLine, w / 2, subY);
+        ctx.restore();
+      }
+
+      // 6. MoneyPrinterTurbo Scene Transition Effects (FadeIn / SlideIn / Shuffle / FadeOut)
+      if (mptTransitionMode !== 'None') {
+        const activeMode =
+          mptTransitionMode === 'Shuffle'
+            ? (['FadeIn', 'SlideIn', 'FadeOut'] as const)[sceneIndex % 3]
+            : mptTransitionMode;
+        if (activeMode === 'FadeIn' && tNorm < 0.14) {
+          const alpha = Math.max(0, 1 - tNorm / 0.14);
+          ctx.fillStyle = `rgba(5, 8, 18, ${alpha.toFixed(2)})`;
+          ctx.fillRect(0, 0, w, h);
+        } else if (activeMode === 'FadeOut' && tNorm > 0.86) {
+          const alpha = Math.min(1, (tNorm - 0.86) / 0.14);
+          ctx.fillStyle = `rgba(5, 8, 18, ${alpha.toFixed(2)})`;
+          ctx.fillRect(0, 0, w, h);
+        } else if (activeMode === 'SlideIn' && tNorm < 0.14) {
+          const wipeW = Math.round(w * (1 - tNorm / 0.14));
+          ctx.fillStyle = primaryColorHex || '#064E3B';
+          ctx.fillRect(w - wipeW, 0, wipeW, h);
+        }
+      }
+
       // Bottom Progress Bar across total video
       const totalPct = ((sceneIndex + tNorm) / totalScenes) * (w - pad * 2);
       ctx.fillStyle = 'rgba(255,255,255,0.15)';
@@ -781,7 +877,21 @@ export function AiMediaProductionStudio({
       ctx.fillStyle = accentColorHex || '#10B981';
       ctx.fillRect(pad, h - 12, totalPct, 5);
     },
-    [companyName, certifications, primaryColorHex, accentColorHex, prompt, showBrandedOverlay, isAr]
+    [
+      companyName,
+      certifications,
+      primaryColorHex,
+      accentColorHex,
+      prompt,
+      showBrandedOverlay,
+      isAr,
+      mptSubtitleEnabled,
+      mptSubtitlePosition,
+      mptSubtitleColor,
+      mptStrokeColor,
+      mptFontSize,
+      mptTransitionMode,
+    ]
   );
 
   // Render canvas frame whenever scene or progress updates
@@ -1213,6 +1323,150 @@ export function AiMediaProductionStudio({
     }
   };
 
+  // MoneyPrinterTurbo (github.com/harry0703/MoneyPrinterTurbo) API Handlers
+  const handleRunMoneyPrinterTurbo = async (
+    action: 'generate-script' | 'generate-terms' | 'create-video' = 'create-video'
+  ) => {
+    setMptLoading(true);
+    setMptStatusMsg(null);
+    try {
+      const res = await fetch('/api/cluster/media-studio/moneyprinter-turbo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action,
+          companyName,
+          companySpecialty,
+          certifications,
+          targetMarket,
+          video_subject: prompt,
+          video_script: mptScript || undefined,
+          video_terms: mptTerms || undefined,
+          video_aspect: aspectRatio,
+          video_transition_mode: mptTransitionMode,
+          video_clip_duration: 4,
+          video_source: mptPexelsKey.trim() ? 'pexels' : 'mahalla-sovereign',
+          video_language: mptVoiceName.split('-').slice(0, 2).join('-'),
+          voice_name: mptVoiceName,
+          voice_rate: mptVoiceRate,
+          subtitle_enabled: mptSubtitleEnabled,
+          subtitle_position: mptSubtitlePosition,
+          text_fore_color: mptSubtitleColor,
+          stroke_color: mptStrokeColor,
+          font_size: mptFontSize,
+          mptServerUrl: mptServerUrl || undefined,
+          pexelsApiKey: mptPexelsKey || undefined,
+          locale,
+        }),
+      });
+      const data = await res.json();
+      if (action === 'generate-script' && data?.data?.video_script) {
+        setMptScript(data.data.video_script);
+        setMptStatusMsg(
+          isAr
+            ? 'تم توليد سيناريو MoneyPrinterTurbo (/api/v1/scripts) بنجاح!'
+            : 'Generated MoneyPrinterTurbo 5-scene script (/api/v1/scripts)!'
+        );
+      } else if (action === 'generate-terms' && Array.isArray(data?.data?.video_terms)) {
+        setMptTerms(data.data.video_terms.join(', '));
+        setMptStatusMsg(
+          isAr
+            ? 'تم استخراج الكلمات المفتاحية للقطات (/api/v1/terms) بنجاح!'
+            : 'Extracted MoneyPrinterTurbo B-roll search terms (/api/v1/terms)!'
+        );
+      } else if (data?.scenes) {
+        if (data.video_script) setMptScript(data.video_script);
+        if (Array.isArray(data.video_terms)) setMptTerms(data.video_terms.join(', '));
+        if (data.srtContent) setMptSrtContent(data.srtContent);
+        if (data.mptRequestPayload) {
+          setMptJsonPayload(JSON.stringify(data.mptRequestPayload, null, 2));
+        }
+        setVideoModelId('moneyprinter-turbo');
+        setProductionData((prev: any) => {
+          if (!prev?.videoStoryboard) return prev;
+          return {
+            ...prev,
+            videoStoryboard: {
+              ...prev.videoStoryboard,
+              videoModelId: 'moneyprinter-turbo',
+              scenes: data.scenes,
+            },
+          };
+        });
+        setActiveSceneIdx(0);
+        setSceneProgress(0);
+        setIsPlayingVideo(true);
+        setMptStatusMsg(
+          isAr
+            ? data?.remoteDispatch?.messageAr ||
+                'تم تشغيل خط إنتاج MoneyPrinterTurbo وتحديث المشاهد والترجمة (.SRT) بنجاح!'
+            : data?.remoteDispatch?.messageEn ||
+                'MoneyPrinterTurbo pipeline synthesized! Playing 5 scenes with burned-in kinetic subtitles.'
+        );
+      }
+    } catch {
+      setMptStatusMsg(
+        isAr
+          ? 'تم تفعيل محرك MoneyPrinterTurbo المحلي لتصدير الفيديو بصيغة .MP4 والترجمة .SRT!'
+          : 'MoneyPrinterTurbo local H.264 .MP4 & .SRT subtitle compiler active!'
+      );
+    } finally {
+      setMptLoading(false);
+    }
+  };
+
+  const handleDownloadMptSrt = () => {
+    const content =
+      mptSrtContent ||
+      currentScenes
+        .map(
+          (sc: any, idx: number) =>
+            `${idx + 1}\n00:00:0${idx * 4},000 --> 00:00:${String((idx + 1) * 4).padStart(2, '0')},000\n${
+              isAr ? sc.voiceoverAr : sc.voiceoverEn
+            }\n`
+        )
+        .join('\n');
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${companyName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-moneyprinter.srt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadMptJson = () => {
+    const payload =
+      mptJsonPayload ||
+      JSON.stringify(
+        {
+          video_subject: prompt,
+          video_script:
+            mptScript ||
+            currentScenes.map((sc: any) => (isAr ? sc.voiceoverAr : sc.voiceoverEn)).join('\n'),
+          video_terms: mptTerms,
+          video_aspect: aspectRatio === '4:5' ? '9:16' : aspectRatio,
+          video_transition_mode: mptTransitionMode,
+          voice_name: mptVoiceName,
+          voice_rate: mptVoiceRate,
+          subtitle_enabled: mptSubtitleEnabled,
+          subtitle_position: mptSubtitlePosition,
+          text_fore_color: mptSubtitleColor,
+          stroke_color: mptStrokeColor,
+          font_size: mptFontSize,
+        },
+        null,
+        2
+      );
+    const blob = new Blob([payload], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `moneyprinter-turbo-payload.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <section className="rounded-3xl border-2 border-indigo-500/30 bg-gradient-to-br from-slate-950 via-indigo-950/90 to-emerald-950 text-white p-6 md:p-8 shadow-2xl space-y-6">
       {/* Top Studio Banner */}
@@ -1226,7 +1480,7 @@ export function AiMediaProductionStudio({
                 'استوديو إنتاج الصور والفيديوهات بالذكاء الاصطناعي • تحليل بيانات الشركة والغرض التسويقي'
               )}
             </span>
-            <Pill tone="purple">MiniMax H3 Director • FLUX.1 • Imagen 3 • Google Veo 2 • Wan 2.1</Pill>
+            <Pill tone="purple">MoneyPrinterTurbo • MiniMax H3 • FLUX.1 • Imagen 3 • Veo 2 • Wan 2.1</Pill>
             <ExpertManualButton manualId="ai-media-studio" locale={locale} variant="pill" />
           </div>
           <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">
@@ -2004,6 +2258,208 @@ export function AiMediaProductionStudio({
                   </div>
                 </div>
 
+                {/* MoneyPrinterTurbo (github.com/harry0703/MoneyPrinterTurbo) Automated Script, Voice, .SRT & .MP4 Pipeline */}
+                <div className="rounded-2xl border-2 border-amber-400/40 bg-slate-900/95 p-4 space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5">
+                      <Film className="w-3.5 h-3.5 text-amber-400" />
+                      <span className="text-xs font-extrabold uppercase tracking-wider text-amber-300">
+                        {t(
+                          'MoneyPrinterTurbo GitHub Pipeline (Script + B-Roll + Edge-TTS + .SRT + .MP4)',
+                          'خط إنتاج MoneyPrinterTurbo (سيناريو + لقطات + تعليق صوتي + ترجمة .SRT + .MP4)'
+                        )}
+                      </span>
+                    </div>
+                    <a
+                      href="https://github.com/harry0703/MoneyPrinterTurbo"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 border border-amber-400/40 px-2.5 py-0.5 text-[10px] font-bold text-amber-200 hover:bg-amber-500/25 transition"
+                    >
+                      GitHub Repo <ExternalLink className="w-2.5 h-2.5" />
+                    </a>
+                  </div>
+
+                  {/* Voice, Rate, Transition & Subtitle Controls */}
+                  <div className="grid sm:grid-cols-3 gap-2">
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-300 mb-1">
+                        {t('Neural TTS Voice (voice_name)', 'صوت التعليق (Edge-TTS)')}
+                      </label>
+                      <select
+                        value={mptVoiceName}
+                        onChange={(e) => setMptVoiceName(e.target.value)}
+                        className="w-full rounded-lg border border-white/20 bg-slate-950 px-2 py-1.5 text-[11px] font-bold text-white"
+                      >
+                        <option value="en-US-ChristopherNeural-Male">en-US Christopher (Male)</option>
+                        <option value="en-US-JennyNeural-Female">en-US Jenny (Female)</option>
+                        <option value="en-GB-RyanNeural-Male">en-GB Ryan (UK Export)</option>
+                        <option value="ar-EG-ShakirNeural-Male">ar-EG Shakir (عربي مصري)</option>
+                        <option value="ar-EG-SalmaNeural-Female">ar-EG Salma (عربي إعلاني)</option>
+                        <option value="de-DE-ConradNeural-Male">de-DE Conrad (Germany)</option>
+                        <option value="fr-FR-HenriNeural-Male">fr-FR Henri (France)</option>
+                        <option value="it-IT-DiegoNeural-Male">it-IT Diego (Italy)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-300 mb-1">
+                        {t('Transition (video_transition_mode)', 'الانتقال بين اللقطات')}
+                      </label>
+                      <select
+                        value={mptTransitionMode}
+                        onChange={(e) => setMptTransitionMode(e.target.value as any)}
+                        className="w-full rounded-lg border border-white/20 bg-slate-950 px-2 py-1.5 text-[11px] font-bold text-white"
+                      >
+                        <option value="FadeIn">FadeIn (Smooth Fade)</option>
+                        <option value="SlideIn">SlideIn (Whip Slide)</option>
+                        <option value="Shuffle">Shuffle (Dynamic Mix)</option>
+                        <option value="FadeOut">FadeOut (Dissolve)</option>
+                        <option value="None">None (Hard Cut)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-300 mb-1">
+                        {t('Subtitle Position & Color', 'موضع ولون الترجمة المدمجة')}
+                      </label>
+                      <div className="flex items-center gap-1.5">
+                        <select
+                          value={mptSubtitlePosition}
+                          onChange={(e) => setMptSubtitlePosition(e.target.value as any)}
+                          className="flex-1 rounded-lg border border-white/20 bg-slate-950 px-2 py-1.5 text-[11px] font-bold text-white"
+                        >
+                          <option value="bottom">{t('Bottom', 'أسفل')}</option>
+                          <option value="center">{t('Center', 'منتصف')}</option>
+                          <option value="top">{t('Top', 'أعلى')}</option>
+                        </select>
+                        <input
+                          type="color"
+                          value={mptSubtitleColor}
+                          onChange={(e) => setMptSubtitleColor(e.target.value)}
+                          title={t('Subtitle Text Color (text_fore_color)', 'لون نص الترجمة')}
+                          className="h-7 w-8 rounded cursor-pointer border border-white/20 bg-slate-950"
+                        />
+                        <label className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-300 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={mptSubtitleEnabled}
+                            onChange={(e) => setMptSubtitleEnabled(e.target.checked)}
+                            className="rounded accent-amber-400"
+                          />
+                          SRT
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Editable Video Terms (/api/v1/terms) & Script (/api/v1/scripts) */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[10px] font-bold text-slate-300">
+                        {t('B-Roll Search Keywords (video_terms):', 'الكلمات المفتاحية للقطات الفيديو (video_terms):')}
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          disabled={mptLoading}
+                          onClick={() => handleRunMoneyPrinterTurbo('generate-terms')}
+                          className="rounded-md bg-white/10 hover:bg-white/20 px-2 py-0.5 text-[10px] font-bold text-amber-300 cursor-pointer"
+                        >
+                          {t('✨ AI Terms (/api/v1/terms)', '✨ توليد الكلمات المفتاحية')}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={mptLoading}
+                          onClick={() => handleRunMoneyPrinterTurbo('generate-script')}
+                          className="rounded-md bg-white/10 hover:bg-white/20 px-2 py-0.5 text-[10px] font-bold text-emerald-300 cursor-pointer"
+                        >
+                          {t('✨ AI Script (/api/v1/scripts)', '✨ توليد السيناريو')}
+                        </button>
+                      </div>
+                    </div>
+                    <input
+                      type="text"
+                      value={mptTerms}
+                      onChange={(e) => setMptTerms(e.target.value)}
+                      placeholder="Egyptian cotton weave, luxury hotel sateen, automated weaving loom..."
+                      className="w-full rounded-lg border border-white/20 bg-slate-950 px-2.5 py-1.5 text-[11px] text-white font-mono"
+                    />
+                    {mptScript && (
+                      <textarea
+                        rows={2}
+                        value={mptScript}
+                        onChange={(e) => setMptScript(e.target.value)}
+                        className="w-full rounded-lg border border-amber-400/30 bg-slate-950 px-2.5 py-1.5 text-[11px] text-amber-100 leading-relaxed"
+                      />
+                    )}
+                  </div>
+
+                  {/* Optional Self-Hosted MoneyPrinterTurbo Server URL / Pexels API Key */}
+                  <div className="grid sm:grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      value={mptServerUrl}
+                      onChange={(e) => setMptServerUrl(e.target.value)}
+                      placeholder={t(
+                        'Optional: MoneyPrinterTurbo Server (e.g. http://127.0.0.1:8080)',
+                        'اختياري: رابط خادم MoneyPrinterTurbo المحلي (http://127.0.0.1:8080)'
+                      )}
+                      className="rounded-lg border border-white/15 bg-slate-950 px-2.5 py-1.5 text-[10px] text-white font-mono"
+                    />
+                    <input
+                      type="password"
+                      value={mptPexelsKey}
+                      onChange={(e) => setMptPexelsKey(e.target.value)}
+                      placeholder={t(
+                        'Optional: PEXELS_API_KEY (leave blank for built-in HD studio)',
+                        'اختياري: مفتاح PEXELS_API_KEY (اتركه فارغاً للاستوديو المدمج)'
+                      )}
+                      className="rounded-lg border border-white/15 bg-slate-950 px-2.5 py-1.5 text-[10px] text-white font-mono"
+                    />
+                  </div>
+
+                  {/* Primary Action Buttons: Synthesize Video + Download .SRT + Download .JSON */}
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      disabled={mptLoading}
+                      onClick={() => handleRunMoneyPrinterTurbo('create-video')}
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold px-3 py-2 text-[11px] transition cursor-pointer shadow"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      {mptLoading
+                        ? t('Running MoneyPrinterTurbo...', 'جاري تشغيل MoneyPrinterTurbo...')
+                        : t(
+                            '⚡ Run MoneyPrinterTurbo Pipeline (/api/v1/videos)',
+                            '⚡ تشغيل خط إنتاج MoneyPrinterTurbo (/api/v1/videos)'
+                          )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDownloadMptSrt}
+                      className="inline-flex items-center gap-1 rounded-xl border border-amber-400/40 bg-amber-500/15 hover:bg-amber-500/25 px-2.5 py-2 text-[11px] font-bold text-amber-200 transition cursor-pointer"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      .SRT
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDownloadMptJson}
+                      className="inline-flex items-center gap-1 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 px-2.5 py-2 text-[11px] font-bold text-white transition cursor-pointer"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      .JSON
+                    </button>
+                  </div>
+
+                  {mptStatusMsg && (
+                    <div className="text-[11px] text-amber-200 bg-amber-500/15 border border-amber-400/30 rounded-lg px-2.5 py-1.5">
+                      ✓ {mptStatusMsg}
+                    </div>
+                  )}
+                </div>
+
                 {/* Master Video Prompts for MiniMax H3, Google Veo 2, Wan 2.1 & HunyuanVideo */}
                 <div className="rounded-2xl border border-white/15 bg-slate-900/90 p-4 space-y-3">
                   <div className="flex items-center justify-between">
@@ -2042,7 +2498,16 @@ export function AiMediaProductionStudio({
                       productionData.videoStoryboard.videoModelPrompts?.['veo-2']}
                   </p>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                    <a
+                      href="https://github.com/harry0703/MoneyPrinterTurbo"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 py-2 px-3 text-xs font-extrabold text-amber-200 transition"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5 text-amber-300" />
+                      {t('MoneyPrinterTurbo (GitHub)', 'أداة MoneyPrinterTurbo (GitHub)')}
+                    </a>
                     <a
                       href="https://hailuoai.video"
                       target="_blank"

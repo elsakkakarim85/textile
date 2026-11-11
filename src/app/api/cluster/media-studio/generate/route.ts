@@ -31,7 +31,7 @@ const MediaGenerateSchema = z.object({
     .enum(['flux-schnell', 'flux-realism', 'sdxl-turbo', 'imagen-3-bridge'])
     .default('flux-schnell'),
   videoModelId: z
-    .enum(['minimax-h3', 'veo-2', 'wan-2.1-t2v', 'hunyuan-video', 'cogvideox-5b'])
+    .enum(['moneyprinter-turbo', 'minimax-h3', 'veo-2', 'wan-2.1-t2v', 'hunyuan-video', 'cogvideox-5b'])
     .default('minimax-h3'),
   preferredLlm: z
     .enum([
@@ -406,8 +406,9 @@ User Prompt: ${body.prompt}`,
         : `• **Visual Positioning:** Position ${body.companyName} as a vertically integrated, audit-ready El-Mahalla export manufacturer combining Egyptian cotton heritage with Industry 4.0 precision.\n• **Lighting & Color Psychology:** Anchor frames in ${body.primaryColorHex} and ${body.accentColorHex} with 35° raking macro strobes to accentuate yarn twist and sateen/terry luster.\n• **On-Screen Technical Proof:**Prominently badge ${body.certifications} and spectrophotometer ΔE ≤ 0.5 tolerance.\n• **Conversion Hook:** Drive ${body.targetMarket} buyers to request the 48-hour DHL physical swatch box and 0%-duty EUR.1/QIZ landed-cost quote.`;
   }
 
-  // Video model specialized master prompts (for MiniMax H3, Veo 2, Wan 2.1, HunyuanVideo, CogVideoX)
+  // Video model specialized master prompts (for MoneyPrinterTurbo, MiniMax H3, Veo 2, Wan 2.1)
   const videoModelPrompts = {
+    'moneyprinter-turbo': `[MoneyPrinterTurbo — github.com/harry0703/MoneyPrinterTurbo | POST /api/v1/videos] video_subject: "${body.prompt} (${body.companyName})" | video_terms: "Egyptian cotton weave, luxury hotel sateen, automated weaving loom, textile dyeing lab, export swatch box" | video_aspect: "${body.aspectRatio}" | voice_name: "en-US-ChristopherNeural-Male" | video_transition_mode: "FadeIn" | subtitle_enabled: true | text_fore_color: "${body.accentColorHex}" | stroke_color: "#000000" | stroke_width: 1.8`,
     'minimax-h3': `[MiniMax Hailuo H3 / T2V-01-Director Master Script — ${body.aspectRatio}, 1080p 60fps Cloth Physics] [Push in, Tilt up] Commercial hero showcase for ${body.companyName} (${body.companySpecialty}): ${body.prompt}, sunlit luxury textile drape with specular sheen in ${body.primaryColorHex} and ${body.accentColorHex}. [Truck right, Rack focus macro] 100mm macro raking strobe across individual combed Egyptian cotton fibers and high-density weave structure (CMC ΔE ≤ 0.5). [Pull out, Pedestal up] High-speed Picanol air-jet weaving and low-liquor reactive dyeing hall in El-Mahalla El-Kubra. [Arc shot, Pan left] Export presentation box stamped with ${body.certifications} and EU Digital Product Passport QR code for ${body.targetMarket}.`,
     'veo-2': `[Google Veo 2 / VideoFX Master Prompt — ${body.aspectRatio}, 24fps Cinema] Continuous multi-shot commercial documentary for ${body.companyName}: Shot 1 (0-4s): ${angleSpecs[0].promptEn}. Shot 2 (4-8s): 100mm macro pan across ${body.prompt} showing individual Egyptian cotton fibers and lustrous weave. Shot 3 (8-12s): Gimbal tracking shot inside ${body.companyName} automated weaving & dyeing hall. Shot 4 (12-16s): Close-up of export swatch box with ${body.certifications} & EU DPP QR code. Lighting: ${pMeta.cameraStyle}.`,
     'wan-2.1-t2v': `[Wan 2.1 14B Text-to-Video Prompt] Photorealistic 1080p commercial video of ${body.prompt} manufactured by ${body.companyName}, smooth camera dolly motion, ultra-detailed fabric drape physics, realistic fiber micro-surface reflection, studio rim lighting in ${body.primaryColorHex} and ${body.accentColorHex}, 8k raw cinema quality.`,
